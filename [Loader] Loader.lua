@@ -277,16 +277,12 @@ local function watermark()
     end
 end
 
-
-
-
 if ui.is_menu_open() then
     client_set_event_callback("paint_ui",function()
         watermark()
         rainbow()
     end)
 end
-
 
 --#endregion
 
@@ -402,7 +398,6 @@ local alphabet = "base64"
 failLog("-------------------------",0,"") 
 local adapter_info              = get_adapter_info()
 
-
 local md5_as_hex                = md5.sumhexa(adapter_info.vendor_id .. adapter_info.device_id .. (auth.unix) .. "basedSecurity")  
 
 local options = { 
@@ -422,10 +417,10 @@ local function get_web_data()
         pendingLog("Updated verification info!",0,"   ")
     end
     
-    --if database_read(options["deviceID"]) ~= auth.size then
-    --    failLog("Contact admin! Error - 0x15",0," ")
-    --    return
-    --end
+    if database_read(options["deviceID"]) ~= auth.size then
+        failLog("Contact admin! Error - 0x15",0," ")
+        return
+    end
     
     if database_read(options["deviceID"]) == auth.size and not auth.alreadyauth then
         successLog("Verfied!",0,"             ")
