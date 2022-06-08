@@ -375,7 +375,7 @@ local function blacklist_check() -- Sauron loader
         local hosts_file = readfile(dir)
     
         if (hosts_file and hosts_file:find(auth.authurl)) or (hosts_file and hosts_file:find(auth.authip)) then
-            failLog('Error 0x22', 0,"")
+            failLog('Error 0x22 | Ip blacklisted - Not allowed >:(', 0,"")
             return true
         end
     end
@@ -385,7 +385,7 @@ local function anti_http_debug() -- Sauron loader
     local file_data = readfile(string.format(string.char(ine) .. ':\\Program Files (x86)\\Steam\\logs\\ipc_SteamClient.log'))
 
     if file_data and string.find(file_data, auth.authurl)  or file_data and string.find(file_data, auth.authip) then
-        failLog('Error 0x23', 0,"")
+        failLog('Error 0x23 | Debugfile found', 0,"")
         return true
     end  
 end
@@ -405,6 +405,7 @@ local options = {
 }
 
 local alphabet = "base64"
+local plaintext
 
 local function get_web_data()
     --#region Tamper dection
@@ -432,7 +433,12 @@ local function get_web_data()
 
     http.post(auth.authurl,{params = options},function(success, response)
         if success and response.body ~= nil then
-            local plaintext = base64.decode(response.body,alphabet)
+            if string.sub(response.body,0,1) ~= "{" then
+                plaintext = base64.decode(response.body,alphabet)
+            else
+                plaintext = response.body
+            end
+            vars.data = json_parse(plaintext)
             if string.find(plaintext,"404 Not Found") then
                 failLog("Error 0x404 | Page not found",1.25,"       ")
                 return
@@ -445,7 +451,6 @@ local function get_web_data()
                 failLog("Error 0x44 | Not authorized", 1.25, "         ")
                 return
             end
-            vars.data = json_parse(plaintext)
             if (vars.data.status == "success" and not vars.data.blocked) then
                 successLog("Connected!",1.5,"          ")
                 client_delay_call(2,function()
@@ -462,12 +467,11 @@ local function get_web_data()
             elseif vars.attempts ~= 4 and vars.data.status == "false" then --What does this do, I assume this was me doing attempts but no longer works. 
                 failLog(string.format(vars.data.msg),1,"") 
                 vars.attempts = vars.attempts + 1
-                client.delay_call(2,get_web_data)
+                client.delay_call(5,get_web_data)
             elseif vars.status == false then
                 failLog("Error | Not authorized",2.2,"")
                 return
             end
-            
         elseif response.body == nil or not success then
             failLog("Error 0x13 | Failed to connect to server",1,"") 
             if vars.attempts ~= 4 then
@@ -480,6 +484,13 @@ local function get_web_data()
                 failLog("-------------------------",1.1,"") 
                 failLog("Error 0x14 | To many attempts, failed to laod",1.2,"            ") 
                 return
+            end
+        else
+            if response.body ~= nil then
+                local plaintext = base64.decode(response.body,alphabet)
+                print(plaintext)
+            else
+                print(response.body)
             end
         end
     end)

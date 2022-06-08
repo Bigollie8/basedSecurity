@@ -97,6 +97,12 @@ if (isset($_POST['encryption']))
         functions::insertlogging($ip, $name, $agent, 0, 0, "unknown", "Delay was not an integer.");
         die(base64_encode(json_encode($response)));
     }
+    if (($_POST['delay']) != $timestamp)
+    {
+        functions::sendHackLog($name, $ip, $agent, "Time mismatch", "Time mismatch", "There is a desync between server and user time");
+        functions::insertlogging($ip, $name, $agent, 0, 0, "unknown", "Time mismatch");
+        die(base64_encode(json_encode($response)));
+    }
 
     $checkForVendor = mysqli_query(Database::$conn, "SELECT `id`, `username`, `vendorID`, `deviceID` FROM users WHERE `username` = '{$_POST['username']}'");
     $THIS = mysqli_fetch_array($checkForVendor);
