@@ -1,4 +1,4 @@
--- Security version 2.0
+-- Security version 3.0
 -- Developed by Ollie#0069 
 
 --#region Important vars
@@ -180,8 +180,6 @@ local seconday = {
     flip = false
 }
 
-
-
 --#endregion
 
 --#region Branding
@@ -277,16 +275,12 @@ local function watermark()
     end
 end
 
-
-
-
 if ui.is_menu_open() then
     client_set_event_callback("paint_ui",function()
         watermark()
         rainbow()
     end)
 end
-
 
 --#endregion
 
@@ -335,7 +329,6 @@ end
 
 --#endregion
 
-
 --#region Logging
 local function logo(name)
     client_color_log(175, 175, 175,"[\0")
@@ -374,13 +367,13 @@ end
 --#endregion
 
 local ine
-local function blacklist_check() -- Sauron loader (big brain)
+
+local function blacklist_check() -- Sauron loader 
     for i = 65, 90 do 
         ine = i
         local dir = string.char(i)..":\\Windows\\System32\\drivers\\etc\\hosts"
         local hosts_file = readfile(dir)
-        
-
+    
         if (hosts_file and hosts_file:find(auth.authurl)) or (hosts_file and hosts_file:find(auth.authip)) then
             failLog('Error 0x22', 0,"")
             return true
@@ -388,7 +381,7 @@ local function blacklist_check() -- Sauron loader (big brain)
     end
 end
 
-local function anti_http_debug() -- Sauron loader (big brain)
+local function anti_http_debug() -- Sauron loader
     local file_data = readfile(string.format(string.char(ine) .. ':\\Program Files (x86)\\Steam\\logs\\ipc_SteamClient.log'))
 
     if file_data and string.find(file_data, auth.authurl)  or file_data and string.find(file_data, auth.authip) then
@@ -397,12 +390,9 @@ local function anti_http_debug() -- Sauron loader (big brain)
     end  
 end
 
-local alphabet = "base64"
-
 failLog("-------------------------",0,"") 
+
 local adapter_info              = get_adapter_info()
-
-
 local md5_as_hex                = md5.sumhexa(adapter_info.vendor_id .. adapter_info.device_id .. (auth.unix) .. "basedSecurity")  
 
 local options = { 
@@ -414,6 +404,8 @@ local options = {
     ['username']                = "Admin"
 }
 
+local alphabet = "base64"
+
 local function get_web_data()
     --#region Tamper dection
 
@@ -422,10 +414,10 @@ local function get_web_data()
         pendingLog("Updated verification info!",0,"   ")
     end
     
-    --if database_read(options["deviceID"]) ~= auth.size then
-    --    failLog("Contact admin! Error - 0x15",0," ")
-    --    return
-    --end
+    if database_read(options["deviceID"]) ~= auth.size then
+        failLog("Contact admin! Error - 0x15",0," ")
+        return
+    end
     
     if database_read(options["deviceID"]) == auth.size and not auth.alreadyauth then
         successLog("Verfied!",0,"             ")
@@ -441,46 +433,43 @@ local function get_web_data()
     http.post(auth.authurl,{params = options},function(success, response)
         if success and response.body ~= nil then
             local plaintext = base64.decode(response.body,alphabet)
-            print(plaintext)
             if string.find(plaintext,"404 Not Found") then
-                failLog("404 Error - x404",1.25,"       ")
-                
-            end
-
-            if string.sub(plaintext,0,1) ~= "{" then
-                failLog("Error 0x16",1.25,"        ")
-                
-            end
-            vars.data = json_parse(plaintext)
-            if (vars.data.msg == "Not authorized") then 
-                failLog("0x44, Contact Admin", 1.25, "         ")
+                failLog("Error 0x404 | Page not found",1.25,"       ")
                 return
             end
-            
+            if string.sub(plaintext,0,1) ~= "{" then
+                failLog("Error 0x16 | Improper server response",1.25,"        ")
+                return
+            end
+            if (vars.data.msg == "Not authorized") then 
+                failLog("Error 0x44 | Not authorized", 1.25, "         ")
+                return
+            end
+            vars.data = json_parse(plaintext)
             if (vars.data.status == "success" and not vars.data.blocked) then
                 successLog("Connected!",1.5,"          ")
                 client_delay_call(2,function()
-                    if #vars.data.lua < 100 then
-                        failLog("Error - 0x17",0," ")
+                    if vars.data.lua == nil or vars.data.lua == false then
+                        failLog("Error 0x17 | Error loading LUA",0," ")
                     else
                         load(vars.data.lua)(vars.data.name, vars.data.role, vars.data.uid, auth.unix, vars.data.msg)
                         successLog("Loaded! Enjoy!",0,"         ")
                     end
                 end)
             elseif vars.data.msg == "0x31, Contact Admin." then
-                failLog(vars.data.msg,0.5,"")
+                failLog("Error 0x31 | Blocked!",0.5,"")
                 return
-            elseif vars.attempts ~= 4 and vars.data.status == "false" then
+            elseif vars.attempts ~= 4 and vars.data.status == "false" then --What does this do, I assume this was me doing attempts but no longer works. 
                 failLog(string.format(vars.data.msg),1,"") 
                 vars.attempts = vars.attempts + 1
                 client.delay_call(2,get_web_data)
             elseif vars.status == false then
-                failLog(vars.data.msg,2.2,"")
+                failLog("Error | Not authorized",2.2,"")
                 return
             end
             
         elseif response.body == nil or not success then
-            failLog("Error - 0x13",1,"") 
+            failLog("Error 0x13 | Failed to connect to server",1,"") 
             if vars.attempts ~= 4 then
                 failLog("-------------------------",1.2,"") 
                 pendingLog("Trying again, attempt #" .. vars.attempts,1.5,"   ")  
@@ -489,7 +478,7 @@ local function get_web_data()
                 auth.unix = string.sub(get_time,0,9)
             elseif vars.attempts > 3 then
                 failLog("-------------------------",1.1,"") 
-                failLog("Error - 0x14",1.2,"            ") 
+                failLog("Error 0x14 | To many attempts, failed to laod",1.2,"            ") 
                 return
             end
         end
@@ -528,7 +517,7 @@ local function heartbeat()
                 heartbeatVars.key = md5.sumhexa(plaintext)  
                 heartbeatVars.data = json_parse(response.body)
                 if heartbeatVars.data.same ~= heartbeatVars.key and heartbeatVars.data.Plus ~= heartbeatVars.key and heartbeatVars.data.Minus ~= heartbeatVars.key then
-                    print("0x49 - Contact admin.")
+                    print("Error 0x49 | Loader heartbeat fail")
                 else
                     return
                 end
