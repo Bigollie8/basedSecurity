@@ -448,7 +448,7 @@ local function get_web_data()
                 return
             end
             if (vars.data.msg == "Not authorized") then 
-                failLog("Error 0x44 | Not authorized", 1.25, "         ")
+                failLog("Error 0x44 | Not authorized | " ..  vars.data.reason, 1.25, "         ")
                 return
             end
             if (vars.data.status == "success" and not vars.data.blocked) then
