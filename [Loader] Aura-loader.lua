@@ -420,10 +420,10 @@ local function get_web_data()
         pendingLog("Updated verification info!",0,"   ")
     end
     
-    --if database_read(options["deviceID"]) ~= auth.size then
-    --    failLog("Contact admin! Error - 0x15",0," ")
-    --    return
-    --end
+    if database_read(options["deviceID"]) ~= auth.size then
+        failLog("Contact admin! Error - 0x15",0," ")
+        return
+    end
     
     if database_read(options["deviceID"]) == auth.size and not auth.alreadyauth then
         successLog("Verfied!",0,"             ")
@@ -441,16 +441,13 @@ local function get_web_data()
             local plaintext = base64.decode(response.body,alphabet)
             if string.find(plaintext,"404 Not Found") then
                 failLog("404 Error - x404",1.25,"       ")
-                
             end
-
             if string.sub(plaintext,0,1) ~= "{" then
-                failLog("Error 0x16",1.25,"        ")
-                
+                failLog("Error 0x16",1.25,"        ") 
             end
             vars.data = json_parse(plaintext)
             if (vars.data.msg == "Not authorized") then 
-                failLog("0x44, Contact Admin", 1.25, "         ")
+                failLog("Error 0x44, Contact Admin", 1.25, "         ")
                 return
             end
             
@@ -458,7 +455,7 @@ local function get_web_data()
                 successLog("Connected!",1.5,"          ")
                 client_delay_call(2,function()
                     if #vars.data.lua < 100 then
-                        failLog("Error - 0x17",0," ")
+                        failLog("Error 0x17",0," ")
                     else
                         load(vars.data.lua)(vars.data.name, vars.data.role, vars.data.uid, auth.unix, vars.data.msg)
                         successLog("Loaded! Enjoy!",0,"         ")

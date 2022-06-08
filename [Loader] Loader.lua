@@ -1,4 +1,4 @@
--- Security version 2.0
+-- Security version 2.5
 -- Developed by Ollie#0069 
 
 --#region Important vars
@@ -7,8 +7,6 @@ local ffi                       = require("ffi") or error("0x20 Contact admin")
 local md5                       = require("gamesense/md5") or error("Subscribe to md5 on forum")
 local base64                    = require "gamesense/base64" or error("Sub to https://gamesense.pub/forums/viewtopic.php?id=21619 on the lua workshop.")
 local js                        = panorama.open()
-local ui_set_visible            = ui.set_visible
-local ui_new_label              = ui.new_label
 local client_set_event_callback = client.set_event_callback
 local client_color_log          = client.color_log
 local client_delay_call         = client.delay_call
@@ -17,9 +15,7 @@ local database_read             = database.read
 local table_bind                = vtable_bind
 local get_time                  = client.unix_time()
 local json_parse                = json.parse
-local global_curtime            = globals.curtime()
 local get_size                  = #readfile(_NAME .. ".lua")
-
 
 local vars = {
     attempts                    = 2,
@@ -222,28 +218,13 @@ local hexTable =  {
 
 
 local function watermark()
-    colors = {
-        theme1                      = {174, 248, 219},
-        theme2                      = {198, 174, 248},
-        loaderTheme1                = {r, g, b},
-        loaderTheme2                = {r, g, b},
-        fail                        = {248, 177, 174},
-        success                     = {192, 248, 174},
-        pending                     = {248, 241, 174},
-        RGB                         = {0  , 0  ,   0}
-    }
-
-    hexTable =  {
-        themeHex                    = rgb_to_hex(colors.theme1[1],colors.theme1[2],colors.theme1[3]),
-        theme2Hex                   = rgb_to_hex(colors.theme2[1],colors.theme2[2],colors.theme2[3]),
-        loaderThemeHex1             = rgb_to_hex(colors.loaderTheme1[1],colors.loaderTheme1[2],colors.loaderTheme1[3]),
-        loaderThemeHex2             = rgb_to_hex(colors.loaderTheme2[1],colors.loaderTheme2[2],colors.loaderTheme2[3]),
-        failHex                     = rgb_to_hex(colors.fail[1],colors.fail[2],colors.fail[3]),
-        succesHex                   = rgb_to_hex(colors.success[1],colors.success[2],colors.success[3]),
-        pendingHex                  = rgb_to_hex(colors.pending[1],colors.pending[2],colors.pending[3]) 
-    }
-
+    colors.loaderTheme1                = {r, g, b}
+    colors.loaderTheme2                = {r, g, b}
+    hexTable.loaderThemeHex1             = rgb_to_hex(colors.loaderTheme1[1],colors.loaderTheme1[2],colors.loaderTheme1[3])
+    hexTable.loaderThemeHex2             = rgb_to_hex(colors.loaderTheme2[1],colors.loaderTheme2[2],colors.loaderTheme2[3])
+   
     ui.set(branding.frame1,hexTable.loaderThemeHex1 .. "-                \aFFFFFFFFPowered by".. hexTable.loaderThemeHex1 .."             -")
+
     if tag.location > 8 then 
         ui.set(branding.tag, "\aFFFFFFFF" .. tag["stage"..tag.location] .. hexTable.loaderThemeHex1 ..  seconday["stage" .. tag.location])
         ui.set(branding.version,hexTable.loaderThemeHex1 .. beta["stage" .. tag.location])
@@ -256,6 +237,7 @@ local function watermark()
             ui.set(branding.loading,loading["stage" .. tag.location])
         end
     end
+
     ui.set(branding.frame2,hexTable.loaderThemeHex1 .. "-                                               -")
 
     vars.counter = vars.counter + 1
@@ -269,10 +251,9 @@ local function watermark()
         vars.counter = 0 
         if tag.flip then
             tag.location = tag.location - 1
-        elseif not tag.flip then
-            tag.location = tag.location + 1
         else
-            print("Error")
+            tag.location = tag.location + 1
+
         end
     end
 end
@@ -370,7 +351,7 @@ end
 --#endregion
 
 local ine
-local function blacklist_check() -- Sauron loader (big brain)
+local function blacklist_check() -- Sauron loader 
     for i = 65, 90 do 
         ine = i
         local dir = string.char(i)..":\\Windows\\System32\\drivers\\etc\\hosts"
@@ -384,7 +365,7 @@ local function blacklist_check() -- Sauron loader (big brain)
     end
 end
 
-local function anti_http_debug() -- Sauron loader (big brain)
+local function anti_http_debug() -- Sauron loader 
     local file_data = readfile(string.format(string.char(ine) .. ':\\Program Files (x86)\\Steam\\logs\\ipc_SteamClient.log'))
 
     if file_data and string.find(file_data, auth.authurl)  or file_data and string.find(file_data, auth.authip) then
@@ -397,7 +378,6 @@ local alphabet = "base64"
 
 failLog("-------------------------",0,"") 
 local adapter_info              = get_adapter_info()
-
 local md5_as_hex                = md5.sumhexa(adapter_info.vendor_id .. adapter_info.device_id .. (auth.unix) .. "basedSecurity")  
 
 local options = { 
@@ -532,9 +512,7 @@ local function heartbeat()
     end
 end
 
-
 client_set_event_callback("paint_ui",heartbeat)
-
 
 pendingLog("Starting",0.1,"             ")
 client.delay_call(2,get_web_data)
