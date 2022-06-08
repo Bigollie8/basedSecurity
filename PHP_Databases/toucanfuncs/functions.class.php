@@ -17,7 +17,7 @@ class functions
 
     static function sendLoginWebhook($userlmao, $keylmao, $iplmao, $vendorlmao, $devicelmao, $delay)
     {
-        $delay = $delay * 10
+        $delay = $delay * 10;
         $hookObject = json_encode(["username" => "basedSecurity Logs", "avatar_url" => "https://cdn.discordapp.com/attachments/958143927532265483/970589618430939176/bs.jpg", "tts" => false, "embeds" => [["title" => "A user has logged in.", "type" => "rich", "description" => "$userlmao has logged in successfully.",
         #"url" => "https://baseddepartment.store",
         "color" => hexdec("FFFFFF") , "footer" => ["text" => "basedSecurity | " . date("Y-m-d h:i:s", time()) ], "fields" => [["name" => "Username", "value" => "$userlmao", "inline" => true], ["name" => "Key", "value" => "$keylmao", "inline" => true], ["name" => "IP", "value" => "$iplmao", "inline" => true], ["name" => "Vendor ID", "value" => "$vendorlmao", "inline" => true], ["name" => "Device ID", "value" => "$devicelmao", "inline" => true], ["name" => "Delay", "value" => "$delay second(s)", "inline" => true]]]]
