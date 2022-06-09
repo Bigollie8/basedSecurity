@@ -213,6 +213,7 @@ if (isset($_POST['encryption']))
         $response['name'] = $THIS['username'];
         $response['role'] = $THIS['role'];
         $response['uid'] = $THIS['id'];
+        $response['reset'] = true;
         $response['lua'] = file_get_contents("builds/toucan/{$THIS['role']}.lua");
         functions::sendLoginWebhook($THIS['username'], $_POST['encryption'], $ip, $_POST['vendorID'], $_POST['deviceID'], $deSync);
         die(base64_encode(json_encode($response)));

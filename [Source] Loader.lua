@@ -1,6 +1,5 @@
 -- Security version 3.1
 -- Developed by Ollie#0069 
--- I love luke bedalov
 
 --#region Important vars
 local http                      = require("gamesense/http") or error("Sub to https://gamesense.pub/forums/viewtopic.php?id=19253 on the lua workshop.")
@@ -405,26 +404,28 @@ local options = {
     ['username']                = "Admin"
 }
 
-local alphabet = "base64"
-local plaintext
-
-local function get_web_data()
-    --#region Tamper dection
-
-    if database_read(options["deviceID"]) == nil then
+local function filesize(reset)
+    if database_read(options["deviceID"]) == nil or reset then
         database_write(options["deviceID"], auth.size)
         pendingLog("Updated verification info!",0,"   ")
     end
     
     if database_read(options["deviceID"]) ~= auth.size then
         failLog("Contact admin! Error - 0x15",0," ")
-        return
+        return true
     end
     
     if database_read(options["deviceID"]) == auth.size and not auth.alreadyauth then
         successLog("Verfied!",0,"             ")
         auth.alreadyauth = true
+        return false
     end
+end
+
+local alphabet = "base64"
+local plaintext
+
+local function get_web_data()
 
     if blacklist_check() then return end
 
@@ -439,7 +440,9 @@ local function get_web_data()
             else
                 plaintext = response.body
             end
+
             vars.data = json_parse(plaintext)
+
             if string.find(plaintext,"404 Not Found") then
                 failLog("Error 0x404 | Page not found",1.25,"       ")
                 return
@@ -449,9 +452,17 @@ local function get_web_data()
                 return
             end
             if (vars.data.msg == "Not authorized") then 
+                if vars.data.reason == nil then
+                    print(response.body)
+                    failLog("Error 0x44 | Not authorized",1.25, "         ")
+                    return
+                end
                 failLog("Error 0x44 | Not authorized | " ..  vars.data.reason, 1.25, "         ")
                 return
             end
+
+            if (filesize(vars.data.reset)) then return end
+
             if (vars.data.status == "success" and not vars.data.blocked) then
                 successLog("Connected!",1.5,"          ")
                 client_delay_call(2,function()
