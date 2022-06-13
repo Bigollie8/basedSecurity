@@ -29,7 +29,8 @@ local vars = {
     frequency                   = nil,
     height                      = 255,
     offset                      = 0,
-    firstloop                   = false
+    firstloop                   = false,
+    version                     = 1.3
 }
 
 local auth = {
@@ -304,6 +305,8 @@ local material_adapter_info_t  =
 	}
 ]]
 
+
+
 local native_GetCurrentAdapter  = table_bind("materialsystem.dll", "VMaterialSystem080", 25, "int(__thiscall*)(void*)")
 local native_GetAdapterInfo     = table_bind("materialsystem.dll", "VMaterialSystem080", 26, "void(__thiscall*)(void*, int, void*)")
 
@@ -401,7 +404,7 @@ local options = {
     ['vendorID']                = adapter_info.vendor_id,
     ['name']                    = js.MyPersonaAPI.GetName(),
     ['delay']                   = auth.unix,
-    ['username']                = "Admin"
+    ['username']                = "basedSecurity"
 }
 
 local function filesize(reset)
@@ -440,7 +443,6 @@ local function get_web_data()
             else
                 plaintext = response.body
             end
-
             vars.data = json_parse(plaintext)
 
             if string.find(plaintext,"404 Not Found") then
@@ -461,6 +463,8 @@ local function get_web_data()
                 return
             end
 
+            if (vars.data.version < vars.version) then print("Updated Required for loader") return end
+
             if (filesize(vars.data.reset)) then return end
 
             if (vars.data.status == "success" and not vars.data.blocked) then
@@ -473,9 +477,6 @@ local function get_web_data()
                         successLog("Loaded! Enjoy!",0,"         ")
                     end
                 end)
-            elseif vars.data.msg == "0x31, Contact Admin." then
-                failLog("Error 0x31 | Blocked!",0.5,"")
-                return
             elseif vars.attempts ~= 4 and vars.data.status == "false" then --What does this do, I assume this was me doing attempts but no longer works. 
                 failLog(string.format(vars.data.msg),1,"") 
                 vars.attempts = vars.attempts + 1
@@ -523,7 +524,7 @@ local info = {
     ['deviceID']                = adapter_info.device_id,
     ['vendorID']                = adapter_info.vendor_id,
     ['unix']                    = 0,
-    ['username']                = "Admin"
+    ['username']                = "basedSecurity"
 }
 
 local function heartbeat()
