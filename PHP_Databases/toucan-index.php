@@ -129,6 +129,12 @@ if (isset($_POST['encryption']))
             "deviceID" => $_POST['deviceID'],
             "num" => mysqli_num_rows($checkForVendor)))));
     }
+    if ($THIS['vendorID'] != $_POST['vendorID'] && $THIS['deviceID'] !=  $_POST['deviceID']) {
+        functions::sendFailedLoad($name, $_POST['encryption'], $ip, $encrypt_match, $encrypt_match_2, "Info does not match", $timestamp, $_POST['delay']);
+        functions::insertlogging($ip, $name, $agent, $vendorID, $deviceID, "unknown", "Info does not match");
+        $response["reason"] = "Info does not match username";
+        die(json_encode(functions::$response));
+    }
     /*
             Anti hack systems
     */
@@ -207,7 +213,7 @@ if (isset($_POST['encryption']))
         die(base64_encode(json_encode($response)));
     }
     elseif ($THIS['blocked'] === "0")
-    { 
+    {
         $response['msg'] = "Authorized";
         $response['status'] = "success";
         $response['name'] = $THIS['username'];
