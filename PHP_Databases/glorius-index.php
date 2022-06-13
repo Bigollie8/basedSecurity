@@ -112,22 +112,32 @@ if (isset($_POST['encryption']))
         die(base64_encode(json_encode($response)));
     }
 
+    
+    $checkForVendor = mysqli_query(Database::$conn, "SELECT `id`, `username`, `vendorID`, `deviceID`, 'blocked' FROM users WHERE `username` = '{$_POST['username']}'");
+    $THIS = mysqli_fetch_array($checkForVendor);
+
     $timestamp = $timestamp + $deSync;
 
-    $encrypt_match = md5(((int)$_POST['vendorID']) . ((int)$_POST['deviceID']) . $timestamp . "basedSecurity");
-    $encrypt_match_2 = md5(((int)$_POST['vendorID']) . ((int)$_POST['deviceID']) . $timestamp - 1 . "basedSecurity");
-    $key = md5($_POST['vendorID'] . $_POST['deviceID'] . $timestamp . "basedSecurity2");
-    $key2 = md5($_POST['vendorID'] . $_POST['deviceID'] . $timestamp + 1 . "basedSecurity2");
-    $key3 = md5($_POST['vendorID'] . $_POST['deviceID'] . $timestamp - 1 . "basedSecurity2");
+    $encrypt_match = md5(((int)$THIS['vendorID']) . ((int)$THIS['deviceID']) . $timestamp . "basedSecurity");
+    $encrypt_match_2 = md5(((int)$THIS['vendorID']) . ((int)$THIS['deviceID']) . $timestamp - 1 . "basedSecurity");
+    $key = md5($THIS['vendorID'] . $THIS['deviceID'] . $timestamp . "basedSecurity2");
+    $key2 = md5($THIS['vendorID'] . $THIS['deviceID'] . $timestamp + 1 . "basedSecurity2");
+    $key3 = md5($THIS['vendorID'] . $THIS['deviceID'] . $timestamp - 1 . "basedSecurity2");
 
-    
-    $checkForVendor = mysqli_query(Database::$conn, "SELECT `id`, `username`, `vendorID`, `deviceID` FROM users WHERE `username` = '{$_POST['username']}'");
-    $THIS = mysqli_fetch_array($checkForVendor);
     if ($THIS['vendorID'] == 0 && $THIS['deviceID'] == 0) {
         mysqli_query(Database::$conn, "UPDATE `users` SET `vendorID` = '{$_POST['vendorID']}', `deviceID` = '{$_POST['deviceID']}' WHERE `username` = '{$_POST['username']}'") or die(base64_encode(json_encode(array(
             "vendorID" => $_POST['vendorID'],
             "deviceID" => $_POST['deviceID'],
             "num" => mysqli_num_rows($checkForVendor)))));
+            $response["reason"] = "Updated user info";
+            die(json_encode(functions::$response));
+    }
+    
+    if ($THIS['vendorID'] != $_POST['vendorID'] && $THIS['deviceID'] != $_POST['deviceID']) {
+        functions::sendFailedLoad($name, $_POST['encryption'], $ip, $encrypt_match, $encrypt_match_2, "Info does not match", $timestamp, $_POST['delay']);
+        functions::insertlogging($ip, $name, $agent, $vendorID, $deviceID, "unknown", "Info does not match");
+        $response["reason"] = "Info does not match username";
+        die(json_encode(functions::$response));
     }
     /*
             Anti hack systems
@@ -197,22 +207,23 @@ if (isset($_POST['encryption']))
     if (mysqli_num_rows($check2) < 1)         die(base64_encode(json_encode($response)));
 
     $THIS = mysqli_fetch_array($check2);
-    mysqli_query(Database::$conn, "INSERT INTO `authlog` (ip, `name`, user_agent, vendorID, deviceID, last_encryption) VALUES('$ip', '{$THIS['username']}', '$agent', '$vendorID', '$deviceID', '$encrypt_match')") or         die(base64_encode(json_encode($response)));
+    mysqli_query(Database::$conn, "INSERT INTO `authlog` (ip, `name`, user_agent, vendorID, deviceID, last_encryption) VALUES('$ip', '{$THIS['username']}', '$agent', '$vendorID', '$deviceID', '$encrypt_match')") or die(base64_encode(json_encode($response)));
 
-    mysqli_query(Database::$conn, "UPDATE users SET `last_loaded` = NOW(), ip = '{$_SERVER["HTTP_CF_CONNECTING_IP"]}' WHERE id = '{$THIS['id']}'") or         die(base64_encode(json_encode($response)));
+    mysqli_query(Database::$conn, "UPDATE users SET `last_loaded` = NOW(), ip = '{$_SERVER["HTTP_CF_CONNECTING_IP"]}' WHERE id = '{$THIS['id']}'") or  die(base64_encode(json_encode($response)));
 
-    if ($THIS['blocked'] === "True")
+    if ($THIS['blocked'] === "1")
     {
         functions::sendBan($THIS['username'], $encrypt_match, $ip, $_POST['vendorID'], $_POST['deviceID'], "User is blocked.");
         die(base64_encode(json_encode($response)));
     }
-    elseif ($THIS['blocked'] === "False")
+    elseif ($THIS['blocked'] === "0")
     {
         $response['msg'] = "Authorized";
         $response['status'] = "success";
-        $response['name'] = $THIS['username'];
+        $response['name'] = $_POST['username'];
         $response['role'] = $THIS['role'];
         $response['uid'] = $THIS['id'];
+        $response['reset'] = true;
         $response['lua'] = file_get_contents("builds/glorius/{$THIS['role']}.lua");
         functions::sendLoginWebhook($THIS['username'], $_POST['encryption'], $ip, $_POST['vendorID'], $_POST['deviceID'], $deSync);
         die(base64_encode(json_encode($response)));

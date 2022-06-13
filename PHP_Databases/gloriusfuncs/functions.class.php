@@ -8,6 +8,7 @@ class functions
     public static $wrongEncryption = array("status" => "false", "msg" => "0x21 Contact Admin.");
     public static $sameEncryption = array("status" => "false", "msg" => "0x19 Load the lua again or Contact an Admin.");
     public static $blocked = array("status" => "false", "msg" => "0x31, Contact Admin.");
+    public static $notFound = array("status" => "false", "msg" => "0x32, User not found.");
 
     static function insertLogging($ip, $name, $user_agent, $vendorID, $deviceID, $deviceused, $reason)
     {
