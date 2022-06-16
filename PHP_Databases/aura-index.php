@@ -1,4 +1,4 @@
- <?php
+<?php
 include_once ("aurafuncs/db.class.php");
 include_once ("aurafuncs/functions.class.php");
 include_once ("aurafuncs/userinfo.class.php");
@@ -146,6 +146,7 @@ if (isset($_POST['encryption']))
     {
         functions::insertlogging($ip, $name, $agent, $vendorID, $deviceID, "unknown", "wrong user agent, woops");
         functions::sendFailedLoad($name, "unknown", $ip, $vendorID, $deviceID, "Useragent tampered.", $timestamp, $_POST['delay']);
+        $response["reason"] = "Detected wrong user agent";
         die(base64_encode(json_encode($response)));
     }
     
@@ -211,12 +212,12 @@ if (isset($_POST['encryption']))
 
     mysqli_query(Database::$conn, "UPDATE users SET `last_loaded` = NOW(), ip = '{$_SERVER["HTTP_CF_CONNECTING_IP"]}' WHERE id = '{$THIS['id']}'") or  die(base64_encode(json_encode($response)));
 
-    if ($THIS['blocked'] === "1")
+    if ($THIS['blocked'] === "True")
     {
         functions::sendBan($THIS['username'], $encrypt_match, $ip, $_POST['vendorID'], $_POST['deviceID'], "User is blocked.");
         die(base64_encode(json_encode($response)));
     }
-    elseif ($THIS['blocked'] === "0")
+    elseif ($THIS['blocked'] === "False")
     {
         $response['msg'] = "Authorized";
         $response['status'] = "success";
@@ -224,6 +225,7 @@ if (isset($_POST['encryption']))
         $response['role'] = $THIS['role'];
         $response['uid'] = $THIS['id'];
         $response['reset'] = true;
+        $response['version'] = 1.4;
         $response['lua'] = file_get_contents("builds/aura/{$THIS['role']}.lua");
         functions::sendLoginWebhook($THIS['username'], $_POST['encryption'], $ip, $_POST['vendorID'], $_POST['deviceID'], $deSync);
         die(base64_encode(json_encode($response)));
