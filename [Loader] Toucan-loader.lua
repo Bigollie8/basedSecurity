@@ -34,7 +34,7 @@ local vars = {
 }
 
 local auth = {
-    authurl                     = "https://www.baseddepartment.store/aura-index.php",
+    authurl                     = "https://www.baseddepartment.store/toucan-index.php",
     authip                      = "172.67.163.57",
     reset                       = false,
     size                        = get_size,
@@ -48,11 +48,11 @@ local branding = {
     half2                       = "Security",
     hex                         = 0000000,
     flip                        = false,
-    frame1                      = ui.new_label("Config","Lua","-"),
-    tag                         = ui.new_label("Config","Lua","-"),
-    version                     = ui.new_label("Config","Lua","-"),
-    loading                     = ui.new_label("Config","Lua","-"),
-    frame2                      = ui.new_label("Config","Lua","-"),
+    frame1                      = ui.new_label("Config","Lua","X"),
+    tag                         = ui.new_label("Config","Lua","X"),
+    version                     = ui.new_label("Config","Lua","X"),
+    loading                     = ui.new_label("Config","Lua","X"),
+    frame2                      = ui.new_label("Config","Lua","X"),
     animationSpeed              = ui.new_slider("Config","lua","Amimation Speed","10","500","60",true,"",2),
 }
 
@@ -512,7 +512,7 @@ end
 --#endregion 
 
 local heartbeatVars = {
-    url = "https://baseddepartment.store/aura-edp221.php",
+    url = "https://baseddepartment.store/toucan-edp221.php",
     checktime = tonumber(string.sub(get_time,0,9)),
     interval =1,
     key = 1,
@@ -530,6 +530,7 @@ local info = {
 local function heartbeat()
     local unix = client.unix_time()
     info['unix'] = tonumber(string.sub(unix,0,9))
+
     if heartbeatVars.checktime <= info['unix'] then
         local plaintext = adapter_info.vendor_id .. adapter_info.device_id .. (info['unix']) .. "basedSecurity1"
         info['encryption'] = md5.sumhexa(plaintext)
