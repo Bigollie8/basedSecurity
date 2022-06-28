@@ -1,6 +1,6 @@
 <?php
-include_once ("basedSecurity/db.class.php");
-include_once ("basedSecurity/functions.class.php");
+include_once ("basedSecurityfuncs/db.class.php");
+include_once ("basedSecurityfuncs/functions.class.php");
 
 Database::initialize();
 

@@ -1,5 +1,5 @@
 <?php
-require_once ("basedSecurity/functions.class.php");
+require_once ("basedSecurityfuncs/functions.class.php");
 
 $username = $_POST['username'];
 $password = $_POST['password'];
