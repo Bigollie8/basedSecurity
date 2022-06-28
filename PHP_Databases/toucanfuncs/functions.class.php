@@ -9,6 +9,7 @@ class functions
     public static $wrongEncryption = array("status" => "false", "msg" => "0x21 Contact Admin.");
     public static $sameEncryption = array("status" => "false", "msg" => "0x19 Load the lua again or Contact an Admin.");
     public static $blocked = array("status" => "false", "msg" => "0x31, Contact Admin.");
+    public static $notFound = array("status" => "false", "msg" => "0x32, User not found.");
 
     static function insertLogging($ip, $name, $user_agent, $vendorID, $deviceID, $deviceused, $reason)
     {
@@ -26,7 +27,7 @@ class functions
 
         $ch = curl_init();
 
-        curl_setopt_array($ch, [CURLOPT_URL => "https://discord.com/api/webhooks/970590028457734215/Jmuq-3QwbHbPdXj2eNegf9zna2s8TVULQYQCWmtuPk0cvK2WJcgZ8ffi1jxenL2r3yPU", CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObject, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
+        curl_setopt_array($ch, [CURLOPT_URL => "https://discord.com/api/webhooks/989924808080900197/S4-xYs0jGbaoCDEEDg57CGItsyGr8uiNIRSVc3WnxMs_yFln2Zk4ZbvMxB_ioXlcVA9g", CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObject, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
 
         $responseWB = curl_exec($ch);
         curl_close($ch);
@@ -58,7 +59,7 @@ class functions
 
         $ch = curl_init();
 
-        curl_setopt_array($ch, [CURLOPT_URL => "https://discord.com/api/webhooks/972357920756990012/oF3DOkSmv9qAhRVVRuTvv1cz6cYBbfzX7jpVKIppMQmaypCPgK9s8-2naAZryJKvDCGb", CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObject, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
+        curl_setopt_array($ch, [CURLOPT_URL => "https://discord.com/api/webhooks/989925176697290813/rGDmXdwckNx1AnWfPhOXZxGMeQKQA8yOZ2W4hYDdPPU9bSOx7u7kRm25LJCWH9wQMnU9", CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObject, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
 
         $responseWB = curl_exec($ch);
         curl_close($ch);
@@ -75,7 +76,7 @@ class functions
 
         $ch = curl_init();
 
-        curl_setopt_array($ch, [CURLOPT_URL => "https://discord.com/api/webhooks/970590193260310558/oZwVN0FrgFYGez66lMtIQIfDBN1TVFUw45AhbFjuQZV9WYT7WOFgHJ9oninI8tMTke00", CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObject, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
+        curl_setopt_array($ch, [CURLOPT_URL => "https://discord.com/api/webhooks/989924938989330453/Ol6-a7HbsCOTed87431loiWYzI8wMr0bDPZ8yTtU_Eo02az2Mgk5YeUwLg0NwLnmY1A2", CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObject, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
 
         $responseWB = curl_exec($ch);
         curl_close($ch);
@@ -91,7 +92,7 @@ class functions
 
         $ch = curl_init();
 
-        curl_setopt_array($ch, [CURLOPT_URL => "https://discord.com/api/webhooks/970590259526139925/Vyf2DVxSy14iQ4mz8eQRRcWzYreHw4UWbVlbyTreo6JBk07oD4k_MHps6KAlXig2hx-K", CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObject, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
+        curl_setopt_array($ch, [CURLOPT_URL => "https://discord.com/api/webhooks/989925047571447819/_ZmIjNo6Js7U5TPsG2zmgMXxMsDgjSd4K9wdwvILq4THgkPfTUDQ2bEu9ClDsGel2Tiq", CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObject, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
 
         $responseWB = curl_exec($ch);
         curl_close($ch);
@@ -108,7 +109,7 @@ class functions
 
         $ch = curl_init();
 
-        curl_setopt_array($ch, [CURLOPT_URL => "https://discord.com/api/webhooks/970591546850304030/mglDmdOg6WkMOh1QhlGWl2SPDDxd3_DW3kDYTs2cHFpp2ugs6v847z2GUgU7GzhZthev", CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObject, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
+        curl_setopt_array($ch, [CURLOPT_URL => "https://discord.com/api/webhooks/989925236927528980/0mNgolt08RAWh6Y92fqnFS68SORyF6Bvq4HxZsHGxeI2TO39cZUBLt9uG6pm_6X_09M-", CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObject, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
 
         $responseWB = curl_exec($ch);
         curl_close($ch);

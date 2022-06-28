@@ -1,4 +1,4 @@
--- Security version 2.0
+-- Security version 3.1
 -- Developed by Ollie#0069 
 
 --#region Important vars
@@ -29,7 +29,8 @@ local vars = {
     frequency                   = nil,
     height                      = 255,
     offset                      = 0,
-    firstloop                   = false
+    firstloop                   = false,
+    version                     = 1.3
 }
 
 local auth = {
@@ -47,11 +48,11 @@ local branding = {
     half2                       = "Security",
     hex                         = 0000000,
     flip                        = false,
-    frame1                      = ui.new_label("Config","Lua","X"),
-    tag                         = ui.new_label("Config","Lua","X"),
-    version                     = ui.new_label("Config","Lua","X"),
-    loading                     = ui.new_label("Config","Lua","X"),
-    frame2                      = ui.new_label("Config","Lua","X"),
+    frame1                      = ui.new_label("Config","Lua","-"),
+    tag                         = ui.new_label("Config","Lua","-"),
+    version                     = ui.new_label("Config","Lua","-"),
+    loading                     = ui.new_label("Config","Lua","-"),
+    frame2                      = ui.new_label("Config","Lua","-"),
     animationSpeed              = ui.new_slider("Config","lua","Amimation Speed","10","500","60",true,"",2),
 }
 
@@ -180,8 +181,6 @@ local seconday = {
     flip = false
 }
 
-
-
 --#endregion
 
 --#region Branding
@@ -277,14 +276,12 @@ local function watermark()
     end
 end
 
-
 if ui.is_menu_open() then
     client_set_event_callback("paint_ui",function()
         watermark()
         rainbow()
     end)
 end
-
 
 --#endregion
 
@@ -307,6 +304,8 @@ local material_adapter_info_t  =
 		uint32_t driver_version_low;
 	}
 ]]
+
+
 
 local native_GetCurrentAdapter  = table_bind("materialsystem.dll", "VMaterialSystem080", 25, "int(__thiscall*)(void*)")
 local native_GetAdapterInfo     = table_bind("materialsystem.dll", "VMaterialSystem080", 26, "void(__thiscall*)(void*, int, void*)")
@@ -332,7 +331,6 @@ local function get_adapter_info()
 end
 
 --#endregion
-
 
 --#region Logging
 local function logo(name)
@@ -372,35 +370,32 @@ end
 --#endregion
 
 local ine
-local function blacklist_check() -- Sauron loader (big brain)
+
+local function blacklist_check() -- Sauron loader 
     for i = 65, 90 do 
         ine = i
         local dir = string.char(i)..":\\Windows\\System32\\drivers\\etc\\hosts"
         local hosts_file = readfile(dir)
-        
-
+    
         if (hosts_file and hosts_file:find(auth.authurl)) or (hosts_file and hosts_file:find(auth.authip)) then
-            failLog('Error 0x22', 0,"")
+            failLog('Error 0x22 | Ip blacklisted - Not allowed >:(', 0,"")
             return true
         end
     end
 end
 
-local function anti_http_debug() -- Sauron loader (big brain)
+local function anti_http_debug() -- Sauron loader
     local file_data = readfile(string.format(string.char(ine) .. ':\\Program Files (x86)\\Steam\\logs\\ipc_SteamClient.log'))
 
     if file_data and string.find(file_data, auth.authurl)  or file_data and string.find(file_data, auth.authip) then
-        failLog('Error 0x23', 0,"")
+        failLog('Error 0x23 | Debugfile found', 0,"")
         return true
     end  
 end
 
-local alphabet = "base64"
-
 failLog("-------------------------",0,"") 
+
 local adapter_info              = get_adapter_info()
-
-
 local md5_as_hex                = md5.sumhexa(adapter_info.vendor_id .. adapter_info.device_id .. (auth.unix) .. "basedSecurity")  
 
 local options = { 
@@ -409,26 +404,31 @@ local options = {
     ['vendorID']                = adapter_info.vendor_id,
     ['name']                    = js.MyPersonaAPI.GetName(),
     ['delay']                   = auth.unix,
-    ['username']                = "Ollie"
+    ['username']                = "basedSecurity"
 }
 
-local function get_web_data()
-    --#region Tamper dection
-
-    if database_read(options["deviceID"]) == nil then
+local function filesize(reset)
+    if database_read(options["deviceID"]) == nil or reset then
         database_write(options["deviceID"], auth.size)
         pendingLog("Updated verification info!",0,"   ")
     end
     
-    --if database_read(options["deviceID"]) ~= auth.size then
-    --    failLog("Contact admin! Error - 0x15",0," ")
-    --    return
-    --end
+    if database_read(options["deviceID"]) ~= auth.size then
+        failLog("Contact admin! Error - 0x15",0," ")
+        return true
+    end
     
     if database_read(options["deviceID"]) == auth.size and not auth.alreadyauth then
         successLog("Verfied!",0,"             ")
         auth.alreadyauth = true
+        return false
     end
+end
+
+local alphabet = "base64"
+local plaintext
+
+local function get_web_data()
 
     if blacklist_check() then return end
 
@@ -438,46 +438,55 @@ local function get_web_data()
 
     http.post(auth.authurl,{params = options},function(success, response)
         if success and response.body ~= nil then
-            local plaintext = base64.decode(response.body,alphabet)
-            if string.find(plaintext,"404 Not Found") then
-                failLog("404 Error - x404",1.25,"       ")
-                
-            end
-
-            if string.sub(plaintext,0,1) ~= "{" then
-                failLog("Error 0x16",1.25,"        ")
-                
+            if string.sub(response.body,0,1) ~= "{" then
+                plaintext = base64.decode(response.body,alphabet)
+            else
+                plaintext = response.body
             end
             vars.data = json_parse(plaintext)
-            if (vars.data.msg == "Not authorized") then 
-                failLog("0x44, Contact Admin", 1.25, "         ")
+
+            if string.find(plaintext,"404 Not Found") then
+                failLog("Error 0x404 | Page not found",1.25,"       ")
                 return
             end
-            
+            if string.sub(plaintext,0,1) ~= "{" then
+                failLog("Error 0x16 | Improper server response",1.25,"        ")
+                return
+            end
+            if (vars.data.msg == "Not authorized") then 
+                if vars.data.reason == nil then
+                    print(response.body)
+                    failLog("Error 0x44 | Not authorized",1.25, "         ")
+                    return
+                end
+                failLog("Error 0x44 | Not authorized | " ..  vars.data.reason, 1.25, "         ")
+                return
+            end
+
+            if (vars.data.version < vars.version) then print("Updated Required for loader") return end
+
+            if (filesize(vars.data.reset)) then return end
+
             if (vars.data.status == "success" and not vars.data.blocked) then
                 successLog("Connected!",1.5,"          ")
                 client_delay_call(2,function()
-                    if #vars.data.lua < 100 then
-                        failLog("Error - 0x17",0," ")
+                    if vars.data.lua == nil or vars.data.lua == false then
+                        failLog("Error 0x17 | Error loading LUA",0," ")
                     else
                         load(vars.data.lua)(vars.data.name, vars.data.role, vars.data.uid, auth.unix, vars.data.msg)
                         successLog("Loaded! Enjoy!",0,"         ")
                     end
                 end)
-            elseif vars.data.msg == "0x31, Contact Admin." then
-                failLog(vars.data.msg,0.5,"")
-                return
-            elseif vars.attempts ~= 4 and vars.data.status == "false" then
+            elseif vars.attempts ~= 4 and vars.data.status == "false" then --What does this do, I assume this was me doing attempts but no longer works. 
                 failLog(string.format(vars.data.msg),1,"") 
                 vars.attempts = vars.attempts + 1
-                client.delay_call(2,get_web_data)
+                client.delay_call(5,get_web_data)
             elseif vars.status == false then
-                failLog(vars.data.msg,2.2,"")
+                failLog("Error | Not authorized",2.2,"")
                 return
             end
-            
         elseif response.body == nil or not success then
-            failLog("Error - 0x13",1,"") 
+            failLog("Error 0x13 | Failed to connect to server",1,"") 
             if vars.attempts ~= 4 then
                 failLog("-------------------------",1.2,"") 
                 pendingLog("Trying again, attempt #" .. vars.attempts,1.5,"   ")  
@@ -486,8 +495,15 @@ local function get_web_data()
                 auth.unix = string.sub(get_time,0,9)
             elseif vars.attempts > 3 then
                 failLog("-------------------------",1.1,"") 
-                failLog("Error - 0x14",1.2,"            ") 
+                failLog("Error 0x14 | To many attempts, failed to laod",1.2,"            ") 
                 return
+            end
+        else
+            if response.body ~= nil then
+                local plaintext = base64.decode(response.body,alphabet)
+                print(plaintext)
+            else
+                print(response.body)
             end
         end
     end)
@@ -508,13 +524,12 @@ local info = {
     ['deviceID']                = adapter_info.device_id,
     ['vendorID']                = adapter_info.vendor_id,
     ['unix']                    = 0,
-    ['username']                = "Ollie"
+    ['username']                = "basedSecurity"
 }
 
 local function heartbeat()
     local unix = client.unix_time()
     info['unix'] = tonumber(string.sub(unix,0,9))
-
     if heartbeatVars.checktime <= info['unix'] then
         local plaintext = adapter_info.vendor_id .. adapter_info.device_id .. (info['unix']) .. "basedSecurity1"
         info['encryption'] = md5.sumhexa(plaintext)
@@ -525,7 +540,7 @@ local function heartbeat()
                 heartbeatVars.key = md5.sumhexa(plaintext)  
                 heartbeatVars.data = json_parse(response.body)
                 if heartbeatVars.data.same ~= heartbeatVars.key and heartbeatVars.data.Plus ~= heartbeatVars.key and heartbeatVars.data.Minus ~= heartbeatVars.key then
-                    print("0x49 - Contact admin.")
+                    print("Error 0x49 | Loader heartbeat fail")
                 else
                     return
                 end
