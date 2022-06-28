@@ -6,7 +6,6 @@ Database::initialize();
 
 $response = array("msg" => "Invalid variable passed");
 
-
 if (empty($_POST['vendorID'])) {
     die(json_encode($response));
 }
@@ -34,7 +33,7 @@ if (strlen($_POST['vendorID']) > 5) {
 if (strlen($_POST['deviceID']) > 5) {
     die(json_encode($response));
 }
-
+//make this better kinda sucks and can be exploited
 $clientEncrypt = $_POST['encryption'];
 $username = $_POST['username'];
 $uid = $_POST['uid'];
