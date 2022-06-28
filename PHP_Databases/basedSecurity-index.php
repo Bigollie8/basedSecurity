@@ -130,14 +130,14 @@ if (isset($_POST['encryption']))
             "deviceID" => $_POST['deviceID'],
             "num" => mysqli_num_rows($checkForVendor)))));
             $response["reason"] = "Updated user info";
-            die(json_encode(functions::$response));
+            die(base64_encode(json_encode($response)));
     }
     
     if ($THIS['vendorID'] != $_POST['vendorID'] && $THIS['deviceID'] != $_POST['deviceID']) {
         functions::sendFailedLoad($name, $_POST['encryption'], $ip, $encrypt_match, $encrypt_match_2, "Info does not match", $timestamp, $_POST['delay']);
         functions::insertlogging($ip, $name, $agent, $vendorID, $deviceID, "unknown", "Info does not match");
         $response["reason"] = "Info does not match username";
-        die(json_encode(functions::$response));
+        die(base64_encode(json_encode($response)));
     }
     /*
             Anti hack systems

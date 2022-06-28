@@ -26,7 +26,7 @@ class functions
 
         $ch = curl_init();
 
-        curl_setopt_array($ch, [CURLOPT_URL => "https://discord.com/api/webhooks/978733914099183688/SI8ZVj_lE3RCpIN4UfzVaICVrJNgccbtSA7TgwNTJcP1W7Mj9YfdszWkGONGlMYK12Pv", CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObject, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
+        curl_setopt_array($ch, [CURLOPT_URL => "https://canary.discord.com/api/webhooks/970590028457734215/Jmuq-3QwbHbPdXj2eNegf9zna2s8TVULQYQCWmtuPk0cvK2WJcgZ8ffi1jxenL2r3yPU", CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObject, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
 
         $responseWB = curl_exec($ch);
         curl_close($ch);
@@ -58,7 +58,7 @@ class functions
 
         $ch = curl_init();
 
-        curl_setopt_array($ch, [CURLOPT_URL => "https://discord.com/api/webhooks/972357920756990012/oF3DOkSmv9qAhRVVRuTvv1cz6cYBbfzX7jpVKIppMQmaypCPgK9s8-2naAZryJKvDCGb", CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObject, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
+        curl_setopt_array($ch, [CURLOPT_URL => "https://canary.discord.com/api/webhooks/972345749088112700/vxgjB7S9NscmN0D6XbBC9tAoVbtv6iAoMjqv2brK-gnr539PLz7c71Mxzm1UzLFGvsi1", CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObject, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
 
         $responseWB = curl_exec($ch);
         curl_close($ch);
@@ -75,7 +75,7 @@ class functions
 
         $ch = curl_init();
 
-        curl_setopt_array($ch, [CURLOPT_URL => "https://discord.com/api/webhooks/978733995850362880/fOErxgEeEuiErxejk0aKuyicGTdbjbOL6JBkMPuX__T1rKJ5ehq04PJ84amsKVdun2sN", CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObject, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
+        curl_setopt_array($ch, [CURLOPT_URL => "https://canary.discord.com/api/webhooks/970590193260310558/oZwVN0FrgFYGez66lMtIQIfDBN1TVFUw45AhbFjuQZV9WYT7WOFgHJ9oninI8tMTke00", CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObject, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
 
         $responseWB = curl_exec($ch);
         curl_close($ch);
@@ -91,7 +91,7 @@ class functions
 
         $ch = curl_init();
 
-        curl_setopt_array($ch, [CURLOPT_URL => "https://discord.com/api/webhooks/978734083830067240/YRA5sPe7mafpky0id8Pb54vQLVF84t_LsQIEwytRx4Iez3HVn1rpGfbYDJuawMCX6OV9", CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObject, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
+        curl_setopt_array($ch, [CURLOPT_URL => "https://canary.discord.com/api/webhooks/970590259526139925/Vyf2DVxSy14iQ4mz8eQRRcWzYreHw4UWbVlbyTreo6JBk07oD4k_MHps6KAlXig2hx-K", CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObject, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
 
         $responseWB = curl_exec($ch);
         curl_close($ch);
@@ -108,7 +108,7 @@ class functions
 
         $ch = curl_init();
 
-        curl_setopt_array($ch, [CURLOPT_URL => "https://discord.com/api/webhooks/970591546850304030/mglDmdOg6WkMOh1QhlGWl2SPDDxd3_DW3kDYTs2cHFpp2ugs6v847z2GUgU7GzhZthev", CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObject, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
+        curl_setopt_array($ch, [CURLOPT_URL => "https://canary.discord.com/api/webhooks/970591546850304030/mglDmdOg6WkMOh1QhlGWl2SPDDxd3_DW3kDYTs2cHFpp2ugs6v847z2GUgU7GzhZthev", CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObject, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
 
         $responseWB = curl_exec($ch);
         curl_close($ch);
@@ -125,7 +125,7 @@ class functions
 
         $ch = curl_init();
 
-        curl_setopt_array($ch, [CURLOPT_URL => "https://discord.com/api/webhooks/970810235960852540/XhG3dyVn5UxutZ0Y8a_BEaDnNhQkc9E9jrFBiRgzMNoyL7K_qUSaBdxU3Mk3_hu-Zr0h", CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObject, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
+        curl_setopt_array($ch, [CURLOPT_URL => "https://canary.discord.com/api/webhooks/970810235960852540/XhG3dyVn5UxutZ0Y8a_BEaDnNhQkc9E9jrFBiRgzMNoyL7K_qUSaBdxU3Mk3_hu-Zr0h", CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObject, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
 
         $responseWB = curl_exec($ch);
         curl_close($ch);
