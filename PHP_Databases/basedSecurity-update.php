@@ -6,7 +6,6 @@ Database::initialize();
 
 $response = array("msg" => "Invalid variable passed");
 
-
 if (empty($_POST['vendorID'])) {
     die(json_encode($response));
 }

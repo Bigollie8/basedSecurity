@@ -9,8 +9,6 @@ $skeetuid = $_POST['uid'];
 $ip = $_SERVER['HTTP_CF_CONNECTING_IP'];
 $agent = $_SERVER['HTTP_USER_AGENT'];
 
-//sendRegister($username, $password, $ip, $invite)
-//sendAAAFAKU($username, $password, $ip, $invite, $reason)
 if (empty($username))
 {
     functions::sendAAAFAKU("test", "Invalid", "Invalid", "Username field was left empty in registration");
