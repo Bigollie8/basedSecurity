@@ -40,9 +40,7 @@
     }
 
     $encrypt = md5($_POST['vendorID'] . $_POST['deviceID'] . $unix . "basedSecurity1");
-
     $key = md5($_POST['vendorID'] . $_POST['deviceID'] . $unix . "basedSecurity2");
-
     $clientEncrypt = $_POST['encryption'];
 
     if ($clientEncrypt ==$encrypt) {

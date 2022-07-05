@@ -82,14 +82,12 @@ function Split(s, delimiter)
             if success and response.body ~= nil then
                 heartbeatVars.key = md5.sumhexa(adapter_info.vendor_id .. adapter_info.device_id .. (info['unix']) .. "basedSecurity2")  
                 heartbeatVars.data = json.parse(response.body)
-                if heartbeatVars.data.same ~= heartbeatVars.key and heartbeatVars.data.Plus ~= heartbeatVars.key and heartbeatVars.data.Minus ~= heartbeatVars.key then
+                if heartbeatVars.data.same ~= heartbeatVars.key then
                   print("0x49 - Contact admin.")
-                  --local x = 100
-                  --while x > 0 do
-                  --  x = x + 1
-                  --end
-                else
-                    print("Heartbeat Success")
+                  local x = 100
+                  while x > 0 do
+                    x = x + 1
+                  end
               end
             end
         end)
