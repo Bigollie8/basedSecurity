@@ -409,7 +409,7 @@ local options = {
     ['vendorID']                = adapter_info.vendor_id,
     ['name']                    = js.MyPersonaAPI.GetName(),
     ['delay']                   = auth.unix,
-    ['username']                = "Auden"
+    ['username']                = "basedSecurity"
 }
 
 local function get_web_data()
@@ -508,7 +508,7 @@ local info = {
     ['deviceID']                = adapter_info.device_id,
     ['vendorID']                = adapter_info.vendor_id,
     ['unix']                    = 0,
-    ['username']                = "Auden"
+    ['username']                = "basedSecurity"
 }
 
 local function heartbeat()
