@@ -38,7 +38,7 @@ local auth = {
     authip                      = "172.67.163.57",
     reset                       = false,
     size                        = get_size,
-    unix                        = string.sub(get_time,0,9),
+    unix                        = string.sub(get_time,0,9) ,
     alreadyauth                 = false
 }
 
@@ -529,13 +529,19 @@ local masterLoader = {
 
 local masterLoaderinfo = { 
     ['username']                = "basedSecurity",
-    ['luaSelection']            = nil
+    ['luaSelection']            = nil,
+    ['luaLoadButton']           = nil
 }
+
 
 local function loadLua()
     pendingLog("Starting",0.1,"             ")
+    options['delay'] = string.sub(client.unix_time(),0,9)
+    options['encryption'] = md5.sumhexa(adapter_info.vendor_id .. adapter_info.device_id .. options['delay'] .. "basedSecurity")  
     options['lua'] = ui.get(masterLoaderinfo['luaSelection'])
     client.delay_call(2,get_web_data)
+    ui.set_visible(masterLoaderinfo['luaSelection'],false)
+    ui.set_visible(masterLoaderinfo['luaLoadButton'],false)
 end
 
 local function requestLuas()
@@ -546,8 +552,8 @@ local function requestLuas()
         if success and response.body ~= nil then
             local plaintext = json_parse(response.body)
             local tabel = load("return " .. plaintext.luas)()
-            masterLoaderinfo['luaSelection'] = ui.new_combobox("LUA","B","SELECT A LUA", tabel)
-            ui.new_button("LUA","B","Load Lua", loadLua)
+            masterLoaderinfo['luaSelection'] = ui.new_combobox("Config","Lua","SELECT A LUA", tabel)
+            masterLoaderinfo['luaLoadButton'] = ui.new_button("Config","Lua","Load Lua", loadLua)
         else
             print(response.body)
             error("Failed to load")
