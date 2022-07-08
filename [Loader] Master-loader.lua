@@ -369,6 +369,10 @@ end
 
 --#endregion
 
+--Creating menu
+
+
+
 local ine
 
 local function blacklist_check() -- Sauron loader 
@@ -404,7 +408,8 @@ local options = {
     ['vendorID']                = adapter_info.vendor_id,
     ['name']                    = js.MyPersonaAPI.GetName(),
     ['delay']                   = auth.unix,
-    ['username']                = "basedSecurity"
+    ['username']                = "basedSecurity",
+    ['lua']                     = nil
 }
 
 local function filesize(reset)
@@ -511,6 +516,47 @@ local function get_web_data()
     end)
 end
 
+--Request the list of luas from the server that you have access too
+--Create a dropdown menu that allows you to select
+--Have load button
+--Have unload button (Is this possible?)
+
+
+local masterLoader = {
+    url = "https://baseddepartment.store/basedSecurity-edp220.php",
+    key = nil
+}
+
+local masterLoaderinfo = { 
+    ['username']                = "basedSecurity",
+    ['luaSelection']            = nil
+}
+
+local function loadLua()
+    pendingLog("Starting",0.1,"             ")
+    options['lua'] = ui.get(masterLoaderinfo['luaSelection'])
+    client.delay_call(2,get_web_data)
+end
+
+local function requestLuas()
+    local unix = client.unix_time()
+    masterLoaderinfo['unix'] = tonumber(string.sub(unix,0,9))
+    masterLoaderinfo['encryption'] = md5_as_hex
+    http.post(masterLoader.url,{params = masterLoaderinfo},function(success, response)
+        if success and response.body ~= nil then
+            local plaintext = json_parse(response.body)
+            local tabel = load("return " .. plaintext.luas)()
+            masterLoaderinfo['luaSelection'] = ui.new_combobox("LUA","B","SELECT A LUA", tabel)
+            ui.new_button("LUA","B","Load Lua", loadLua)
+        else
+            print(response.body)
+            error("Failed to load")
+        end
+    end)
+end
+
+requestLuas()
+
 --#endregion 
 
 local heartbeatVars = {
@@ -556,6 +602,6 @@ end
 client_set_event_callback("paint_ui",heartbeat)
 
 
-pendingLog("Starting",0.1,"             ")
-client.delay_call(2,get_web_data)
+
+
 --#endregion`
