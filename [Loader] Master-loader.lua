@@ -448,9 +448,7 @@ local function get_web_data()
             else
                 plaintext = response.body
             end
-
-            print(plaintext)
-
+            
             vars.data = json_parse(plaintext)
             if string.find(plaintext,"404 Not Found") then
                 failLog("Error 0x404 | Page not found",1.25,"       ")
