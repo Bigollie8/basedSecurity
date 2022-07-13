@@ -190,7 +190,7 @@ if (isset($_POST['encryption']))
         }
     }
 
-    $check = mysqli_query(Database::$conn, "SELECT id, last_encryption FROM authlog WHERE vendorID = '$vendorID' AND deviceID = '$deviceID' order by id desc limit 1") or         die(base64_encode(json_encode($response)));
+    $check = mysqli_query(Database::$conn, "SELECT id, last_encryption FROM authlog WHERE vendorID = '$vendorID' AND deviceID = '$deviceID' order by id desc limit 1") or die(base64_encode(json_encode($response)));
     if (mysqli_num_rows($check) > 0)
     {
         $THIS = mysqli_fetch_array($check);
