@@ -1,11 +1,26 @@
+from multiprocessing import parent_process
 import sys
 import os
-from github import Github
+from git import Repo
+from git import Git
+import shutil
+import datetime 
 
-g = github("username","password")
-repos = g.get_user().get_repos()
 
-path = "C:/Users/bigol/repos/basedSecurity"
+def constructPath():
+    rawDate = datetime.datetime.now()
+    if rawDate.hour > 12:
+        hour = str(rawDate.hour - 12)
+        suffix = "pm"
+    else:
+        hour = str(rawDate.hour)
+        suffix = "am"
+
+    timestamp = str(rawDate.year) + "-" + str(rawDate.month) + "-" + str(rawDate.day)  + " " + hour  + "-" + str(rawDate.minute)  + "-" + str(rawDate.second) + suffix
+    parent = r'C:/Users/bigol/Desktop/Update Manager/root'
+    return os.path.join(parent, timestamp)
+    
+path = constructPath()
 
 def startupText():
     # This function is used to alert the users of the steps they need
@@ -13,7 +28,7 @@ def startupText():
     # red to stand out more to the user
     sys.stdout.write("\033[;1m")
     sys.stdout.write("\033[1;31m")
-    print("# WARNING, make sure you are on the master branch and have the most recent files #")
+    print("# WARNING # You are about to push an update to the servers # WARNING #")
     sys.stdout.write("\033[0;0m")
 
 
@@ -28,10 +43,13 @@ def verify():
 
     return True
 
-def downloadGithub():
-    # This function is going to be used to download the most recent files from
-    # github. 
-    print("Done")
+def githubRepo():
+    file = os.path.join(os.getcwd(), 'id_rsa.key')
+    git_ssh_cmd = 'ssh -i %s' % file
+    Repo.clone_from("https://github.com/Bigollie8/basedSecurity", path,env=dict(GIT_SSH_COMMAND=git_ssh_cmd))
+    print("File saved to : " + path)
+    print("Cloned")
+
 
 
 def updateFiles():
@@ -49,7 +67,19 @@ def updateFiles():
             print(name)
     print("Done")
 
+def cleanup():
+    try:
+        shutil.rmtree(path)
+    except OSError as e:
+        print ("Error: %s - %s." % (e.filename, e.strerror))
 
-startupText()
-verify()
-updateFiles()
+def driver():
+    for x in range(5): startupText()
+    verify()
+    updateFiles()
+    githubRepo()
+    input("Deleting files press enter!")
+    cleanup()
+
+
+driver()
