@@ -36,7 +36,6 @@ def startupText():
     print("# WARNING # You are about to push an update to the servers # WARNING #")
     sys.stdout.write("\033[0;0m")
 
-
 def pause():
     # This function is intented to give the user a chance to exit if 
     # they have not completed all the steps needed to push the update
@@ -50,8 +49,6 @@ def pause():
     return True
 
 list_of_files = []
-
-
 
 def githubRepo():
     # This function pulls the files from our github when you intiate the 
@@ -70,11 +67,13 @@ def cleanup():
     # backend scripts
 
     input("Deleting files press enter!")
-
+    print(path)
     try:
         shutil.rmtree(path)
     except OSError as e:
         print ("Error: %s - %s." % (e.filename, e.strerror))
+    finally:
+        print("removed")
 
 def verifyConnection():
     # This function is used to ensure that we
@@ -95,6 +94,7 @@ def checkFile(file):
     if "backend" not in file: return False
     if "php" not in file: return False
     if "lua" in file: return False
+    if "funcs" in file: return False
 
     return True
 
