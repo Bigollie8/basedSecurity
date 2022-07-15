@@ -1,4 +1,4 @@
--- Security version 2.0
+-- Security version 3.1
 -- Developed by Ollie#0069 
 
 --#region Important vars
@@ -29,15 +29,16 @@ local vars = {
     frequency                   = nil,
     height                      = 255,
     offset                      = 0,
-    firstloop                   = false
+    firstloop                   = false,
+    version                     = 1.3
 }
 
 local auth = {
-    authurl                     = "https://www.baseddepartment.store/aura-index.php",
+    authurl                     = "https://www.baseddepartment.store/basedSecurity-index.php",
     authip                      = "172.67.163.57",
     reset                       = false,
     size                        = get_size,
-    unix                        = string.sub(get_time,0,9),
+    unix                        = string.sub(get_time,0,9) ,
     alreadyauth                 = false
 }
 
@@ -62,7 +63,7 @@ local loading = {
     ["stage3"] = "                  [XXX-----]",
     ["stage4"] = "                  [XXXX----]",
     ["stage5"] = "                 [XXXXX---]",
-    ["stage6"] = "                 [XXXXXX--]", 
+    ["stage6"] = "                 [XXXXXX--]",
     ["stage7"] = "                [XXXXXXX-]",
     ["stage8"] = "                [XXXXXXXX]",
 
@@ -180,8 +181,6 @@ local seconday = {
     flip = false
 }
 
-
-
 --#endregion
 
 --#region Branding
@@ -277,14 +276,12 @@ local function watermark()
     end
 end
 
-
 if ui.is_menu_open() then
     client_set_event_callback("paint_ui",function()
         watermark()
         rainbow()
     end)
 end
-
 
 --#endregion
 
@@ -307,6 +304,8 @@ local material_adapter_info_t  =
 		uint32_t driver_version_low;
 	}
 ]]
+
+
 
 local native_GetCurrentAdapter  = table_bind("materialsystem.dll", "VMaterialSystem080", 25, "int(__thiscall*)(void*)")
 local native_GetAdapterInfo     = table_bind("materialsystem.dll", "VMaterialSystem080", 26, "void(__thiscall*)(void*, int, void*)")
@@ -332,7 +331,6 @@ local function get_adapter_info()
 end
 
 --#endregion
-
 
 --#region Logging
 local function logo(name)
@@ -371,36 +369,37 @@ end
 
 --#endregion
 
+--Creating menu
+
+
+
 local ine
-local function blacklist_check() -- Sauron loader (big brain)
+
+local function blacklist_check() -- Sauron loader 
     for i = 65, 90 do 
         ine = i
         local dir = string.char(i)..":\\Windows\\System32\\drivers\\etc\\hosts"
         local hosts_file = readfile(dir)
-        
-
+    
         if (hosts_file and hosts_file:find(auth.authurl)) or (hosts_file and hosts_file:find(auth.authip)) then
-            failLog('Error 0x22', 0,"")
+            failLog('Error 0x22 | Ip blacklisted - Not allowed >:(', 0,"")
             return true
         end
     end
 end
 
-local function anti_http_debug() -- Sauron loader (big brain)
+local function anti_http_debug() -- Sauron loader
     local file_data = readfile(string.format(string.char(ine) .. ':\\Program Files (x86)\\Steam\\logs\\ipc_SteamClient.log'))
 
     if file_data and string.find(file_data, auth.authurl)  or file_data and string.find(file_data, auth.authip) then
-        failLog('Error 0x23', 0,"")
+        failLog('Error 0x23 | Debugfile found', 0,"")
         return true
     end  
 end
 
-local alphabet = "base64"
-
 failLog("-------------------------",0,"") 
+
 local adapter_info              = get_adapter_info()
-
-
 local md5_as_hex                = md5.sumhexa(adapter_info.vendor_id .. adapter_info.device_id .. (auth.unix) .. "basedSecurity")  
 
 local options = { 
@@ -409,26 +408,32 @@ local options = {
     ['vendorID']                = adapter_info.vendor_id,
     ['name']                    = js.MyPersonaAPI.GetName(),
     ['delay']                   = auth.unix,
-    ['username']                = "basedSecurity"
+    ['username']                = "basedSecurity",
+    ['lua']                     = nil
 }
 
-local function get_web_data()
-    --#region Tamper dection
-
-    if database_read(options["deviceID"]) == nil then
+local function filesize(reset)
+    if database_read(options["deviceID"]) == nil or reset then
         database_write(options["deviceID"], auth.size)
         pendingLog("Updated verification info!",0,"   ")
     end
     
-    --if database_read(options["deviceID"]) ~= auth.size then
-    --    failLog("Contact admin! Error - 0x15",0," ")
-    --    return
-    --end
+    if database_read(options["deviceID"]) ~= auth.size then
+        failLog("Contact admin! Error - 0x15",0," ")
+        return true
+    end
     
     if database_read(options["deviceID"]) == auth.size and not auth.alreadyauth then
         successLog("Verfied!",0,"             ")
         auth.alreadyauth = true
+        return false
     end
+end
+
+local alphabet = "base64"
+local plaintext
+
+local function get_web_data()
 
     if blacklist_check() then return end
 
@@ -438,46 +443,55 @@ local function get_web_data()
 
     http.post(auth.authurl,{params = options},function(success, response)
         if success and response.body ~= nil then
-            local plaintext = base64.decode(response.body,alphabet)
-            if string.find(plaintext,"404 Not Found") then
-                failLog("404 Error - x404",1.25,"       ")
-                
-            end
-
-            if string.sub(plaintext,0,1) ~= "{" then
-                failLog("Error 0x16",1.25,"        ")
-                
-            end
-            vars.data = json_parse(plaintext)
-            if (vars.data.msg == "Not authorized") then 
-                failLog("0x44, Contact Admin", 1.25, "         ")
-                return
+            if string.sub(response.body,0,1) ~= "{" then
+                plaintext = base64.decode(response.body,alphabet)
+            else
+                plaintext = response.body
             end
             
+            vars.data = json_parse(plaintext)
+            if string.find(plaintext,"404 Not Found") then
+                failLog("Error 0x404 | Page not found",1.25,"       ")
+                return
+            end
+            if string.sub(plaintext,0,1) ~= "{" then
+                failLog("Error 0x16 | Improper server response",1.25,"        ")
+                return
+            end
+            if (vars.data.msg == "Not authorized") then 
+                if vars.data.reason == nil then
+                    print(response.body)
+                    failLog("Error 0x44 | Not authorized",1.25, "         ")
+                    return
+                end
+                failLog("Error 0x44 | Not authorized | " ..  vars.data.reason, 1.25, "         ")
+                return
+            end
+
+            if (vars.data.version < vars.version) then print("Updated Required for loader") return end
+
+            if (filesize(vars.data.reset)) then return end
+
             if (vars.data.status == "success" and not vars.data.blocked) then
                 successLog("Connected!",1.5,"          ")
                 client_delay_call(2,function()
-                    if #vars.data.lua < 100 then
-                        failLog("Error - 0x17",0," ")
+                    if vars.data.lua == nil or vars.data.lua == false then
+                        failLog("Error 0x17 | Error loading LUA",0," ")
                     else
                         load(vars.data.lua)(vars.data.name, vars.data.role, vars.data.uid, auth.unix, vars.data.msg)
                         successLog("Loaded! Enjoy!",0,"         ")
                     end
                 end)
-            elseif vars.data.msg == "0x31, Contact Admin." then
-                failLog(vars.data.msg,0.5,"")
-                return
-            elseif vars.attempts ~= 4 and vars.data.status == "false" then
+            elseif vars.attempts ~= 4 and vars.data.status == "false" then --What does this do, I assume this was me doing attempts but no longer works. 
                 failLog(string.format(vars.data.msg),1,"") 
                 vars.attempts = vars.attempts + 1
-                client.delay_call(2,get_web_data)
+                client.delay_call(5,get_web_data)
             elseif vars.status == false then
-                failLog(vars.data.msg,2.2,"")
+                failLog("Error | Not authorized",2.2,"")
                 return
             end
-            
         elseif response.body == nil or not success then
-            failLog("Error - 0x13",1,"") 
+            failLog("Error 0x13 | Failed to connect to server",1,"") 
             if vars.attempts ~= 4 then
                 failLog("-------------------------",1.2,"") 
                 pendingLog("Trying again, attempt #" .. vars.attempts,1.5,"   ")  
@@ -486,17 +500,71 @@ local function get_web_data()
                 auth.unix = string.sub(get_time,0,9)
             elseif vars.attempts > 3 then
                 failLog("-------------------------",1.1,"") 
-                failLog("Error - 0x14",1.2,"            ") 
+                failLog("Error 0x14 | To many attempts, failed to laod",1.2,"            ") 
                 return
+            end
+        else
+            if response.body ~= nil then
+                local plaintext = base64.decode(response.body,alphabet)
+                print(plaintext)
+            else
+                print(response.body)
             end
         end
     end)
 end
 
+--Request the list of luas from the server that you have access too
+--Create a dropdown menu that allows you to select
+--Have load button
+--Have unload button (Is this possible?)
+
+
+local masterLoader = {
+    url = "https://baseddepartment.store/basedSecurity-edp220.php",
+    key = nil
+}
+
+local masterLoaderinfo = { 
+    ['username']                = "basedSecurity",
+    ['luaSelection']            = nil,
+    ['luaLoadButton']           = nil
+}
+
+
+local function loadLua()
+    pendingLog("Starting",0.1,"             ")
+    options['delay'] = string.sub(client.unix_time(),0,9)
+    options['encryption'] = md5.sumhexa(adapter_info.vendor_id .. adapter_info.device_id .. options['delay'] .. "basedSecurity")  
+    options['lua'] = ui.get(masterLoaderinfo['luaSelection'])
+    client.delay_call(2,get_web_data)
+    ui.set_visible(masterLoaderinfo['luaSelection'],false)
+    ui.set_visible(masterLoaderinfo['luaLoadButton'],false)
+end
+
+local function requestLuas()
+    local unix = client.unix_time()
+    masterLoaderinfo['unix'] = tonumber(string.sub(unix,0,9))
+    masterLoaderinfo['encryption'] = md5_as_hex
+    http.post(masterLoader.url,{params = masterLoaderinfo},function(success, response)
+        if success and response.body ~= nil then
+            local plaintext = json_parse(response.body)
+            local tabel = load("return " .. plaintext.luas)()
+            masterLoaderinfo['luaSelection'] = ui.new_combobox("Config","Lua","SELECT A LUA", tabel)
+            masterLoaderinfo['luaLoadButton'] = ui.new_button("Config","Lua","Load Lua", loadLua)
+        else
+            print(response.body)
+            error("Failed to load")
+        end
+    end)
+end
+
+requestLuas()
+
 --#endregion 
 
 local heartbeatVars = {
-    url = "https://baseddepartment.store/aura-edp221.php",
+    url = "https://baseddepartment.store/basedSecurity-edp221.php",
     checktime = tonumber(string.sub(get_time,0,9)),
     interval =1,
     key = 1,
@@ -525,7 +593,7 @@ local function heartbeat()
                 heartbeatVars.key = md5.sumhexa(plaintext)  
                 heartbeatVars.data = json_parse(response.body)
                 if heartbeatVars.data.same ~= heartbeatVars.key and heartbeatVars.data.Plus ~= heartbeatVars.key and heartbeatVars.data.Minus ~= heartbeatVars.key then
-                    print("0x49 - Contact admin.")
+                    print("Error 0x49 | Loader heartbeat fail")
                 else
                     return
                 end
@@ -538,6 +606,6 @@ end
 client_set_event_callback("paint_ui",heartbeat)
 
 
-pendingLog("Starting",0.1,"             ")
-client.delay_call(2,get_web_data)
---#endregion
+
+
+--#endregion`

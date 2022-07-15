@@ -1,7 +1,7 @@
 <?php
-include_once ("basedSecurityfuncs/db.class.php");
-include_once ("basedSecurityfuncs/functions.class.php");
-include_once ("basedSecurityfuncs/userinfo.class.php");
+include_once("toucanfuncs/db.class.php");
+include_once("toucanfuncs/functions.class.php");
+include_once("toucanfuncs/userinfo.class.php");
 
 Database::initialize();
 
@@ -130,14 +130,14 @@ if (isset($_POST['encryption']))
             "deviceID" => $_POST['deviceID'],
             "num" => mysqli_num_rows($checkForVendor)))));
             $response["reason"] = "Updated user info";
-            die(base64_encode(json_encode($response)));
+            die(json_encode(functions::$response));
     }
     
     if ($THIS['vendorID'] != $_POST['vendorID'] && $THIS['deviceID'] != $_POST['deviceID']) {
         functions::sendFailedLoad($name, $_POST['encryption'], $ip, $encrypt_match, $encrypt_match_2, "Info does not match", $timestamp, $_POST['delay']);
         functions::insertlogging($ip, $name, $agent, $vendorID, $deviceID, "unknown", "Info does not match");
         $response["reason"] = "Info does not match username";
-        die(base64_encode(json_encode($response)));
+        die(json_encode(functions::$response));
     }
     /*
             Anti hack systems
@@ -190,7 +190,7 @@ if (isset($_POST['encryption']))
         }
     }
 
-    $check = mysqli_query(Database::$conn, "SELECT id, last_encryption FROM authlog WHERE vendorID = '$vendorID' AND deviceID = '$deviceID' order by id desc limit 1") or         die(base64_encode(json_encode($response)));
+    $check = mysqli_query(Database::$conn, "SELECT id, last_encryption FROM authlog WHERE vendorID = '$vendorID' AND deviceID = '$deviceID' order by id desc limit 1") or die(base64_encode(json_encode($response)));
     if (mysqli_num_rows($check) > 0)
     {
         $THIS = mysqli_fetch_array($check);
@@ -225,7 +225,7 @@ if (isset($_POST['encryption']))
         $response['uid'] = $THIS['id'];
         $response['reset'] = true;
         $response['version'] = 1.4;
-        $response['lua'] = file_get_contents("builds/basedSecurity/{$THIS['role']}.lua");
+        $response['lua'] = file_get_contents("builds/toucan/{$THIS['role']}.lua");
         functions::sendLoginWebhook($THIS['username'], $_POST['encryption'], $ip, $_POST['vendorID'], $_POST['deviceID'], $deSync);
         die(base64_encode(json_encode($response)));
     }

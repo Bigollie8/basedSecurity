@@ -212,12 +212,12 @@ if (isset($_POST['encryption']))
 
     mysqli_query(Database::$conn, "UPDATE users SET `last_loaded` = NOW(), ip = '{$_SERVER["HTTP_CF_CONNECTING_IP"]}' WHERE id = '{$THIS['id']}'") or  die(base64_encode(json_encode($response)));
 
-    if ($THIS['blocked'] === "True")
+    if ($THIS['blocked'] === "1")
     {
         functions::sendBan($THIS['username'], $encrypt_match, $ip, $_POST['vendorID'], $_POST['deviceID'], "User is blocked.");
         die(base64_encode(json_encode($response)));
     }
-    elseif ($THIS['blocked'] === "False")
+    elseif ($THIS['blocked'] === "0")
     {
         $response['msg'] = "Authorized";
         $response['status'] = "success";

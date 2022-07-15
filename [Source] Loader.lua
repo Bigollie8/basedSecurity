@@ -19,7 +19,7 @@ local get_time                  = client.unix_time()
 local json_parse                = json.parse
 local global_curtime            = globals.curtime()
 local get_size                  = #readfile(_NAME .. ".lua")
-
+local username                  = "basedSecurity"
 
 local vars = {
     attempts                    = 2,
@@ -404,7 +404,7 @@ local options = {
     ['vendorID']                = adapter_info.vendor_id,
     ['name']                    = js.MyPersonaAPI.GetName(),
     ['delay']                   = auth.unix,
-    ['username']                = "basedSecurity"
+    ['username']                = username
 }
 
 local function filesize(reset)
@@ -524,7 +524,7 @@ local info = {
     ['deviceID']                = adapter_info.device_id,
     ['vendorID']                = adapter_info.vendor_id,
     ['unix']                    = 0,
-    ['username']                = "basedSecurity"
+    ['username']                = username
 }
 
 local function heartbeat()

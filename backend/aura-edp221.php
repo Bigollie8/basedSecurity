@@ -1,11 +1,10 @@
 <?php
-include_once ("toucanfuncs/db.class.php");
-include_once ("toucanfuncs/functions.class.php");
+include_once ("aurafuncs/db.class.php");
+include_once ("aurafuncs/functions.class.php");
 
 Database::initialize();
 
 $response = array("msg" => "Invalid variable passed");
-
 
 if (empty($_POST['vendorID'])) {
     die(json_encode($response));
