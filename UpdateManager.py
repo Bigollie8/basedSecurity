@@ -117,7 +117,7 @@ def updateFiles(files):
     for x in files:
         if checkFile(x):
             serverPath = os.path.join("public_html",x.replace(path + r"\backend",""))
-            print("We would be deleting " + serverPath)
+            print("Overwriting " + serverPath.replace("\\",""))
             ftp.storlines('STOR ' + serverPath.replace("\\",""), open(x, 'rb'))
     ftp.quit()
 
@@ -126,9 +126,9 @@ def driver():
     if not pause(): return
     listFiles()
     githubRepo()
-    cleanup()
     if not verifyConnection(): return
     updateFiles(list_of_files)
+    cleanup()
     print("Finished")
 
 driver()
