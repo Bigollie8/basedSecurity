@@ -1,3 +1,5 @@
+# nice comments, chooch
+
 from multiprocessing import parent_process
 import sys
 import os
