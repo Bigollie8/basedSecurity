@@ -241,7 +241,7 @@
             {
                 if (strstr($THIS['luas'], $_POST['lua']))
                 {
-                    $response['lua'] = file_get_contents("builds/{$_POST['lua']}/{$THIS['role']}.lua");
+                    $response['lua'] = file_get_contents("builds/{$_POST['lua']}/{$_POST['role']}.lua");
                 }
                 else
                 {
