@@ -2,7 +2,7 @@
 include_once ("aurafuncs/db.class.php");
 include_once ("aurafuncs/functions.class.php");
 include_once ("aurafuncs/userinfo.class.php");
-
+//Proof of concept <3 david
 Database::initialize();
 
 $response = array("status" => "error", "msg" => "Not authorized");
