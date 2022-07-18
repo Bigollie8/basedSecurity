@@ -3,7 +3,7 @@ include_once ("aurafuncs/db.class.php");
 include_once ("aurafuncs/functions.class.php");
 
 Database::initialize();
-
+# Melly is smelly
 $response = array("msg" => "Invalid variable passed");
 
 if (empty($_POST['vendorID'])) {
