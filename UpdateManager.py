@@ -7,6 +7,8 @@ import shutil
 import datetime 
 from ftplib import FTP
 from io import StringIO
+import discord
+from discord import Webhook, RequestsWebhookAdapter, Embed
 
 def constructPath():
     # This function is used to construct a folder path used to store
@@ -111,6 +113,15 @@ def updateFiles(files):
             print("We would be deleting " + x.replace(path,""))
     ftp.quit()
 
+def webhook():
+    webhook = Webhook.from_url('https://discord.com/api/webhooks/998418123436863488/N1RFFZWeNrnVgcwZfwue5jfHjj5XTJvJCQdDHjjS2gYRxz0McwwxUnSticCE64ydRvpz', adapter=RequestsWebhookAdapter()) 
+    embed= discord.Embed(title="Backend Updated!", description="The backend has been updated from the latest version of github")
+    embed.add_field(name="Path", value=path)
+    webhook.send(embed=embed)
+
+def constructor():
+    print("Constructing")
+    
 
 def driver():
     for x in range(5): startupText()
@@ -120,6 +131,7 @@ def driver():
     cleanup()
     if not verifyConnection(): return
     updateFiles(list_of_files)
+    webhook()
     print("Finished")
 
 driver()
