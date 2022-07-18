@@ -3,6 +3,7 @@ import sys
 import os
 from turtle import update
 from git import Repo
+import git
 import shutil
 import datetime 
 from ftplib import FTP
@@ -23,7 +24,7 @@ def constructPath():
         suffix = "am"
 
     timestamp = str(rawDate.year) + "-" + str(rawDate.month) + "-" + str(rawDate.day)  + " " + hour  + "-" + str(rawDate.minute)  + "-" + str(rawDate.second) + suffix
-    parent = r'C:/Users/bigol/Desktop/Update Manager/root'
+    parent = r'C:\Users\bigol\Desktop\Update Manager\root'
     return os.path.join(parent, timestamp)
     
 path = constructPath()
@@ -38,7 +39,6 @@ def startupText():
     print("# WARNING # You are about to push an update to the servers # WARNING #")
     sys.stdout.write("\033[0;0m")
 
-
 def pause():
     # This function is intented to give the user a chance to exit if 
     # they have not completed all the steps needed to push the update
@@ -52,18 +52,6 @@ def pause():
     return True
 
 list_of_files = []
-
-def listFiles():
-    # This function will take the local save of the security and 
-    # push the update to the cpanel. This will keep us accountable
-    # to our github commit and gives a more orginized feeling to 
-    # pushing updates 
-
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            if "\.git" not in file:
-                print("Appending " + str(file) + " to payload")
-                list_of_files.append(os.path.join(root,file))
 
 def githubRepo():
     # This function pulls the files from our github when you intiate the 
@@ -82,11 +70,13 @@ def cleanup():
     # backend scripts
 
     input("Deleting files press enter!")
-
+    print(path)
     try:
         shutil.rmtree(path)
     except OSError as e:
         print ("Error: %s - %s." % (e.filename, e.strerror))
+    finally:
+        print("removed")
 
 def verifyConnection():
     # This function is used to ensure that we
@@ -103,15 +93,37 @@ def verifyConnection():
         ftp.quit()
     return True
 
+def checkFile(file):
+    if "backend" not in file: return False
+    if "php" not in file: return False
+    if "lua" in file: return False
+    if "funcs" in file: return False
+
+    return True
+
+def listFiles():
+    # This function will take the local save of the security and 
+    # push the update to the cpanel. This will keep us accountable
+    # to our github commit and gives a more orginized feeling to 
+    # pushing updates 
+
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            if "php" in file:
+                print("Appending " + str(file) + " to payload")
+                list_of_files.append(os.path.join(root,file))
+
 def updateFiles(files):
-    print("Updating files")
     ftp = FTP('162.0.228.203')
     ftp.login("baseddepartment", "+cvssATXEc@7")
     ftp.cwd('public_html')
     for x in files:
-        if ".git" not in x:
-            print("We would be deleting " + x.replace(path,""))
+        if checkFile(x):
+            serverPath = os.path.join("public_html",x.replace(path + r"\backend",""))
+            print("Overwriting " + serverPath.replace("\\",""))
+            ftp.storlines('STOR ' + serverPath.replace("\\",""), open(x, 'rb'))
     ftp.quit()
+
 
 def webhook():
     webhook = Webhook.from_url('https://discord.com/api/webhooks/998418123436863488/N1RFFZWeNrnVgcwZfwue5jfHjj5XTJvJCQdDHjjS2gYRxz0McwwxUnSticCE64ydRvpz', adapter=RequestsWebhookAdapter()) 
@@ -122,16 +134,15 @@ def webhook():
 def constructor():
     print("Constructing")
     
-
 def driver():
     for x in range(5): startupText()
     if not pause(): return
     listFiles()
     githubRepo()
-    cleanup()
     if not verifyConnection(): return
     updateFiles(list_of_files)
     webhook()
+    cleanup()
     print("Finished")
 
 driver()
