@@ -262,11 +262,112 @@ end
 
 
 client_set_event_callback("paint_ui",function()
-    if ui.is_menu_open() then
-        watermark()
-        rainbow()
-    end
+    if not ui.is_menu_open() then return end
+   
+    watermark()
+    rainbow()
+    
 end)
+
+--#endregion
+
+--#region Encryption
+
+local info = database.read("SecurityStorage")
+--local info = "Continueing to test this encryption system to ensure its integrity"
+
+local function combine(table1,table2)
+    local string1,string2 ="",""
+    for _, v in pairs(table1) do
+        if type(v) == "string" then
+            string1 = string1 .. v
+        else
+            string1 = string1 .. tostring(v)
+        end
+    end
+    for _, p in pairs(table2) do
+        if type(p) == "string" then
+            string2 = string2 .. p
+        else
+            string2 = string2 .. tostring(p)
+        end
+    end
+    return string1 .. string2
+end
+
+local function table_to_matrix(table,col,row)
+    local matrix = {}
+    local f,location = 1,1
+    for i=1, row do
+        matrix[i]        = {}
+        for j=location, #table do
+            if f == col + 1 then
+                f = 1
+                location = j
+                break
+            end
+            matrix[i][f] = table[j]
+            f = f + 1
+        end
+    end
+    return matrix
+end
+
+local function string_to_table(string)
+    local storage = {}
+    for x in string:gmatch "." do
+        table.insert(storage,x) 
+    end
+    return storage
+end
+
+local function table_to_string(tbl)
+    local result         = ""
+    for k, v in pairs(tbl) do
+        -- Check the key type (ignore any numerical keys - assume its an array)
+        if type(k) == "string" then
+            result = result .. v
+        end
+        -- Check the value type
+        if type(v) == "table" then
+            result = result .. table_to_string(v)
+        elseif type(v) == "boolean" then
+            result = result .. tostring(v)
+        else
+            result = result .. v
+        end
+    end
+    return result
+end
+
+
+local function encrypt(msg,key)
+    local cipher         = ""
+
+    local msg_len        = #msg
+    local msg_lst        = string_to_table(msg)
+    local col            = key
+    local row            = math.ceil((msg_len/col))
+    local fill_null      = (row * col) - msg_len
+    local void           = string_to_table(string.rep("_" , fill_null))
+    local combined       = string_to_table(combine(msg_lst, void))
+    local matrix         = table_to_matrix(combined,col,row)
+
+    for i=1, col do
+        for x,r in ipairs(matrix) do
+
+            if matrix[x] == nil then
+                print("Error decrypting")
+                return nil
+            end
+        
+            cipher       = cipher .. matrix[x][i]
+        end
+    end
+    return cipher
+end
+
+
 
 --#endregion
 
@@ -424,6 +525,7 @@ local function get_web_data()
 
     http.post(auth.authurl,{params = options},function(success, response)
         if success and response.body ~= nil then
+
             if string.sub(response.body,0,1) ~= "{" then
                 plaintext = base64.decode(response.body,alphabet)
             else
@@ -456,7 +558,9 @@ local function get_web_data()
                     if vars.data.lua == nil or vars.data.lua == false then
                         failLog("Error 0x17 | Error loading LUA",0," ")
                     else
-                        load(vars.data.lua)(vars.data.name, vars.data.role, vars.data.uid, auth.unix, vars.data.msg)
+                        local information = encrypt(vars.data.name .. " " .. vars.data.role .. " " .. vars.data.uid .. " " .. auth.unix .. " " .. vars.data.half1,5)
+                        print(information .. " encrypted information")
+                        load(vars.data.lua)(information)
                         successLog("Loaded! Enjoy!",0,"         ")
                     end
                 end)
@@ -467,7 +571,10 @@ local function get_web_data()
             elseif vars.status == false then
                 failLog("Error | Not authorized",2.2,"")
                 return
+            else
+                failLog("Error 0x99 | Please contact admin")
             end
+---------------------------------------------------------------------------------------------------------------
         elseif response.body == nil or not success then
             failLog("Error 0x13 | Failed to connect to server",1,"") 
             if vars.attempts ~= 4 then
@@ -481,6 +588,7 @@ local function get_web_data()
                 failLog("Error 0x14 | To many attempts, failed to laod",1.2,"            ") 
                 return
             end
+---------------------------------------------------------------------------------------------------------------
         else
             if response.body ~= nil then
                 local plaintext = base64.decode(response.body,alphabet)
