@@ -46,7 +46,7 @@ def generatePayload():
 
 filePath = os.path.join("public_html//builds//" + build)
 path = os.path.join("public_html//builds//" + build + "//" + filename)
-image.png
+
 def listFiles():
     # This function will take the local save of the security and 
     # push the update to the cpanel. This will keep us accountable
