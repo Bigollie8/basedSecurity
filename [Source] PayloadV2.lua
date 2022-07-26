@@ -107,10 +107,22 @@ local vars = {
 
 local function payload(args)
 
-    local function informationVerification(args)
+    local function informationVerification(args) -- OTHER WAY TO DETIRMIN IF INFO IS INVALID
         if #args ~= 5 then 
             print("Error 0x21 | Not Authorized")  
             return false 
+        elseif true then -- check differance in unix with hard coded differance
+            print("detected false info")
+            return false
+        elseif true then -- make a good handshake
+            print("detected false info")
+            return false
+        elseif true then -- verify custom hash
+            print("detected false info")
+            return false
+        elseif true then
+            print("detected false info")
+            return false
         else
             vars.username = args[1]
             vars.role = args[2]
@@ -119,13 +131,20 @@ local function payload(args)
             vars.msg = args[5]
             return true
         end
-    
+    end
+
+    local function banUser(bool)
+        if bool then
+            print("Verified!")
+            return false
+        else
+            print("YOU HAVE BEEN BANNED")
+            return true
+        end
     end
 
     local function lua()
         local function intiHeartbeat()
-            --Embeded heartbeat to add complexity and hopefully make it harder for them 
-            -- to disect this
             --#region security 
             local ffi = require("ffi")
             local md5 = require 'gamesense/md5' or error("error 203 - MD5 Required")
@@ -229,7 +248,7 @@ local function payload(args)
             client.set_event_callback("paint_ui",heartbeat)
         end
         
-        if not informationVerification(args) then print("Failed check - " .. #args) return end
+        if banUser(informationVerification(args)) then print("Failed check") return end
 
         intiHeartbeat()
 
