@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-global
 local args = {...}
 
 --#region Decryption
@@ -301,6 +302,13 @@ local function payload(args)
     local function informationVerification(args) -- OTHER WAY TO DETIRMIN IF INFO IS INVALID
         local unix = client.unix_time()
         unix = tonumber(string.sub(unix,0,9))
+        print(args[1])
+        print(args[2])
+        print(args[3])
+        print(args[4])
+        print(args[5])
+        print(args[6])
+        print(#args)
         if #args ~= 6 then -- verfies deconstruction of encryption resulted in proper amount of results
             print("Error 0x21 | Not Authorized")  
             return false 
@@ -310,7 +318,7 @@ local function payload(args)
         elseif false then -- make a good handshake
             print("detected false info")
             return false
-        elseif args[6] ~= sha256("changing of encryption look") then -- verify custom hash
+        elseif args[6] ~= sha256("Testing") then -- verify custom hash
             print("Hash Mismatch")
             return false
         elseif false then

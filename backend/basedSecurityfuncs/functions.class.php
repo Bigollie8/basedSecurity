@@ -160,15 +160,15 @@ class functions
 
     static function array_to_matrix($table,$col,$row){
         $matrix = array();
-        $f = 1;
-        $location = 1;
+        $f = 0;
+        $location = 0;
         for ($i=0; $i < $row; $i++){
-            matrix[$i] = array();
-            for($j=0; $j < $col; $j++){
+            $matrix[$i] = array();
+            for($j=$location; $j < sizeof($table,0) ; $j++){
                 if($f == $col +1){
-                    $f = 1;
+                    $f = 0;
                     $location = $j;
-                    break
+                    break;
                 }
                 $matrix[$i][$f] = $table[$j];
                 $f++;
@@ -178,22 +178,30 @@ class functions
     }
 
     static function luaEncrypt($string, $key){
-        #str_split() == string to table
+        try{
+            $cipher = "";
 
-        $cipher = "";
-        $string_len = strlen($string);
-        $string_array = str_split($string);
-        $col = $key;
-        $row = round((string_len/col) + 0.5);
-        $fill_null = ($row * $col) - $string_len;
-        $void = str_split("_" * fill_null);
-        $combinded = combine($string_array,$void);
-        $matrix = array_to_matrix($combinded,$col,$row);
+            $string_len = strlen($string);
+            $string_array = str_split($string,1);
 
-        for($i=0; $i < col; $i++){
-            for($x=0; $x < row; $x++){
-                $cipher .= $matrix[x][i];
+            $col = $key;
+            $row = ceil($string_len/$col);
+
+            $fill_null = ($row * $col) - $string_len;
+            $void = str_split(str_repeat("_", $fill_null),1);
+            $combind = array_merge($string_array,$void);
+
+            $matrix = functions::array_to_matrix($combind,$col,$row);
+    
+            for($i=0; $i < $col; $i++){
+                for($x=0; $x < $row + 1; $x++){
+                    $cipher .= $matrix[$x][$i];
+                }
             }
+            return $cipher;
+        }
+        catch(Throwable $e){
+            return $e;
         }
     }
 }

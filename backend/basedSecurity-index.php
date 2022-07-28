@@ -222,14 +222,15 @@
         mysqli_query(Database::$conn, "INSERT INTO `authlog` (ip, `name`, user_agent, vendorID, deviceID, last_encryption) VALUES('$ip', '{$THIS['username']}', '$agent', '$vendorID', '$deviceID', '$encrypt_match')") or die(base64_encode(json_encode($response)));
 
         mysqli_query(Database::$conn, "UPDATE users SET `last_loaded` = NOW(), ip = '{$_SERVER["HTTP_CF_CONNECTING_IP"]}' WHERE id = '{$THIS['id']}'") or  die(base64_encode(json_encode($response)));
-
+        $hash = hash('sha256','Testing');
         if ($THIS['blocked'] === "1")
         {
             #functions::ban($banurl, $username, $ip, $vendorID, $deviceID, "User is blocked.");
             die(base64_encode(json_encode($response)));
         }
         elseif ($THIS['blocked'] === "0")
-        {
+        { # "$_POST['username'] $THIS['role'] $THIS['id'] $timestamp Authorized $hash";
+            $word = $_POST['username'] . " " . $THIS['role'] . " " . $timestamp . " " . "Authorized" . " " . $hash;
             $response['msg'] = "Authorized";
             $response['status'] = "success";
             $response['name'] = $_POST['username'];
@@ -237,7 +238,8 @@
             $response['uid'] = $THIS['id'];
             $response['reset'] = true;
             $response['version'] = 1.4;
-            $response['testEncryption'] = hash('sha256','Testing')
+            $response['hash'] = $hash;
+            $response['testEncryption'] = functions::test();
             if (!is_null($_POST['lua']))
             {
                 if (strstr($THIS['luas'], $_POST['lua']))
