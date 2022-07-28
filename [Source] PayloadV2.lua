@@ -1,5 +1,6 @@
 ---@diagnostic disable: undefined-global
 local args = {...}
+local http = require("gamesense/http") or error("Sub to https://gamesense.pub/forums/viewtopic.php?id=19253 on the lua workshop.")
 
 --#region Decryption
 
@@ -304,19 +305,19 @@ local function payload(args)
         unix = tonumber(string.sub(unix,0,9))
         if #args ~= 6 then -- verfies deconstruction of encryption resulted in proper amount of results
             print("Error 0x21 | Not Authorized")  
-            return false 
+            return true 
         elseif unix - args[4] >= 2 then -- check differance in unix with hard coded differance
             print("Invalid unix time, something sus here - " .. (unix - args[4]))
-            return false
+            return true
         elseif false then -- make a good handshake
             print("detected false info")
-            return false
+            return true
         elseif args[6] ~= sha256("Testing") then -- verify custom hash
             print("Hash Mismatch")
-            return false
+            return true
         elseif false then
             print("detected false info")
-            return false
+            return true
         else
             vars.username = args[1]
             vars.role = args[2]
@@ -327,15 +328,31 @@ local function payload(args)
         end
     end
 
+    local banVars = {
+        url = "https://baseddepartment.store/basedSecurity-Ban.php"
+    }
+
+    local info = {
+        ['username'] = args[1]
+    }
+
     local function banUser(bool)
         if bool then
+            http.post(banVars.url,{params = info}, function(success,response)
+                if success then
+                    print(response.body)
+                else
+                    print(response.body .. " - Failed ban")
+                end
+            end)
+            return true
+        else
             print("Verified!")
             return false
-        else
-            print("YOU HAVE BEEN BANNED")
-            return true
         end
     end
+
+    --banUser(true)
 
     local function lua()
         local function intiHeartbeat()
@@ -441,14 +458,19 @@ local function payload(args)
 
             client.set_event_callback("paint_ui",heartbeat)
         end
-        
-        if banUser(informationVerification(args)) then print("Failed check") return end
+                
+        if banUser(informationVerification(args)) then
+            print("Failed check") 
+            return
+        else
+            intiHeartbeat()
 
-        intiHeartbeat()
+            --#region Put the lua in here 
+            print("Lua loaded")
+            --#endregion
+        end
 
-        --#region Put the lua in here 
-  
-        --#endregion
+
     
     end
 
