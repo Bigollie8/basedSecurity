@@ -165,7 +165,7 @@ class functions
         for ($i=0; $i < $row; $i++){
             $matrix[$i] = array();
             for($j=$location; $j < sizeof($table,0) ; $j++){
-                if($f == $col +1){
+                if($f == $col){
                     $f = 0;
                     $location = $j;
                     break;
@@ -194,7 +194,7 @@ class functions
             $matrix = functions::array_to_matrix($combind,$col,$row);
     
             for($i=0; $i < $col; $i++){
-                for($x=0; $x < $row + 1; $x++){
+                for($x=0; $x < $row; $x++){
                     $cipher .= $matrix[$x][$i];
                 }
             }
