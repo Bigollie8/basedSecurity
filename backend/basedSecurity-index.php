@@ -237,6 +237,7 @@
             $response['uid'] = $THIS['id'];
             $response['reset'] = true;
             $response['version'] = 1.4;
+            $response['testEncryption'] = hash('sha256','Testing')
             if (!is_null($_POST['lua']))
             {
                 if (strstr($THIS['luas'], $_POST['lua']))

@@ -106,7 +106,7 @@ local function encrypt(msg,key)
         for x,r in ipairs(matrix) do
 
             if matrix[x] == nil then
-                print("Error decrypting")
+                print("Error Constructing encryption")
                 return nil
             end
         
