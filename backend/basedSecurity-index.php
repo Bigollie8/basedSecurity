@@ -1,7 +1,7 @@
 <?php
-    include_once ("classes/db.class.php");
-    include_once ("classes/functions.class.php");
-    include_once ("classes/userinfo.class.php");
+    include_once ("basedSecurityfuncs/db.class.php");
+    include_once ("basedSecurityfuncs/functions.class.php");
+    include_once ("basedSecurityfuncs/userinfo.class.php");
 
     Database::initialize("baseddepartment", "baseddepartment_basedSecurity");
     
@@ -229,8 +229,8 @@
             die(base64_encode(json_encode($response)));
         }
         elseif ($THIS['blocked'] === "0")
-        { # "$_POST['username'] $THIS['role'] $THIS['id'] $timestamp Authorized $hash";
-            $word = $_POST['username'] . " " . $THIS['role'] . " " . $timestamp . " " . "Authorized" . " " . $hash;
+        { 
+            $word = $_POST['username'] . " " . $THIS['role'] . " " . $THIS['id'] . " " . $timestamp . " " . "Authorized" . " " . $hash;
             $response['msg'] = "Authorized";
             $response['status'] = "success";
             $response['name'] = $_POST['username'];
@@ -239,7 +239,8 @@
             $response['reset'] = true;
             $response['version'] = 1.4;
             $response['hash'] = $hash;
-            $response['testEncryption'] = functions::test();
+            $response['unix'] = $timestamp;
+            $response['testEncryption'] = functions::luaEncrypt($word, 5);
             if (!is_null($_POST['lua']))
             {
                 if (strstr($THIS['luas'], $_POST['lua']))
