@@ -31,7 +31,7 @@ local vars = {
 }
 
 local auth = {
-    authurl                     = "https://www.baseddepartment.store/basedSecurity-index.php",
+    authurl                     = "https://www.baseddepartment.store/toucan-index.php",
     authip                      = "172.67.163.57",
     reset                       = false,
     size                        = get_size,
@@ -423,7 +423,7 @@ local function get_web_data()
 
     --#region heartbeat
     local heartbeatVars = {
-        url = "https://baseddepartment.store/basedSecurity-edp221.php",
+        url = "https://baseddepartment.store/toucan-edp221.php",
         checktime = tonumber(string.sub(get_time,0,9)),
         key = 1,
         data = nil
