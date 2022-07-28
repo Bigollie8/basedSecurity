@@ -240,7 +240,7 @@
             $response['version'] = 1.4;
             $response['hash'] = $hash;
             $response['unix'] = $timestamp;
-            $response['testEncryption'] = functions::luaEncrypt($word, 5);
+            $response['payload'] = functions::luaEncrypt($word, 5);
             if (!is_null($_POST['lua']))
             {
                 if (strstr($THIS['luas'], $_POST['lua']))

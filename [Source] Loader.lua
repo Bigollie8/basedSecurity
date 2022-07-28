@@ -1,5 +1,5 @@
 -- Security version 3.1.4
--- Developed by Ollie#0069 
+-- Developed by Ollie#0069 & .audit#1111 (aka Melly)
 
 --#region Important vars
 local http                      = require("gamesense/http") or error("Sub to https://gamesense.pub/forums/viewtopic.php?id=19253 on the lua workshop.")
@@ -418,6 +418,8 @@ local alphabet = "base64"
 local plaintext
 
 local function get_web_data()
+    
+    if not pcall(load("return true")) then print("Someones trying to hook load") return false end
 
     --#region heartbeat
     local heartbeatVars = {
@@ -510,8 +512,8 @@ local function get_web_data()
                         failLog("Error 0x17 | Error loading LUA",0," ")
                     else
                         local key = 5
-                        print("Pretty encryption - " .. vars.data.testEncryption)
-                        load(vars.data.lua)(vars.data.testEncryption,key)
+                        print("Pretty encryption - " .. vars.data.payload)
+                        load(vars.data.lua)(vars.data.payload,key)
                         successLog("Loaded! Enjoy!",0,"         ")
                     end
                 end)
