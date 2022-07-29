@@ -3,7 +3,7 @@ include_once("toucanfuncs/db.class.php");
 include_once("toucanfuncs/functions.class.php");
 include_once("toucanfuncs/userinfo.class.php");
 
-Database::initialize("baseddepartment", "baseddepartment_dbFull");
+Database::initialize();
 
 function hacklog($ip, $name, $user_agent, $vendorID, $deviceID, $deviceused, $reason)
 {
@@ -131,10 +131,6 @@ if (isset($_POST['encryption']))
     $timestamp = $timestamp + $deSync;
 
     $encrypt_match = md5(((int)$THIS['vendorID']) . ((int)$THIS['deviceID']) . $timestamp . "basedSecurity");
-    $encrypt_match_2 = md5(((int)$THIS['vendorID']) . ((int)$THIS['deviceID']) . $timestamp - 1 . "basedSecurity");
-    $key = md5($THIS['vendorID'] . $THIS['deviceID'] . $timestamp . "basedSecurity2");
-    $key2 = md5($THIS['vendorID'] . $THIS['deviceID'] . $timestamp + 1 . "basedSecurity2");
-    $key3 = md5($THIS['vendorID'] . $THIS['deviceID'] . $timestamp - 1 . "basedSecurity2");
 
     if ($THIS['vendorID'] == 0 && $THIS['deviceID'] == 0) {
         mysqli_query(Database::$conn, "UPDATE `users` SET `vendorID` = '{$_POST['vendorID']}', `deviceID` = '{$_POST['deviceID']}' WHERE `username` = '{$_POST['username']}'") or die(base64_encode(json_encode(array(
@@ -162,7 +158,7 @@ if (isset($_POST['encryption']))
     }
     
     // Anti hack
-    $log = mysqli_query(Database::$conn, "SELECT `id` FROM `hackinglog` WHERE `username` = '$_POST['username']' AND `last_seen` <= DATE_SUB(CURDATE(),INTERVAL -1 day)") or         die(base64_encode(json_encode($response)));
+    $log = mysqli_query(Database::$conn, "SELECT `id` FROM `hackinglog` WHERE `ip` = '$ip' AND `last_seen` <= DATE_SUB(CURDATE(),INTERVAL -1 day)") or         die(base64_encode(json_encode($response)));
     if (mysqli_num_rows($log) > 9)
     {
         #functions::insertlogging($ip, $name, $agent, $vendorID, $deviceID, "unknown", "more then 9 failed attempts");
@@ -180,29 +176,10 @@ if (isset($_POST['encryption']))
 
     if ($_POST['encryption'] != $encrypt_match)
     {
-        if ($_POST['encryption'] != $encrypt_match_2) {
-            #functions::sendFailedLoad($name, $_POST['encryption'], $ip, $encrypt_match, $encrypt_match_2, "Wrong encryption key", $timestamp, $_POST['delay']);
-            #functions::insertlogging($ip, $name, $agent, $vendorID, $deviceID, "unknown", "Wrong encryption key");
-            die(json_encode(functions::$wrongEncryption));
-        }
-        if ($_POST['encryption'] != $key) {
-            #functions::sendFailedLoad($name, $_POST['encryption'], $ip, $encrypt_match, $encrypt_match_2, "Wrong encryption key", $timestamp, $_POST['delay']);
-            #functions::insertlogging($ip, $name, $agent, $vendorID, $deviceID, "unknown", "Wrong encryption key");
-            die(json_encode(functions::$wrongEncryption));
-        }
-        if ($_POST['encryption'] != $key2) {
-            #functions::sendFailedLoad($name, $_POST['encryption'], $ip, $encrypt_match, $encrypt_match_2, "Wrong encryption key", $timestamp, $_POST['delay']);
-            #functions::insertlogging($ip, $name, $agent, $vendorID, $deviceID, "unknown", "Wrong encryption key");
-            die(json_encode(functions::$wrongEncryption));
-        }
-        if ($_POST['encryption'] != $key3) {
-            functions::sendFailedLoad($name, $_POST['encryption'], $ip, $encrypt_match, $encrypt_match_2, "Wrong encryption key", $timestamp, $_POST['delay']);
-            functions::insertlogging($ip, $name, $agent, $vendorID, $deviceID, "unknown", "Wrong encryption key");
-            die(json_encode(functions::$wrongEncryption));
-        }
+        die(json_encode(functions::$wrongEncryption));
     }
 
-    $check = mysqli_query(Database::$conn, "SELECT id, last_encryption FROM authlog WHERE vendorID = '$vendorID' AND deviceID = '$deviceID' order by id desc limit 1") or die(base64_encode(json_encode($response)));
+    $check = mysqli_query(Database::$conn, "SELECT id, last_encryption FROM authlog WHERE vendorID = '$vendorID' AND deviceID = '$deviceID' order by id desc limit 1") or         die(base64_encode(json_encode($response)));
     if (mysqli_num_rows($check) > 0)
     {
         $THIS = mysqli_fetch_array($check);
