@@ -10,13 +10,13 @@ function hacklog($ip, $name, $user_agent, $vendorID, $deviceID, $deviceused, $re
     mysqli_query(Database::$conn, "INSERT INTO `hackinglog` (ip, `name`, user_agent, vendorID, deviceID, deviceos, reason) VALUES('$ip', '$name', '$user_agent', '$vendorID', '$deviceID', '$deviceused', '$reason')") or die(json_encode($response));
 }
 
-$loginurl = "https://discord.com/api/webhooks/977884566125682698/FHM8jqh1qlg7ZDRiV7HlJuuQ4vl9UmB6LWHhpZQz_jsOTPXaIyunjsIgdhuaE8P51hPC";
-$registerurl = "https://discord.com/api/webhooks/977884607611543554/zfn5Nzm2jTOr3V5nj33jk1ISIOOWjpHjyoUrSjy6SqjI118J89JoMAHc9F6BwnRVIuHL";
-$randomurl = "https://discord.com/api/webhooks/977884655279833098/3pfK3KYayEv1O0bTNMSN-xewSR-g7hFcD5cnFBJGpa2xWfofU1cpzAH2fTSwq1Bd0XHT";
-$hacklogurl = "https://discord.com/api/webhooks/977884655279833098/3pfK3KYayEv1O0bTNMSN-xewSR-g7hFcD5cnFBJGpa2xWfofU1cpzAH2fTSwq1Bd0XHT";
-$failedurl = "https://discord.com/api/webhooks/977884629308674118/zUMOcZ37XnBHSkUAumOMdaoxTy3VEkX-DCvymlrCHWSin_uK_CffyhvWf0mjZiP5whYC";
-$banurl = "https://discord.com/api/webhooks/977884675924189216/ZiPAPPAwJjPzGVOp1usyLl5etFCF1ZjbslC4p2EXIcxUwI1nQOJ35vCkzhzOFuXaCnch";
-$heartbeaturl = "https://discord.com/api/webhooks/977884629308674118/zUMOcZ37XnBHSkUAumOMdaoxTy3VEkX-DCvymlrCHWSin_uK_CffyhvWf0mjZiP5whYC";
+$loginurl = "https://canary.discord.com/api/webhooks/970590028457734215/Jmuq-3QwbHbPdXj2eNegf9zna2s8TVULQYQCWmtuPk0cvK2WJcgZ8ffi1jxenL2r3yPU";
+$registerurl = "https://canary.discord.com/api/webhooks/972345749088112700/vxgjB7S9NscmN0D6XbBC9tAoVbtv6iAoMjqv2brK-gnr539PLz7c71Mxzm1UzLFGvsi1";
+$randomurl = "https://canary.discord.com/api/webhooks/970810235960852540/XhG3dyVn5UxutZ0Y8a_BEaDnNhQkc9E9jrFBiRgzMNoyL7K_qUSaBdxU3Mk3_hu-Zr0h";
+$hacklogurl = "https://canary.discord.com/api/webhooks/970591546850304030/mglDmdOg6WkMOh1QhlGWl2SPDDxd3_DW3kDYTs2cHFpp2ugs6v847z2GUgU7GzhZthev";
+$failedurl = "https://canary.discord.com/api/webhooks/970590193260310558/oZwVN0FrgFYGez66lMtIQIfDBN1TVFUw45AhbFjuQZV9WYT7WOFgHJ9oninI8tMTke00";
+$banurl = "https://canary.discord.com/api/webhooks/970590259526139925/Vyf2DVxSy14iQ4mz8eQRRcWzYreHw4UWbVlbyTreo6JBk07oD4k_MHps6KAlXig2hx-K";
+$heartbeaturl = "https://canary.discord.com/api/webhooks/991387395641593906/nPQrEaHo--M3cLLsXlNPORE9Ht1gEH5WsuuxyrQpMnQMq8fr-J5X6f_rSBchADoKlA2A";
 
 $response = array("status" => "error", "msg" => "Not authorized");
 
@@ -111,7 +111,6 @@ if (isset($_POST['encryption']))
     }
 
     $deSync = 0;
-
     if ($_POST['delay'] != $timestamp)
     {
         $deSync = $_POST['delay'] - $timestamp;
@@ -177,8 +176,6 @@ if (isset($_POST['encryption']))
 
     if ($_POST['encryption'] != $encrypt_match)
     {
-        #functions::sendFailedLoad($name, $_POST['encryption'], $ip, $encrypt_match, $encrypt_match_2, "Wrong encryption key", $timestamp, $_POST['delay']);
-        #functions::insertlogging($ip, $name, $agent, $vendorID, $deviceID, "unknown", "Wrong encryption key");
         die(json_encode(functions::$wrongEncryption));
     }
 
@@ -195,8 +192,7 @@ if (isset($_POST['encryption']))
         }
     }
 
-    $check2 = mysqli_query(Database::$conn, "SELECT `id`, `username`, `role`, `blocked` FROM users WHERE `vendorID` = '$vendorID' AND `deviceID` = '$deviceID'") or die(json_encode(functions::$notFound));
-    
+    $check2 = mysqli_query(Database::$conn, "SELECT `id`, `username`, `role`, `blocked` FROM users WHERE `vendorID` = '$vendorID' AND `deviceID` = '$deviceID'") or die(json_encode(functions::$blocked));
     if (mysqli_num_rows($check2) < 1)         die(base64_encode(json_encode($response)));
 
     $THIS = mysqli_fetch_array($check2);
@@ -235,7 +231,7 @@ if (isset($_POST['encryption']))
         }
         else
         {
-            $response['lua'] = file_get_contents("builds/basedSecurity/{$THIS['role']}.lua");
+            $response['lua'] = file_get_contents("builds/aura/{$THIS['role']}.lua");
         }
         #functions::login($loginurl, $username, $_POST['encryption'], $ip, $vendorID, $deviceID, $deSync);
         die(base64_encode(json_encode($response)));
