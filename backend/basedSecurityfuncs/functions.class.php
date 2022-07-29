@@ -157,5 +157,52 @@ class functions
     	$end_length = strlen(strval($salt_length));
     	return base64_encode($result.$salt.$salt_length.$end_length);
     }
+
+    static function array_to_matrix($table,$col,$row){
+        $matrix = array();
+        $f = 0;
+        $location = 0;
+        for ($i=0; $i < $row; $i++){
+            $matrix[$i] = array();
+            for($j=$location; $j < sizeof($table,0) ; $j++){
+                if($f == $col){
+                    $f = 0;
+                    $location = $j;
+                    break;
+                }
+                $matrix[$i][$f] = $table[$j];
+                $f++;
+            }
+        }
+        return $matrix;
+    }
+
+    static function luaEncrypt($string, $key){
+        try{
+            $cipher = "";
+
+            $string_len = strlen($string);
+            $string_array = str_split($string,1);
+
+            $col = $key;
+            $row = ceil($string_len/$col);
+
+            $fill_null = ($row * $col) - $string_len;
+            $void = str_split(str_repeat("_", $fill_null),1);
+            $combind = array_merge($string_array,$void);
+
+            $matrix = functions::array_to_matrix($combind,$col,$row);
+    
+            for($i=0; $i < $col; $i++){
+                for($x=0; $x < $row; $x++){
+                    $cipher .= $matrix[$x][$i];
+                }
+            }
+            return $cipher;
+        }
+        catch(Throwable $e){
+            return $e;
+        }
+    }
 }
 ?>

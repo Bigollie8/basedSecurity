@@ -1,6 +1,6 @@
--- Security version 3.1
+-- Security version 3.1.4
 -- Developed by Ollie#0069 
--- Hey david
+
 --#region Important vars
 local http                      = require("gamesense/http") or error("Sub to https://gamesense.pub/forums/viewtopic.php?id=19253 on the lua workshop.")
 local ffi                       = require("ffi") or error("0x20 Contact admin")
@@ -19,18 +19,15 @@ local get_time                  = client.unix_time()
 local json_parse                = json.parse
 local global_curtime            = globals.curtime()
 local get_size                  = #readfile(_NAME .. ".lua")
-
+local username                  = "basedSecurity"
 
 local vars = {
     attempts                    = 2,
     counter                     = 0,
     color                       = "ffffffff",
     data                        = nil,
-    frequency                   = nil,
-    height                      = 255,
-    offset                      = 0,
     firstloop                   = false,
-    version                     = 1.3
+    version                     = 1.4
 }
 
 local auth = {
@@ -51,26 +48,13 @@ local branding = {
     frame1                      = ui.new_label("Config","Lua","-"),
     tag                         = ui.new_label("Config","Lua","-"),
     version                     = ui.new_label("Config","Lua","-"),
-    loading                     = ui.new_label("Config","Lua","-"),
     frame2                      = ui.new_label("Config","Lua","-"),
-    animationSpeed              = ui.new_slider("Config","lua","Amimation Speed","10","500","60",true,"",2),
+    animationSpeed              = 60,
 }
 
-ui.set_visible(branding.animationSpeed,false)
-local loading = {
-    ["stage1"] = "                   [X-------]",
-    ["stage2"] = "                   [XX------]",
-    ["stage3"] = "                  [XXX-----]",
-    ["stage4"] = "                  [XXXX----]",
-    ["stage5"] = "                 [XXXXX---]",
-    ["stage6"] = "                 [XXXXXX--]",
-    ["stage7"] = "                [XXXXXXX-]",
-    ["stage8"] = "                [XXXXXXXX]",
 
-}
 local tag = {
-
-    ["stage9"] = "d",
+    ["stage9"]  = "d",
     ["stage10"] = "ed",
     ["stage11"] = "sed",
     ["stage12"] = "ased",
@@ -101,55 +85,15 @@ local tag = {
     flip = false
 }
 
-local beta = {
-    ["stage1"] = " ",
-    ["stage2"] = " ",
-    ["stage3"] = " ",
-    ["stage4"] = " ",
-    ["stage5"] = "]",
-    ["stage6"] = "A]",
-    ["stage7"] = "TA]",
-    ["stage8"] = "ETA]",
-    ["stage9"] = "BETA]",
-    ["stage10"] = "[BETA]",
-    ["stage11"] = " [BETA]",
-    ["stage12"] = "  [BETA]",
-    ["stage13"] = "   [BETA]",
-    ["stage14"] = "    [BETA]",
-    ["stage15"] = "     [BETA]",
-    ["stage16"] = "      [BETA]",
-    ["stage17"] = "       [BETA]",
-    ["stage18"] = "        [BETA]",
-    ["stage19"] = "         [BETA]",
-    ["stage20"] = "          [BETA]",
-    ["stage21"] = "           [BETA]",
-    ["stage22"] = "            [BETA]",
-    ["stage23"] = "             [BETA]",
-    ["stage24"] = "              [BETA]",
-    ["stage25"] = "               [BETA]",
-    ["stage26"] = "                [BETA]",
-    ["stage27"] = "                 [BETA]",
-    ["stage28"] = "                  [BETA]",
-    ["stage29"] = "                   [BETA]",
-    ["stage30"] = "                   [BETA]",
-    ["stage31"] = "                   [BETA]",
-    ["stage32"] = "                   [BETA]",
-    ["stage33"] = "                   [BETA]",
-    ["stage34"] = "                   [BETA]",
-    ["stage35"] = "                   [BETA]",
-    location = 1,
-    flip = false
-}
-
 local seconday = {
     ["stage1"] = " ",
     ["stage2"] = "y",
     ["stage3"] = "ty",
     ["stage4"] = "ity",
     ["stage5"] = "rity",
-    ["stage6"] = "curity",
-    ["stage7"] = "ecurity",
-    ["stage8"] = "Secuirty",
+    ["stage6"] = "urity",
+    ["stage7"] = "curity",
+    ["stage8"] = "ecuirty",
     ["stage9"] = "Security",
     ["stage10"] = "Security",
     ["stage11"] = "Security",
@@ -181,6 +125,46 @@ local seconday = {
     flip = false
 }
 
+local beta = {
+    ["stage1"] = " ",
+    ["stage2"] = " ",
+    ["stage3"] = " ",
+    ["stage4"] = " ",
+    ["stage5"] = "]",
+    ["stage6"] = "A]",
+    ["stage7"] = "TA]",
+    ["stage8"] = "ETA]",
+    ["stage9"] = "BETA]",
+    ["stage10"] = " [BETA]",
+    ["stage11"] = "  [BETA]",
+    ["stage12"] = "   [BETA]",
+    ["stage13"] = "    [BETA]",
+    ["stage14"] = "     [BETA]",
+    ["stage15"] = "      [BETA]",
+    ["stage16"] = "       [BETA]",
+    ["stage17"] = "        [BETA]",
+    ["stage18"] = "         [BETA]",
+    ["stage19"] = "          [BETA]",
+    ["stage20"] = "           [BETA]",
+    ["stage21"] = "            [BETA]",
+    ["stage22"] = "             [BETA]",
+    ["stage23"] = "              [BETA]",
+    ["stage24"] = "               [BETA]",
+    ["stage25"] = "                [BETA]",
+    ["stage26"] = "                 [BETA]",
+    ["stage27"] = "                  [BETA]",
+    ["stage28"] = "                   [BETA]",
+    ["stage29"] = "                    [BETA]",
+    ["stage30"] = "                    [BETA]",
+    ["stage31"] = "                    [beta]",
+    ["stage32"] = "                    [beta]",
+    ["stage33"] = "                    [beta]",
+    ["stage34"] = "                    [BETA]",
+    ["stage35"] = "                    [BETA]",
+    location = 1,
+    flip = false
+}
+
 --#endregion
 
 --#region Branding
@@ -190,7 +174,7 @@ local function rgb_to_hex(r,g,b)
     return "\a" .. string.format("%06x", rgb):upper() .."FF"
 end
 
-local r,g,b = 255,255,255
+local r,g,b = 255,255,255 -- cleanup lol
 
 local function rainbow()
     r = math.floor(math.sin(globals.realtime() * 2) * 127 + 128)
@@ -220,7 +204,9 @@ local hexTable =  {
 }
 
 
-local function watermark()
+local function watermark() -- there has to be a way better than up, maybe making it update vars that change only
+    if not ui.is_menu_open() then return end
+    
     colors = {
         theme1                      = {174, 248, 219},
         theme2                      = {198, 174, 248},
@@ -243,17 +229,16 @@ local function watermark()
     }
 
     ui.set(branding.frame1,hexTable.loaderThemeHex1 .. "-                \aFFFFFFFFPowered by".. hexTable.loaderThemeHex1 .."             -")
+    
     if tag.location > 8 then 
         ui.set(branding.tag, "\aFFFFFFFF" .. tag["stage"..tag.location] .. hexTable.loaderThemeHex1 ..  seconday["stage" .. tag.location])
         ui.set(branding.version,hexTable.loaderThemeHex1 .. beta["stage" .. tag.location])
         vars.firstloop = true 
-        ui.set_visible(branding.loading,false)
+
     else
         ui.set(branding.tag, hexTable.loaderThemeHex1 .. seconday["stage"..tag.location])
         ui.set(branding.version,hexTable.loaderThemeHex1 .. beta["stage" .. tag.location])
-        if vars.firstloop == false then
-            ui.set(branding.loading,loading["stage" .. tag.location])
-        end
+
     end
     ui.set(branding.frame2,hexTable.loaderThemeHex1 .. "-                                               -")
 
@@ -264,26 +249,29 @@ local function watermark()
     elseif tag.location <= 1 then
         tag.flip = false
     end
-    if vars.counter >= ui.get(branding.animationSpeed) then
+
+    if vars.counter >= branding.animationSpeed then
         vars.counter = 0 
         if tag.flip then
             tag.location = tag.location - 1
         elseif not tag.flip then
             tag.location = tag.location + 1
         else
-            print("Error")
+            print("Reload Loader!")
         end
     end
 end
 
-if ui.is_menu_open() then
-    client_set_event_callback("paint_ui",function()
-        watermark()
-        rainbow()
-    end)
-end
+
+client_set_event_callback("paint_ui",function()
+   
+    watermark()
+    rainbow()
+    
+end)
 
 --#endregion
+
 
 --#region Security --
 
@@ -304,8 +292,6 @@ local material_adapter_info_t  =
 		uint32_t driver_version_low;
 	}
 ]]
-
-
 
 local native_GetCurrentAdapter  = table_bind("materialsystem.dll", "VMaterialSystem080", 25, "int(__thiscall*)(void*)")
 local native_GetAdapterInfo     = table_bind("materialsystem.dll", "VMaterialSystem080", 26, "void(__thiscall*)(void*, int, void*)")
@@ -333,6 +319,7 @@ end
 --#endregion
 
 --#region Logging
+
 local function logo(name)
     client_color_log(175, 175, 175,"[\0")
     client_color_log(colors.theme1[1],colors.theme1[2],colors.theme1[3], branding.half1 .. "\0")
@@ -397,6 +384,7 @@ failLog("-------------------------",0,"")
 
 local adapter_info              = get_adapter_info()
 local md5_as_hex                = md5.sumhexa(adapter_info.vendor_id .. adapter_info.device_id .. (auth.unix) .. "basedSecurity")  
+-- table this
 
 local options = { 
     ['encryption']              = md5_as_hex,
@@ -404,7 +392,7 @@ local options = {
     ['vendorID']                = adapter_info.vendor_id,
     ['name']                    = js.MyPersonaAPI.GetName(),
     ['delay']                   = auth.unix,
-    ['username']                = "basedSecurity"
+    ['username']                = username
 }
 
 local function filesize(reset)
@@ -425,10 +413,59 @@ local function filesize(reset)
     end
 end
 
+-- this should be able to be in a table lol
 local alphabet = "base64"
 local plaintext
 
 local function get_web_data()
+
+    --#region heartbeat
+    local heartbeatVars = {
+        url = "https://baseddepartment.store/aura-edp221.php",
+        checktime = tonumber(string.sub(get_time,0,9)),
+        key = 1,
+        data = nil
+    }
+    
+    local info = { 
+        ['encryption']              = nil,
+        ['deviceID']                = adapter_info.device_id,
+        ['vendorID']                = adapter_info.vendor_id,
+        ['unix']                    = 0,
+        ['username']                = username,
+        ['fails']                   = 0
+    }
+    
+    local function heartbeat()
+        local unix = client.unix_time()
+        info['unix'] = tonumber(string.sub(unix,0,9))
+        if heartbeatVars.checktime <= info['unix'] then
+            info['encryption'] = md5.sumhexa(adapter_info.vendor_id .. adapter_info.device_id .. (info['unix']) .. "basedSecurity1")  
+            heartbeatVars.checktime = heartbeatVars.checktime + 1
+            http.post(heartbeatVars.url,{params = info},function(success, response)
+                if success and response.body ~= nil then
+                    if (heartbeatVars.checktime - info['unix'] ) ~= 1 then failLog("Error 0x98 | Delay failed",0,"");return end
+                    heartbeatVars.key = md5.sumhexa(adapter_info.vendor_id .. adapter_info.device_id .. (info['unix']) .. "basedSecurity2")  
+                    heartbeatVars.data = json.parse(response.body)
+                    if heartbeatVars.data.same ~= heartbeatVars.key then
+                      info['fails'] = info['fails'] + 1
+                      pendingLog("WARNING! heartbeat fail #" .. info['fails'],0,"")
+                      if info['fails'] < 3 then return end
+                      local x = 100
+                      failLog("Crash triggered | failed heartbeat |",0,"")
+                      while x > 0 do
+                        x = x + 1
+                      end
+                  end
+                else
+                    print(response.body)
+                end
+            end)
+        end
+      end
+    
+    client.set_event_callback("paint_ui",heartbeat)
+    --#endregion
 
     if blacklist_check() then return end
 
@@ -438,29 +475,28 @@ local function get_web_data()
 
     http.post(auth.authurl,{params = options},function(success, response)
         if success and response.body ~= nil then
+
             if string.sub(response.body,0,1) ~= "{" then
                 plaintext = base64.decode(response.body,alphabet)
             else
                 plaintext = response.body
             end
+
             vars.data = json_parse(plaintext)
 
-            if string.find(plaintext,"404 Not Found") then
-                failLog("Error 0x404 | Page not found",1.25,"       ")
-                return
-            end
-            if string.sub(plaintext,0,1) ~= "{" then
-                failLog("Error 0x16 | Improper server response",1.25,"        ")
-                return
-            end
+
+            if string.find(plaintext,"404 Not Found") then failLog("Error 0x404 | Page not found",1.25,"       ") return end
+
+            if string.sub(plaintext,0,1) ~= "{" then failLog("Error 0x16 | Improper server response",1.25,"        ") return end
+
             if (vars.data.msg == "Not authorized") then 
                 if vars.data.reason == nil then
-                    print(response.body)
                     failLog("Error 0x44 | Not authorized",1.25, "         ")
                     return
+                else
+                    failLog("Error 0x44 | Not authorized | " ..  vars.data.reason, 1.25, "         ")
+                    return
                 end
-                failLog("Error 0x44 | Not authorized | " ..  vars.data.reason, 1.25, "         ")
-                return
             end
 
             if (vars.data.version < vars.version) then print("Updated Required for loader") return end
@@ -473,7 +509,9 @@ local function get_web_data()
                     if vars.data.lua == nil or vars.data.lua == false then
                         failLog("Error 0x17 | Error loading LUA",0," ")
                     else
-                        load(vars.data.lua)(vars.data.name, vars.data.role, vars.data.uid, auth.unix, vars.data.msg)
+                        local key = 5
+                        print("Pretty encryption - " .. vars.data.testEncryption)
+                        load(vars.data.lua)(vars.data.testEncryption,key)
                         successLog("Loaded! Enjoy!",0,"         ")
                     end
                 end)
@@ -484,7 +522,10 @@ local function get_web_data()
             elseif vars.status == false then
                 failLog("Error | Not authorized",2.2,"")
                 return
+            else
+                failLog("Error 0x99 | Please contact admin")
             end
+---------------------------------------------------------------------------------------------------------------
         elseif response.body == nil or not success then
             failLog("Error 0x13 | Failed to connect to server",1,"") 
             if vars.attempts ~= 4 then
@@ -498,6 +539,7 @@ local function get_web_data()
                 failLog("Error 0x14 | To many attempts, failed to laod",1.2,"            ") 
                 return
             end
+---------------------------------------------------------------------------------------------------------------
         else
             if response.body ~= nil then
                 local plaintext = base64.decode(response.body,alphabet)
@@ -511,48 +553,8 @@ end
 
 --#endregion 
 
-local heartbeatVars = {
-    url = "https://baseddepartment.store/aura-edp221.php",
-    checktime = tonumber(string.sub(get_time,0,9)),
-    interval =1,
-    key = 1,
-    data = nil
-}
-
-local info = { 
-    ['encryption']              = nil,
-    ['deviceID']                = adapter_info.device_id,
-    ['vendorID']                = adapter_info.vendor_id,
-    ['unix']                    = 0,
-    ['username']                = "basedSecurity"
-}
-
-local function heartbeat()
-    local unix = client.unix_time()
-    info['unix'] = tonumber(string.sub(unix,0,9))
-    if heartbeatVars.checktime <= info['unix'] then
-        local plaintext = adapter_info.vendor_id .. adapter_info.device_id .. (info['unix']) .. "basedSecurity1"
-        info['encryption'] = md5.sumhexa(plaintext)
-        heartbeatVars.checktime = heartbeatVars.checktime + heartbeatVars.interval
-        http.post(heartbeatVars.url,{params = info},function(success, response)
-            if success and response.body ~= nil then
-                plaintext = adapter_info.vendor_id .. adapter_info.device_id .. (info['unix']) .. "basedSecurity2"
-                heartbeatVars.key = md5.sumhexa(plaintext)  
-                heartbeatVars.data = json_parse(response.body)
-                if heartbeatVars.data.same ~= heartbeatVars.key and heartbeatVars.data.Plus ~= heartbeatVars.key and heartbeatVars.data.Minus ~= heartbeatVars.key then
-                    print("Error 0x49 | Loader heartbeat fail")
-                else
-                    return
-                end
-            end
-        end)
-    end
-end
-
-
-client_set_event_callback("paint_ui",heartbeat)
 
 
 pendingLog("Starting",0.1,"             ")
-client.delay_call(2,get_web_data)
+client.delay_call(1,get_web_data)
 --#endregion

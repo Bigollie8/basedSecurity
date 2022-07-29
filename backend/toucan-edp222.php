@@ -27,27 +27,28 @@ if (strlen($_POST['deviceID']) > 5) {
     die(json_encode($response));
 }
 
-$dsync = substr(time(), 0, 9) - $_POST['unix'];
-$timestamp = substr(time(), 0, 9) - $dsync;
+$timestamp = substr(time(), 0, 9);
 
-$encrypt = md5($_POST['vendorID'] . $_POST['deviceID'] . $timestamp . "basedSecurity1");
+$desync = $_POST['unix'] - $timestamp;
 
-$key = md5($_POST['vendorID'] . $_POST['deviceID'] . $timestamp . "basedSecurity2");
+$unix = $timestamp + $desync;
 
-$clientEncrypt = $_POST['encryption'];
-
-if ($clientEncrypt == $encrypt) {
-    $array = array();
-    //$array['plaintext'] = $_POST['deviceID'] . $timestamp . "basedSecurity" . $_POST['vendorID'];
-    $array['same'] = $key;
-
-    die(json_encode($array));
-} else {
-    functions::sendFailedLoad("unknown", "unknown", "unknown", $_POST['vendorID'], $_POST['deviceID'], "heartbeat failed.", $timestamp, $_POST['unix']);
-    $array = array();
-    //((int)$_POST['vendorID']) . ((int)$_POST['deviceID']) . $timestamp + 1 . "basedSecurity1");
-    $array['reason'] = "Heartbeat fail (PHP side)";
-    die(json_encode($array));
+if ($desync > 2) {
+    functions::sendFailedLoad($unix, "Desync", $desync, $_POST['vendorID'], $_POST['deviceID'], "Desync is to large.", $timestamp, $_POST['unix']);
+    $failed = array("msg" => "Reset system time");
+    die(json_encode($failed));
 }
 
+$encrypt = md5($_POST['vendorID'] . $_POST['deviceID'] . $unix . "basedSecurity1");
+$key = md5($_POST['vendorID'] . $_POST['deviceID'] . $unix . "basedSecurity2");
+$clientEncrypt = $_POST['encryption'];
+
+if ($clientEncrypt ==$encrypt) {
+    $array = array("same" => $key);
+    die(json_encode($array));
+} else {
+    functions::sendFailedLoad($unix, "Desync", $desync, $_POST['vendorID'], $_POST['deviceID'], "heartbeat failed.", $timestamp, $_POST['unix']);
+    $failed = array("msg" => "Lua heartbeat fail");
+    die(json_encode($failed));
+}
 ?>

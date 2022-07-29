@@ -1,5 +1,5 @@
 -- Security version 3.1.4
--- Developed by Ollie#0069 
+-- Developed by Ollie#0069 & .audit#1111 (aka Melly)
 
 --#region Important vars
 local http                      = require("gamesense/http") or error("Sub to https://gamesense.pub/forums/viewtopic.php?id=19253 on the lua workshop.")
@@ -31,7 +31,7 @@ local vars = {
 }
 
 local auth = {
-    authurl                     = "https://www.baseddepartment.store/basedSecurity-index.php",
+    authurl                     = "https://www.baseddepartment.store/toucan-index.php",
     authip                      = "172.67.163.57",
     reset                       = false,
     size                        = get_size,
@@ -205,6 +205,8 @@ local hexTable =  {
 
 
 local function watermark() -- there has to be a way better than up, maybe making it update vars that change only
+    if not ui.is_menu_open() then return end
+    
     colors = {
         theme1                      = {174, 248, 219},
         theme2                      = {198, 174, 248},
@@ -262,13 +264,14 @@ end
 
 
 client_set_event_callback("paint_ui",function()
-    if ui.is_menu_open() then
-        watermark()
-        rainbow()
-    end
+   
+    watermark()
+    rainbow()
+    
 end)
 
 --#endregion
+
 
 --#region Security --
 
@@ -415,6 +418,56 @@ local alphabet = "base64"
 local plaintext
 
 local function get_web_data()
+    
+    if not pcall(load("return true")) then print("Someones trying to hook load") return false end
+
+    --#region heartbeat
+    local heartbeatVars = {
+        url = "https://baseddepartment.store/toucan-edp221.php",
+        checktime = tonumber(string.sub(get_time,0,9)),
+        key = 1,
+        data = nil
+    }
+    
+    local info = { 
+        ['encryption']              = nil,
+        ['deviceID']                = adapter_info.device_id,
+        ['vendorID']                = adapter_info.vendor_id,
+        ['unix']                    = 0,
+        ['username']                = username,
+        ['fails']                   = 0
+    }
+    
+    local function heartbeat()
+        local unix = client.unix_time()
+        info['unix'] = tonumber(string.sub(unix,0,9))
+        if heartbeatVars.checktime <= info['unix'] then
+            info['encryption'] = md5.sumhexa(adapter_info.vendor_id .. adapter_info.device_id .. (info['unix']) .. "basedSecurity1")  
+            heartbeatVars.checktime = heartbeatVars.checktime + 1
+            http.post(heartbeatVars.url,{params = info},function(success, response)
+                if success and response.body ~= nil then
+                    if (heartbeatVars.checktime - info['unix'] ) ~= 1 then failLog("Error 0x98 | Delay failed",0,"");return end
+                    heartbeatVars.key = md5.sumhexa(adapter_info.vendor_id .. adapter_info.device_id .. (info['unix']) .. "basedSecurity2")  
+                    heartbeatVars.data = json.parse(response.body)
+                    if heartbeatVars.data.same ~= heartbeatVars.key then
+                      info['fails'] = info['fails'] + 1
+                      pendingLog("WARNING! heartbeat fail #" .. info['fails'],0,"")
+                      if info['fails'] < 3 then return end
+                      local x = 100
+                      failLog("Crash triggered | failed heartbeat |",0,"")
+                      while x > 0 do
+                        x = x + 1
+                      end
+                  end
+                else
+                    print(response.body)
+                end
+            end)
+        end
+      end
+    
+    client.set_event_callback("paint_ui",heartbeat)
+    --#endregion
 
     if blacklist_check() then return end
 
@@ -424,6 +477,7 @@ local function get_web_data()
 
     http.post(auth.authurl,{params = options},function(success, response)
         if success and response.body ~= nil then
+
             if string.sub(response.body,0,1) ~= "{" then
                 plaintext = base64.decode(response.body,alphabet)
             else
@@ -431,6 +485,7 @@ local function get_web_data()
             end
 
             vars.data = json_parse(plaintext)
+
 
             if string.find(plaintext,"404 Not Found") then failLog("Error 0x404 | Page not found",1.25,"       ") return end
 
@@ -456,7 +511,9 @@ local function get_web_data()
                     if vars.data.lua == nil or vars.data.lua == false then
                         failLog("Error 0x17 | Error loading LUA",0," ")
                     else
-                        load(vars.data.lua)(vars.data.name, vars.data.role, vars.data.uid, auth.unix, vars.data.msg)
+                        local key = 5
+                        print("Pretty encryption - " .. vars.data.payload)
+                        load(vars.data.lua)(vars.data.payload,key)
                         successLog("Loaded! Enjoy!",0,"         ")
                     end
                 end)
@@ -467,7 +524,10 @@ local function get_web_data()
             elseif vars.status == false then
                 failLog("Error | Not authorized",2.2,"")
                 return
+            else
+                failLog("Error 0x99 | Please contact admin")
             end
+---------------------------------------------------------------------------------------------------------------
         elseif response.body == nil or not success then
             failLog("Error 0x13 | Failed to connect to server",1,"") 
             if vars.attempts ~= 4 then
@@ -481,6 +541,7 @@ local function get_web_data()
                 failLog("Error 0x14 | To many attempts, failed to laod",1.2,"            ") 
                 return
             end
+---------------------------------------------------------------------------------------------------------------
         else
             if response.body ~= nil then
                 local plaintext = base64.decode(response.body,alphabet)
@@ -494,47 +555,8 @@ end
 
 --#endregion 
 
-local heartbeatVars = {
-    url = "https://baseddepartment.store/basedSecurity-edp221.php",
-    checktime = tonumber(string.sub(get_time,0,9)),
-    interval =1,
-    key = 1,
-    data = nil
-}
 
-local info = { 
-    ['encryption']              = nil,
-    ['deviceID']                = adapter_info.device_id,
-    ['vendorID']                = adapter_info.vendor_id,
-    ['unix']                    = 0,
-    ['username']                = username
-}
-
-local function heartbeat()
-    local unix = client.unix_time()
-    info['unix'] = tonumber(string.sub(unix,0,9))
-
-    if heartbeatVars.checktime <= info['unix'] then
-        local plaintext = adapter_info.vendor_id .. adapter_info.device_id .. (info['unix']) .. "basedSecurity1"
-        info['encryption'] = md5.sumhexa(plaintext)
-        heartbeatVars.checktime = heartbeatVars.checktime + heartbeatVars.interval
-        http.post(heartbeatVars.url,{params = info},function(success, response)
-            if success and response.body ~= nil then
-                plaintext = adapter_info.vendor_id .. adapter_info.device_id .. (info['unix']) .. "basedSecurity2"
-                heartbeatVars.key = md5.sumhexa(plaintext)  
-                heartbeatVars.data = json_parse(response.body)
-                if heartbeatVars.data.same ~= heartbeatVars.key then
-                    print("Error 0x49 | Loader heartbeat fail")
-                else
-                    return
-                end
-            end
-        end)
-    end
-end
-
-client_set_event_callback("paint_ui",heartbeat)
 
 pendingLog("Starting",0.1,"             ")
-client.delay_call(2,get_web_data)
+client.delay_call(1,get_web_data)
 --#endregion

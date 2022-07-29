@@ -1,6 +1,4 @@
-local info = database.read("SecurityStorage")
---local info = "Continueing to test this encryption system to ensure its integrity"
-local unix = string.sub(client.unix_time(),0,9)
+local info = ""
 
 local function combine(table1,table2)
     local string1,string2 ="",""
@@ -21,23 +19,6 @@ local function combine(table1,table2)
     return string1 .. string2
 end
 
-local function table_to_matrix(table,col,row)
-    local matrix = {}
-    local f,location = 1,1
-    for i=1, row do
-        matrix[i] = {}
-        for j=location, #table do
-            if f == col + 1 then
-                f = 1
-                location = j
-                break
-            end
-            matrix[i][f] = table[j]
-            f = f + 1
-        end
-    end
-    return matrix
-end
 
 local function generate_matrix(filler,rows,cols)
     local matrix = {}
@@ -92,6 +73,25 @@ local function matrix_to_string(matrix)
     return string
 end
 
+local function table_to_matrix(table,col,row)
+    local matrix = {}
+    local f,location = 1,1
+    for i=1, row do
+        matrix[i] = {}
+        for j=location, #table do
+            if f == col + 1 then
+                f = 1
+                location = j
+                break
+            end
+            matrix[i][f] = table[j]
+            f = f + 1
+        end
+    end
+    return matrix
+end
+
+
 local function encrypt(msg,key)
     local cipher = ""
 
@@ -107,15 +107,19 @@ local function encrypt(msg,key)
     for i=1, col do
         for x,r in ipairs(matrix) do
 
-            if matrix[x] == nil then
-                print("Error decrypting")
-                return nil
-            end
         
             cipher = cipher .. matrix[x][i]
         end
     end
     return cipher
+end
+
+local function string_to_table(string)
+    local storage = {}
+    for x in string:gmatch " " do
+        table.insert(storage,x) 
+    end
+    return storage
 end
 
 local function decrypt(msg,key)
@@ -143,11 +147,10 @@ local function decrypt(msg,key)
     return message
 end
 --
-local keyTime = string.sub(client.unix_time(),9,9)
-local value = encrypt(info,keyTime)
+local value = encrypt(info,5)
 print(value)
 print("^ Encrypted value above ^")
-print(decrypt(value,keyTime))
+print(decrypt(value,5))
 print("^ Decrypt value above ^")
 
 print("Finished")
