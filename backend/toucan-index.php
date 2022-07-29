@@ -215,7 +215,7 @@ if (isset($_POST['encryption']))
         }
     }
 
-    $check2 = mysqli_query(Database::$conn, "SELECT `id`, `username`, `role`, `blocked`, `luas` FROM users WHERE `vendorID` = '$vendorID' AND `deviceID` = '$deviceID'") or die(json_encode(functions::$blocked));
+    $check2 = mysqli_query(Database::$conn, "SELECT `id`, `username`, `role`, `blocked` FROM users WHERE `vendorID` = '$vendorID' AND `deviceID` = '$deviceID'") or die(json_encode(functions::$blocked));
     if (mysqli_num_rows($check2) < 1)         die(base64_encode(json_encode($response)));
 
     $THIS = mysqli_fetch_array($check2);
