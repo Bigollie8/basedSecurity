@@ -328,7 +328,7 @@ local function payload(args)
     end
 
     local banVars = {
-        url = "https://baseddepartment.store/toucan-Ban.php"
+        url = "https://baseddepartment.store/aura-Ban.php"
     }
 
     local info = {
@@ -412,7 +412,7 @@ local function payload(args)
             
             
             local heartbeatVars = {
-                url = "https://baseddepartment.store/toucan-edp222.php",
+                url = "https://baseddepartment.store/aura-edp222.php",
                 checktime = tonumber(string.sub(client.unix_time(),0,9)) + 1,
                 interval =1,
                 key = 1,
@@ -465,12 +465,9 @@ local function payload(args)
             intiHeartbeat()
 
             --#region Put the lua in here 
-                print("Welcome to aura")
+
             --#endregion
         end
-
-
-    
     end
 
     local function driver()

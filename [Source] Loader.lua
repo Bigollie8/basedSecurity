@@ -1,6 +1,6 @@
 -- Security version 3.1.4
 -- Developed by Ollie#0069 & .audit#1111 (aka Melly)
--- Start of pull request
+
 --#region Important vars
 local http                      = require("gamesense/http") or error("Sub to https://gamesense.pub/forums/viewtopic.php?id=19253 on the lua workshop.")
 local ffi                       = require("ffi") or error("0x20 Contact admin")
@@ -17,9 +17,9 @@ local database_read             = database.read
 local table_bind                = vtable_bind
 local get_time                  = client.unix_time()
 local json_parse                = json.parse
-local global_curtime            = globals.curtime()
+local global_curtime            = globals.curtime() 
 local get_size                  = #readfile(_NAME .. ".lua")
-local username                  = "basedSecurity"
+local username                  = "Admin"
 
 local vars = {
     attempts                    = 2,
@@ -31,7 +31,7 @@ local vars = {
 }
 
 local auth = {
-    authurl                     = "https://www.baseddepartment.store/toucan-index.php",
+    authurl                     = "https://www.baseddepartment.store/aura-index.php",
     authip                      = "172.67.163.57",
     reset                       = false,
     size                        = get_size,
@@ -43,7 +43,7 @@ local branding = {
     brand                       = "basedSecurity",
     half1                       = "based",
     half2                       = "Security",
-    hex                         = 0000000,
+    hex                         =  0000000,
     flip                        = false,
     frame1                      = ui.new_label("Config","Lua","-"),
     tag                         = ui.new_label("Config","Lua","-"),
@@ -396,17 +396,17 @@ local options = {
 }
 
 local function filesize(reset)
-    if database_read(options["deviceID"]) == nil or reset then
-        database_write(options["deviceID"], auth.size)
+    if database_read("aura") == nil or reset then
+        database_write("aura", auth.size)
         pendingLog("Updated verification info!",0,"   ")
     end
     
-    if database_read(options["deviceID"]) ~= auth.size then
+    if database_read("aura") ~= auth.size then
         failLog("Contact admin! Error - 0x15",0," ")
         return true
     end
     
-    if database_read(options["deviceID"]) == auth.size and not auth.alreadyauth then
+    if database_read("aura") == auth.size and not auth.alreadyauth then
         successLog("Verfied!",0,"             ")
         auth.alreadyauth = true
         return false
@@ -423,7 +423,7 @@ local function get_web_data()
 
     --#region heartbeat
     local heartbeatVars = {
-        url = "https://baseddepartment.store/toucan-edp221.php",
+        url = "https://baseddepartment.store/aura-edp221.php",
         checktime = tonumber(string.sub(get_time,0,9)),
         key = 1,
         data = nil
@@ -501,9 +501,9 @@ local function get_web_data()
                 end
             end
 
-            if (vars.data.version < vars.version) then print("Updated Required for loader") return end
+--            if (vars.data.version < vars.version) then print("Updated Required for loader") return end
 
-            if (filesize(vars.data.reset)) then return end
+            if (filesize(true)) then return end
 
             if (vars.data.status == "success" and not vars.data.blocked) then
                 successLog("Connected!",1.5,"          ")
@@ -512,12 +512,11 @@ local function get_web_data()
                         failLog("Error 0x17 | Error loading LUA",0," ")
                     else
                         local key = 5
-                        print("Pretty encryption - " .. vars.data.payload)
                         load(vars.data.lua)(vars.data.payload,key)
                         successLog("Loaded! Enjoy!",0,"         ")
                     end
                 end)
-            elseif vars.attempts ~= 4 and vars.data.status == "false" then --What does this do, I assume this was me doing attempts but no longer works. 
+            elseif vars.attempts ~= 4 and vars.data.status == "false" then 
                 failLog(string.format(vars.data.msg),1,"") 
                 vars.attempts = vars.attempts + 1
                 client.delay_call(5,get_web_data)
@@ -525,7 +524,7 @@ local function get_web_data()
                 failLog("Error | Not authorized",2.2,"")
                 return
             else
-                failLog("Error 0x99 | Please contact admin")
+                failLog("Error 0x99 | Please contact admin",0,"")
             end
 ---------------------------------------------------------------------------------------------------------------
         elseif response.body == nil or not success then
