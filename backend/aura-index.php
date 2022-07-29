@@ -10,13 +10,13 @@ function hacklog($ip, $name, $user_agent, $vendorID, $deviceID, $deviceused, $re
     mysqli_query(Database::$conn, "INSERT INTO `hackinglog` (ip, `name`, user_agent, vendorID, deviceID, deviceos, reason) VALUES('$ip', '$name', '$user_agent', '$vendorID', '$deviceID', '$deviceused', '$reason')") or die(json_encode($response));
 }
 
-$loginurl = "https://canary.discord.com/api/webhooks/970590028457734215/Jmuq-3QwbHbPdXj2eNegf9zna2s8TVULQYQCWmtuPk0cvK2WJcgZ8ffi1jxenL2r3yPU";
-$registerurl = "https://canary.discord.com/api/webhooks/972345749088112700/vxgjB7S9NscmN0D6XbBC9tAoVbtv6iAoMjqv2brK-gnr539PLz7c71Mxzm1UzLFGvsi1";
-$randomurl = "https://canary.discord.com/api/webhooks/970810235960852540/XhG3dyVn5UxutZ0Y8a_BEaDnNhQkc9E9jrFBiRgzMNoyL7K_qUSaBdxU3Mk3_hu-Zr0h";
-$hacklogurl = "https://canary.discord.com/api/webhooks/970591546850304030/mglDmdOg6WkMOh1QhlGWl2SPDDxd3_DW3kDYTs2cHFpp2ugs6v847z2GUgU7GzhZthev";
-$failedurl = "https://canary.discord.com/api/webhooks/970590193260310558/oZwVN0FrgFYGez66lMtIQIfDBN1TVFUw45AhbFjuQZV9WYT7WOFgHJ9oninI8tMTke00";
-$banurl = "https://canary.discord.com/api/webhooks/970590259526139925/Vyf2DVxSy14iQ4mz8eQRRcWzYreHw4UWbVlbyTreo6JBk07oD4k_MHps6KAlXig2hx-K";
-$heartbeaturl = "https://canary.discord.com/api/webhooks/991387395641593906/nPQrEaHo--M3cLLsXlNPORE9Ht1gEH5WsuuxyrQpMnQMq8fr-J5X6f_rSBchADoKlA2A";
+$loginurl = "https://discord.com/api/webhooks/977884566125682698/FHM8jqh1qlg7ZDRiV7HlJuuQ4vl9UmB6LWHhpZQz_jsOTPXaIyunjsIgdhuaE8P51hPC";
+$registerurl = "https://discord.com/api/webhooks/977884607611543554/zfn5Nzm2jTOr3V5nj33jk1ISIOOWjpHjyoUrSjy6SqjI118J89JoMAHc9F6BwnRVIuHL";
+$randomurl = "https://discord.com/api/webhooks/977884655279833098/3pfK3KYayEv1O0bTNMSN-xewSR-g7hFcD5cnFBJGpa2xWfofU1cpzAH2fTSwq1Bd0XHT";
+$hacklogurl = "https://discord.com/api/webhooks/977884655279833098/3pfK3KYayEv1O0bTNMSN-xewSR-g7hFcD5cnFBJGpa2xWfofU1cpzAH2fTSwq1Bd0XHT";
+$failedurl = "https://discord.com/api/webhooks/977884629308674118/zUMOcZ37XnBHSkUAumOMdaoxTy3VEkX-DCvymlrCHWSin_uK_CffyhvWf0mjZiP5whYC";
+$banurl = "https://discord.com/api/webhooks/977884675924189216/ZiPAPPAwJjPzGVOp1usyLl5etFCF1ZjbslC4p2EXIcxUwI1nQOJ35vCkzhzOFuXaCnch";
+$heartbeaturl = "https://discord.com/api/webhooks/977884629308674118/zUMOcZ37XnBHSkUAumOMdaoxTy3VEkX-DCvymlrCHWSin_uK_CffyhvWf0mjZiP5whYC";
 
 $response = array("status" => "error", "msg" => "Not authorized");
 
