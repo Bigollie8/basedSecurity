@@ -7,40 +7,40 @@ import hashlib
 
 app = Flask(__name__)
 
-@app.route('/')
-def hello_world():
-    return 'peekaboo!'
-
-def check1():
-    return False
-
-
-urlEncrypt = (cipher.encryptMessage("thisismetypingareallylongmsg",str(random.randint(20,123))))
-url = '/login/<username>/<creds>'
+key = str(random.randint(20,123))
+urlEncrypt =    cipher.encryptMessage("thisismetypingareallylongmsg",key)
+urlHash = (hashlib.md5(urlEncrypt.encode())).hexdigest()
+url = '/login/<payload>/<creds>'
 
 def updateKey():
     global urlEncrypt
-    urlEncrypt = (cipher.encryptMessage("thisismetypingareallylongmsg",str(random.randint(20,123))))
-    urlEncrypt = hashlib.md5(urlEncrypt.encode())
-    urlEncrypt = urlEncrypt.hexdigest()
-    return str(urlEncrypt)
+    global urlHash
+    global key
+    key = str(random.randint(20,123))
+    urlEncrypt = cipher.encryptMessage("thisismetypingareallylongmsg",key)
+    urlHash = hashlib.md5(urlEncrypt.encode()).hexdigest()
+    return str(urlHash)
 
+@app.route('/')
+def index():
+    return 'BasedSecurity.inc!'
 
 @app.route('/generate')
+
 def generate():
     updateKey()
-    print("Expected response == " + urlEncrypt)
-    return ('http://127.0.0.1:5000' + '/login'+ '/admin/' + urlEncrypt)
+    print("Expected response == " + urlHash)
+    return ('http://127.0.0.1:5000' + '/login'+ '/'+ urlEncrypt +'/' + urlHash)
 
 @app.route(url,methods = ['POST','GET'])
-def login(username,creds):
+def login(payload,creds):
     if request.method == 'GET':
         print("Success")
 
-        if creds == urlEncrypt:
-            return {"100":"Success", "username":username,"URL":creds}
+        if creds == urlHash:
+            return {"100":"Success", "payload":(cipher.decryptMessage(payload,key)),"URL":creds}
         else:
-            return {"400":"Failed",creds:urlEncrypt}
+            return {"400":"Failed",creds:urlHash}
     else:
         print("false")
         return {"400":""}
