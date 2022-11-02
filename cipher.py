@@ -11,8 +11,8 @@ banner = pyfiglet.figlet_format("Based Security")
 os.system('clear')
 print(banner)
 
-payload = "thisismetypingareallylongmsg"
-key = random.randint(2,10)
+testpayload = 'x0001' + str(round(time.time()* 7.19123))
+testkey = random.randint(3,len(testpayload))
 
 def encrypt(payload,key):
     cipher = ""
@@ -53,12 +53,7 @@ def decrypt(payload,key):
 
     for _ in range(col):
         for r in range(row):
-            try:
-                matrix[r][k_index] = payload_lst[payload_index]
-            except IndexError:
-                print("matrix[" + str(r) + "][" + str(k_index) + "]")
-                print("Error Decrypting - Index error")
-                return "Failed"
+            matrix[r][k_index] = payload_lst[payload_index]
             payload_index += 1
         k_index += 1
 
@@ -78,13 +73,17 @@ def decrypt(payload,key):
 
 print("Verifying encryption")
 
-for x in range(10):
-    key = random.randint(2,len(payload)/2)
-    encrypted = encrypt(payload,key)
-    decrypted = decrypt(encrypted,key)
-    if payload != decrypted:
+for i in tqdm(range(100)):
+    sleep(.1)
+
+for x in range(1000):
+    testkey = random.randint(3,len(testpayload))
+    encrypted = encrypt(testpayload,testkey)
+    decrypted = decrypt(encrypted,testkey)
+    if testpayload != decrypted:
         print("Failed check " + str(x+1) + "/10")
 
-for i in tqdm(range(10)):
-    sleep(.3)
+print("Done")
+
+
 

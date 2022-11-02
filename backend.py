@@ -9,8 +9,8 @@ import pyfiglet
 
 app = Flask(__name__)
 
-payloadVAR = "thisismetypingareallylongmsg"
-key = random.randint(3,len(payloadVAR)/2)
+payloadVAR = 'x0001' + str(round(time.time()* 7.19123))
+key = random.randint(3,len(payloadVAR))
 urlEncrypt = Cipher.encrypt(payloadVAR,key)
 urlHash = (hashlib.md5(urlEncrypt.encode())).hexdigest()
 url = '/login/<payload>/<creds>'
@@ -22,10 +22,11 @@ def updateKey():
     global urlEncrypt
     global urlHash
     global key
-    key = random.randint(3,len(payloadVAR)/2)
-    print("Key is now " + str(key))
+
+    key = random.randint(3,len(payloadVAR))
     urlEncrypt = Cipher.encrypt(payloadVAR,key)
     urlHash = hashlib.md5(urlEncrypt.encode()).hexdigest()
+
     return str(urlHash)
 
 def reset(length):
@@ -33,15 +34,13 @@ def reset(length):
     os.system('clear')
     print(banner)
 
-def verify(creds):
-    print(key)
-    expectedLength = 28
+def verify(payload,creds):
+    expectedLength = 0
     if creds != urlHash:
          return False
-    decryptPayload = Cipher.decrypt(payloadVAR,key)
-    if len(decryptPayload) != expectedLength:
+    decryptPayload = Cipher.decrypt(payload,key)
+    if len(decryptPayload) == expectedLength:
         return False
-    print("Returning true")
     return True
 
 @app.route('/')
@@ -56,9 +55,8 @@ def generate():
 
 @app.route(url,methods = ['POST','GET'])
 def login(payload,creds):
-    test = creds
     if request.method == 'GET':
-        if verify(test):
+        if verify(payload,creds):
             reset(2)
             return {"Status" : True,"URL":creds,"payload":Cipher.decrypt(payload,key)}
         else:
