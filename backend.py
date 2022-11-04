@@ -1,4 +1,3 @@
-from multiprocessing.managers import ValueProxy
 from flask import Flask
 from flask import request
 import Cipher
@@ -31,6 +30,12 @@ verifyVars = {
     "decryptPayload" : "",
 }
 
+tracking = {
+    "success" : 0,
+    "fail" : 0,
+    "total" : 0,
+}
+
 def updateUserInfo(payload):
     decrypted = Cipher.decrypt(payload,vars["key"])
 
@@ -42,15 +47,12 @@ def updateUserInfo(payload):
         print("Invalid Payload")
         return False
 
-
-
     info["username"] = table[0]
     #Search databse for info and update it accordingly
     info["vendorid"] = str(3021)
     info["deviceid"] = str(1739)
 
     return True
-
 
 def updateVars(payload):
     vars["key"] = int(str(round(time.time()))[9]) + 3
@@ -63,6 +65,7 @@ def updateVars(payload):
     return True
 
 def verify(payload,creds):
+    tracking["total"] += 1
     if updateVars(payload):
         verifyVars["expectedLength"] = 0
         verifyVars["decryptPayload"] = Cipher.decrypt(payload,vars["key"])
@@ -85,8 +88,12 @@ def index():
 def login(payload,creds):
     if request.method == 'GET':
         if verify(payload,creds):
+            tracking["success"] += 1
+            print("Connection Tracking: \nSuccess = " + str(tracking["success"]) + "\nFail = " + str(tracking["fail"]) + "\nTotal = " + str(tracking["total"]))
             return {"Status" : True,"URL":creds,"payload":Cipher.decrypt(payload,vars["key"])}
         else:
+            tracking["fail"] += 1
+            print("Connection Tracking: \nSuccess = " + str(tracking["success"]) + "\nFail = " + str(tracking["fail"]) + "\nTotal = " + str(tracking["total"]))
             return {"Status" : False,creds:vars["expectedHash"]}
     else:
         print("False")
@@ -95,9 +102,4 @@ def login(payload,creds):
 
 if __name__ == '__main__':
     app.run()
-
-
-
-
-
 
