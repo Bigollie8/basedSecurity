@@ -1,3 +1,4 @@
+from multiprocessing.managers import ValueProxy
 from flask import Flask
 from flask import request
 import Cipher
@@ -32,16 +33,29 @@ verifyVars = {
 
 def updateUserInfo(payload):
     decrypted = Cipher.decrypt(payload,vars["key"])
-    table = decrypted.split(":")
+
+    try:
+        if decrypted == None:
+            return False
+        table = decrypted.split(":")
+    except ValueError:
+        print("Invalid Payload")
+        return False
+
+
+
     info["username"] = table[0]
     #Search databse for info and update it accordingly
     info["vendorid"] = str(3021)
     info["deviceid"] = str(1739)
 
+    return True
+
 
 def updateVars(payload):
     vars["key"] = int(str(round(time.time()))[9]) + 3
-    updateUserInfo(payload)
+    if not updateUserInfo(payload):
+        return False
     info["unix"] = str(round(time.time()))
     vars["expectedPayload"] = info["username"] + ":" + info["vendorid"] + ":" +  info["deviceid"] + ":" +  info["unix"] + ":" +  info["plaintext"]
     vars["expectedEncrypt"] = Cipher.encrypt(vars["expectedPayload"],vars["key"])

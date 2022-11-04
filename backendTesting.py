@@ -20,6 +20,7 @@ def testConnection():
     encryptedPayload = Cipher.encrypt(payload,key)
     hash = hashlib.md5(encryptedPayload.encode()).hexdigest()
     url = "http://127.0.0.1:5000" + '/login'+ '/'+ encryptedPayload +'/' + hash
+    print(url)
     textResponse = requests.get(url)
     responseJSON = textResponse.json()
     print("Encrypting - " + payload)
