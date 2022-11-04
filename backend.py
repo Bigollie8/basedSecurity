@@ -2,70 +2,81 @@ from flask import Flask
 from flask import request
 import Cipher
 import time
-import random
 import hashlib
-import os
 import pyfiglet
 
 app = Flask(__name__)
 
-payloadVAR = 'x0001' + str(round(time.time()* 7.19123))
-key = random.randint(3,len(payloadVAR))
-urlEncrypt = Cipher.encrypt(payloadVAR,key)
-urlHash = (hashlib.md5(urlEncrypt.encode())).hexdigest()
-url = '/login/<payload>/<creds>'
-creds = 0
+info = {
+    "username" : "Filler",
+    "vendorid" : str(123),
+    "deviceid" : str(123),
+    "unix" : str(123),
+    "plaintext" : "BasedSecurity"
+}
+
+vars = {
+    "expectedPayload" : str(info["username"] + ":" + info["vendorid"] + ":" +  info["deviceid"] + ":" +  info["unix"] + ":" +  info["plaintext"]),
+    "key" : 1,
+    "expectedEncrypt" : "",
+    "expectedHash" : "",
+    "url" :'/login/<payload>/<creds>',
+}
+
 banner = pyfiglet.figlet_format("Based Security")
 
+verifyVars = {
+    "expectedLength" : 0,
+    "decryptPayload" : "",
+}
 
-def updateKey():
-    global urlEncrypt
-    global urlHash
-    global key
+def updateUserInfo(payload):
+    decrypted = Cipher.decrypt(payload,vars["key"])
+    table = decrypted.split(":")
+    info["username"] = table[0]
+    #Search databse for info and update it accordingly
+    info["vendorid"] = str(3021)
+    info["deviceid"] = str(1739)
 
-    key = random.randint(3,len(payloadVAR))
-    urlEncrypt = Cipher.encrypt(payloadVAR,key)
-    urlHash = hashlib.md5(urlEncrypt.encode()).hexdigest()
 
-    return str(urlHash)
-
-def reset(length):
-    time.sleep(length)
-    os.system('clear')
-    print(banner)
+def updateVars(payload):
+    vars["key"] = int(str(round(time.time()))[9]) + 3
+    updateUserInfo(payload)
+    info["unix"] = str(round(time.time()))
+    vars["expectedPayload"] = info["username"] + ":" + info["vendorid"] + ":" +  info["deviceid"] + ":" +  info["unix"] + ":" +  info["plaintext"]
+    vars["expectedEncrypt"] = Cipher.encrypt(vars["expectedPayload"],vars["key"])
+    vars["expectedHash"] = hashlib.md5(vars["expectedEncrypt"].encode()).hexdigest()
+    return True
 
 def verify(payload,creds):
-    expectedLength = 0
-    if creds != urlHash:
-         return False
-    decryptPayload = Cipher.decrypt(payload,key)
-    if len(decryptPayload) == expectedLength:
-        return False
-    return True
+    if updateVars(payload):
+        verifyVars["expectedLength"] = 0
+        verifyVars["decryptPayload"] = Cipher.decrypt(payload,vars["key"])
+        if creds != vars["expectedHash"]:
+            print("Mismatched Hash")
+            return False
+        if vars["expectedPayload"] != verifyVars["decryptPayload"]:
+            print("Mismatched Payload")
+            return False
+        if len(verifyVars["decryptPayload"]) == verifyVars["expectedLength"]:
+            print("Imroper payload length")
+            return False
+        return True
 
 @app.route('/')
 def index():
     return 'BasedSecurity.inc!'
 
-@app.route('/generate')
-def generate():
-    updateKey()
-    print("Expected response == " + urlHash)
-    return ('http://127.0.0.1:5000' + '/login'+ '/'+ urlEncrypt +'/' + urlHash)
-
-@app.route(url,methods = ['POST','GET'])
+@app.route(vars["url"],methods = ['POST','GET'])
 def login(payload,creds):
     if request.method == 'GET':
         if verify(payload,creds):
-            reset(2)
-            return {"Status" : True,"URL":creds,"payload":Cipher.decrypt(payload,key)}
+            return {"Status" : True,"URL":creds,"payload":Cipher.decrypt(payload,vars["key"])}
         else:
-            return {"Status" : False,creds:urlHash}
+            return {"Status" : False,creds:vars["expectedHash"]}
     else:
-        
         print("False")
         return {"Status":"Error"}
-
 
 
 if __name__ == '__main__':

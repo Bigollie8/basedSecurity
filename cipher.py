@@ -53,7 +53,12 @@ def decrypt(payload,key):
 
     for _ in range(col):
         for r in range(row):
-            matrix[r][k_index] = payload_lst[payload_index]
+            try:
+                matrix[r][k_index] = payload_lst[payload_index]
+            except IndexError:
+                print("Key mismatch impossible decryption")
+                print(str(key) + " - failed key")
+                return
             payload_index += 1
         k_index += 1
 
@@ -74,7 +79,7 @@ def decrypt(payload,key):
 print("Verifying encryption")
 
 for i in tqdm(range(100)):
-    sleep(.1)
+    sleep(.01)
 
 for x in range(1000):
     testkey = random.randint(3,len(testpayload))
