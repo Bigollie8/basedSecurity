@@ -23,6 +23,8 @@ vars = {
     "expectedEncrypt" : "",
     "expectedHash" : "",
     "url" :'/login/<payload>/<creds>',
+    "FailWebook" : DiscordWebhook(url='https://discord.com/api/webhooks/970590193260310558/oZwVN0FrgFYGez66lMtIQIfDBN1TVFUw45AhbFjuQZV9WYT7WOFgHJ9oninI8tMTke00'),
+    "SuccessWebhook" : DiscordWebhook(url='https://discord.com/api/webhooks/970590028457734215/Jmuq-3QwbHbPdXj2eNegf9zna2s8TVULQYQCWmtuPk0cvK2WJcgZ8ffi1jxenL2r3yPU')
 }
 
 banner = pyfiglet.figlet_format("Based Security")
@@ -38,13 +40,6 @@ tracking = {
     "total" : 0,
 }
 
-FailWebook = DiscordWebhook(url='https://discord.com/api/webhooks/970590193260310558/oZwVN0FrgFYGez66lMtIQIfDBN1TVFUw45AhbFjuQZV9WYT7WOFgHJ9oninI8tMTke00')
-SuccessWebhook = DiscordWebhook(url='https://discord.com/api/webhooks/970590028457734215/Jmuq-3QwbHbPdXj2eNegf9zna2s8TVULQYQCWmtuPk0cvK2WJcgZ8ffi1jxenL2r3yPU')
-#successEmbed = DiscordEmbed(title='Login Attempt', description='Success', color='03b2f8')
-#failEmbed = DiscordEmbed(title='Login Attempt', description='Fail', color='03b2f8')
-#FailWebook.add_embed(failEmbed)
-#SuccessWebhook.add_embed(successEmbed)
-
 def sendWebhook(url,status,hash,payload,name):
     embed = DiscordEmbed(title="Login Attempt", description=status,color='03b2f8')
     embed.add_embed_field(name='Name', value=name)
@@ -56,8 +51,8 @@ def sendWebhook(url,status,hash,payload,name):
     url.execute(remove_embeds=True)
 
 def updateUserInfo(payload):
+    global table
     decrypted = Cipher.decrypt(payload,vars["key"])
-
     try:
         if decrypted == None:
             return False
@@ -67,10 +62,14 @@ def updateUserInfo(payload):
         return False
 
     info["username"] = table[0]
+    var = True
     #Search databse for info and update it accordingly
-    info["vendorid"] = str(3021)
+    if not var:
+        #If user is not found return false
+        return False
+    #Updated user info with matched data from database
     info["deviceid"] = str(1739)
-
+    info["vendorid"] = str(3021)
     return True
 
 def updateVars(payload):
@@ -97,6 +96,17 @@ def verify(payload,creds):
         if len(verifyVars["decryptPayload"]) == verifyVars["expectedLength"]:
             print("Imroper payload length")
             return False
+        if vars["expectedEncrypt"] != payload:
+            print("Improper Encrypt")
+            return False
+        if table[1] != info["vendorid"]:
+            print("Invalid VendorId")
+            return False
+        if table[2] != info["deviceid"]:
+            print("Invalid DeviceID")
+            return False
+        if table[3] != info["unix"]:
+            return False
         return True
 
 @app.route('/')
@@ -109,16 +119,16 @@ def login(payload,creds):
         if verify(payload,creds):
             tracking["success"] += 1
             print("Connection Tracking: \nSuccess = " + str(tracking["success"]) + "\nFail = " + str(tracking["fail"]) + "\nTotal = " + str(tracking["total"]))
-            sendWebhook(SuccessWebhook,True,creds,payload,"name")
+            sendWebhook(vars["SuccessWebhook"],"Success",creds,payload,info["username"])
             return {"Status" : True,"URL":creds,"payload":Cipher.decrypt(payload,vars["key"])}
         else:
             tracking["fail"] += 1
             print("Connection Tracking: \nSuccess = " + str(tracking["success"]) + "\nFail = " + str(tracking["fail"]) + "\nTotal = " + str(tracking["total"]))
-            sendWebhook(FailWebook,False,creds,payload,"name")
+            sendWebhook(vars["FailWebook"],"Fail",creds,payload,info["username"])
             return {"Status" : False,creds:vars["expectedHash"]}
     else:
         print("False")
-        sendWebhook(FailWebook,False,creds,payload,"name")
+        sendWebhook(vars["FailWebook"],"Improper Request",creds,payload,info["username"])
         return {"Status": False}
 
 
