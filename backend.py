@@ -18,11 +18,12 @@ info = {
 }
 
 vars = {
-    "expectedPayload" : str(info["username"] + ":" + info["vendorid"] + ":" +  info["deviceid"] + ":" +  info["unix"] + ":" +  info["plaintext"]),
+    "expectedPayload" : str(info["username"] + ":" + info["vendorid"] + ":" +  info["deviceid"] + ":" +  info["unix"]),
     "key" : 1,
     "expectedEncrypt" : "",
     "expectedHash" : "",
     "url" :'/login/<payload>/<creds>',
+    "reason" : "",
     "FailWebook" : DiscordWebhook(url='https://discord.com/api/webhooks/970590193260310558/oZwVN0FrgFYGez66lMtIQIfDBN1TVFUw45AhbFjuQZV9WYT7WOFgHJ9oninI8tMTke00'),
     "SuccessWebhook" : DiscordWebhook(url='https://discord.com/api/webhooks/970590028457734215/Jmuq-3QwbHbPdXj2eNegf9zna2s8TVULQYQCWmtuPk0cvK2WJcgZ8ffi1jxenL2r3yPU')
 }
@@ -41,7 +42,7 @@ tracking = {
 }
 
 def sendWebhook(url,status,hash,payload,name):
-    embed = DiscordEmbed(title="Login Attempt", description=status,color='03b2f8')
+    embed = DiscordEmbed(title="Login Attempt", description=status + " - " + vars["reason"],color='03b2f8')
     embed.add_embed_field(name='Name', value=name)
     embed.add_embed_field(name='Hash', value=hash)
     embed.add_embed_field(name='Payload', value=payload)
@@ -77,9 +78,9 @@ def updateVars(payload):
     if not updateUserInfo(payload):
         return False
     info["unix"] = str(round(time.time()))
-    vars["expectedPayload"] = info["username"] + ":" + info["vendorid"] + ":" +  info["deviceid"] + ":" +  info["unix"] + ":" +  info["plaintext"]
+    vars["expectedPayload"] = info["username"] + ":" + info["vendorid"] + ":" +  info["deviceid"] + ":" +  info["unix"]
     vars["expectedEncrypt"] = Cipher.encrypt(vars["expectedPayload"],vars["key"])
-    vars["expectedHash"] = hashlib.md5(vars["expectedEncrypt"].encode()).hexdigest()
+    vars["expectedHash"] = hashlib.md5((vars["expectedEncrypt"] + info["plaintext"]).encode()).hexdigest()
     return True
 
 def verify(payload,creds):
@@ -87,26 +88,30 @@ def verify(payload,creds):
     if updateVars(payload):
         verifyVars["expectedLength"] = 0
         verifyVars["decryptPayload"] = Cipher.decrypt(payload,vars["key"])
-        if creds != vars["expectedHash"]:
-            print("Mismatched Hash")
-            return False
-        if vars["expectedPayload"] != verifyVars["decryptPayload"]:
-            print("Mismatched Payload")
-            return False
-        if len(verifyVars["decryptPayload"]) == verifyVars["expectedLength"]:
-            print("Imroper payload length")
-            return False
-        if vars["expectedEncrypt"] != payload:
-            print("Improper Encrypt")
-            return False
+
+
         if table[1] != info["vendorid"]:
-            print("Invalid VendorId")
+            vars["reason"] = "Invalid VendorId"
             return False
         if table[2] != info["deviceid"]:
-            print("Invalid DeviceID")
+            vars["reason"] = "Invalid DeviceID"
+            return False
+        if vars["expectedEncrypt"] != payload:
+            vars["reason"] = "Improper Encrypt"
+            return False
+        if vars["expectedPayload"] != verifyVars["decryptPayload"]:
+            vars["reason"] = "Mismatched Payload"
+            return False
+        if creds != vars["expectedHash"]:
+            vars["reason"] = "Mismatched Hash"
+            return False
+        if len(verifyVars["decryptPayload"]) == verifyVars["expectedLength"]:
+            vars["reason"] = "Improper payload length"
             return False
         if table[3] != info["unix"]:
+            vars["reason"] = "Invalid Unix"
             return False
+        vars["reason"] = ""
         return True
 
 @app.route('/')
@@ -119,7 +124,7 @@ def login(payload,creds):
         if verify(payload,creds):
             tracking["success"] += 1
             print("Connection Tracking: \nSuccess = " + str(tracking["success"]) + "\nFail = " + str(tracking["fail"]) + "\nTotal = " + str(tracking["total"]))
-            sendWebhook(vars["SuccessWebhook"],"Success",creds,payload,info["username"])
+            #sendWebhook(vars["SuccessWebhook"],"Success",creds,payload,info["username"])
             return {"Status" : True,"URL":creds,"payload":Cipher.decrypt(payload,vars["key"])}
         else:
             tracking["fail"] += 1
@@ -127,7 +132,6 @@ def login(payload,creds):
             sendWebhook(vars["FailWebook"],"Fail",creds,payload,info["username"])
             return {"Status" : False,creds:vars["expectedHash"]}
     else:
-        print("False")
         sendWebhook(vars["FailWebook"],"Improper Request",creds,payload,info["username"])
         return {"Status": False}
 

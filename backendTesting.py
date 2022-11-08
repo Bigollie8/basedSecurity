@@ -2,6 +2,7 @@ import requests
 import time
 import Cipher
 import hashlib
+import random
 
 #Testing vars for loader connection
 info = {
@@ -27,10 +28,10 @@ def restoreVars():
 
 def updateVars():
     info["unix"] = str(round(time.time()))
-    vars["payload"] = info["username"] + ":" + info["vendorid"] + ":" + info["deviceid"] + ":" + info["unix"] + ":" + info["plaintext"]
+    vars["payload"] = info["username"] + ":" + info["vendorid"] + ":" + info["deviceid"] + ":" + info["unix"]
     vars["key"] = int(str(round(time.time()))[9]) + 3
     vars["encryptedPayload"] = Cipher.encrypt(vars["payload"],vars["key"])
-    vars["hash"] = hashlib.md5(vars["encryptedPayload"].encode()).hexdigest()
+    vars["hash"] = hashlib.md5((vars["encryptedPayload"] + info["plaintext"]).encode()).hexdigest()
     vars["url"] = "http://127.0.0.1:5000" + '/login'+ '/'+ vars["encryptedPayload"] +'/' + vars["hash"]
 
 def testConnection():
@@ -74,9 +75,8 @@ while True:
             print(vars["hash"])
 
         testConnection()
-        restoreVars()
-
 
     else:
-        time.sleep(1)
+        time.sleep(random.randint(1,3))
+        updateVars()
         testConnection()
