@@ -31,7 +31,7 @@ local vars = {
 }
 
 local auth = {
-    authurl                     = "https://www.baseddepartment.store/aura-index.php",
+    authurl                     = "https://www.baseddepartment.store/",
     authip                      = "172.67.163.57",
     reset                       = false,
     size                        = get_size,

@@ -1,4 +1,3 @@
-from turtle import color
 from flask import Flask
 from flask import request
 from discord_webhook import DiscordWebhook, DiscordEmbed

@@ -182,32 +182,10 @@ local function rainbow()
     b = math.floor(math.sin(globals.realtime() * 2 + 4) * 127 + 128)
 end 
 
-local colors =  {
-    theme1                      = {174, 248, 219},
-    theme2                      = {198, 174, 248},
-    loaderTheme1                = {r, g, b},
-    loaderTheme2                = {r, g, b},
-    fail                        = {248, 177, 174},
-    success                     = {192, 248, 174},
-    pending                     = {248, 241, 174},
-    RGB                         = {0  , 0  ,   0}
-}
+local colors, hexTable
 
-local hexTable =  {
-    themeHex                    = rgb_to_hex(colors.theme1[1],colors.theme1[2],colors.theme1[3]),
-    theme2Hex                   = rgb_to_hex(colors.theme2[1],colors.theme2[2],colors.theme2[3]),
-    loaderThemeHex1             = rgb_to_hex(colors.loaderTheme1[1],colors.loaderTheme1[2],colors.loaderTheme1[3]),
-    loaderThemeHex2             = rgb_to_hex(colors.loaderTheme2[1],colors.loaderTheme2[2],colors.loaderTheme2[3]),
-    failHex                     = rgb_to_hex(colors.fail[1],colors.fail[2],colors.fail[3]),
-    succesHex                   = rgb_to_hex(colors.success[1],colors.success[2],colors.success[3]),
-    pendingHex                  = rgb_to_hex(colors.pending[1],colors.pending[2],colors.pending[3]) 
-}
-
-
-local function watermark() -- there has to be a way better than up, maybe making it update vars that change only
-    if not ui.is_menu_open() then return end
-    
-    colors = {
+local function updateColors()
+    colors =  {
         theme1                      = {174, 248, 219},
         theme2                      = {198, 174, 248},
         loaderTheme1                = {r, g, b},
@@ -227,6 +205,14 @@ local function watermark() -- there has to be a way better than up, maybe making
         succesHex                   = rgb_to_hex(colors.success[1],colors.success[2],colors.success[3]),
         pendingHex                  = rgb_to_hex(colors.pending[1],colors.pending[2],colors.pending[3]) 
     }
+end
+
+updateColors()
+
+local function watermark() -- there has to be a way better than up, maybe making it update vars that change only
+    if not ui.is_menu_open() then return end
+    
+    updateColors()
 
     ui.set(branding.frame1,hexTable.loaderThemeHex1 .. "-                \aFFFFFFFFPowered by".. hexTable.loaderThemeHex1 .."             -")
     
@@ -271,7 +257,6 @@ client_set_event_callback("paint_ui",function()
 end)
 
 --#endregion
-
 
 --#region Security --
 
@@ -423,7 +408,7 @@ local function get_web_data()
 
     --#region heartbeat
     local heartbeatVars = {
-        url = "https://baseddepartment.store/aura-edp221.php",
+        url = "https://baseddepartment.store/",
         checktime = tonumber(string.sub(get_time,0,9)),
         key = 1,
         data = nil
