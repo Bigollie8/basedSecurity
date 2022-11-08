@@ -62,14 +62,15 @@ while True:
         if userinput == "q" or userinput == "Q":
             break
         elif userinput == "1":
-            info["username"] == "Null"
+            info["username"] = "Null"
         elif userinput == "2":
-            info["deviceid"] == "1234"
+            info["deviceid"] = "1234"
         elif userinput == "3":
             info["vendorid"] = "1234"
         updateVars()
         if userinput == "4":
-            vars["hash"] = hashlib.md5(("Badhash").encode()).hexdigest()
+            vars["hash"] = hashlib.md5(info["deviceid"].encode()).hexdigest()
+            vars["url"] = "http://127.0.0.1:5000" + '/login'+ '/'+ vars["encryptedPayload"] +'/' + vars["hash"]
             print(vars["hash"])
 
         testConnection()
