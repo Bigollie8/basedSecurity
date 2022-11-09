@@ -5,6 +5,7 @@ import Cipher
 import time
 import hashlib
 import pyfiglet
+import os
 
 app = Flask(__name__)
 
@@ -21,8 +22,14 @@ vars = {
     "key" : 1,
     "expectedEncrypt" : "",
     "expectedHash" : "",
-    "url" :'/login/<payload>/<creds>',
     "reason" : "",
+    "loginURL" :'/login/<payload>/<creds>',
+    "heartbeatexpectedPayload" : str(info["username"] + ":" + info["vendorid"] + ":" +  info["deviceid"] + ":" +  info["unix"]),
+    "heartbeatkey" : 1,
+    "heartbeatexpectedEncrypt" : "",
+    "heartbeatexpectedHash" : "",
+    "heartbeatURL" : '/heartbeat/<payload>/<creds>',
+
     "FailWebook" : DiscordWebhook(url='https://discord.com/api/webhooks/970590193260310558/oZwVN0FrgFYGez66lMtIQIfDBN1TVFUw45AhbFjuQZV9WYT7WOFgHJ9oninI8tMTke00'),
     "SuccessWebhook" : DiscordWebhook(url='https://discord.com/api/webhooks/970590028457734215/Jmuq-3QwbHbPdXj2eNegf9zna2s8TVULQYQCWmtuPk0cvK2WJcgZ8ffi1jxenL2r3yPU')
 }
@@ -38,6 +45,7 @@ tracking = {
     "success" : 0,
     "fail" : 0,
     "total" : 0,
+    "heartbeat" : 0
 }
 
 def sendWebhook(url,status,hash,payload,name):
@@ -50,9 +58,9 @@ def sendWebhook(url,status,hash,payload,name):
     url.add_embed(embed)
     url.execute(remove_embeds=True)
 
-def updateUserInfo(payload):
+def updateUserInfo(payload,type):
     global table
-    decrypted = Cipher.decrypt(payload,vars["key"])
+    decrypted = Cipher.decrypt(payload,vars[type + "key"])
     try:
         if decrypted == None:
             return False
@@ -72,22 +80,22 @@ def updateUserInfo(payload):
     info["vendorid"] = str(3021)
     return True
 
-def updateVars(payload):
-    vars["key"] = int(str(round(time.time()))[9]) + 3
-    if not updateUserInfo(payload):
+def updateVars(payload,type):
+    vars[type + "key"] = int(str(round(time.time()))[9]) + 3
+    if not updateUserInfo(payload,type):
+        print("Failed to update user info")
         return False
-    info["unix"] = str(round(time.time()))
-    vars["expectedPayload"] = info["username"] + ":" + info["vendorid"] + ":" +  info["deviceid"] + ":" +  info["unix"]
-    vars["expectedEncrypt"] = Cipher.encrypt(vars["expectedPayload"],vars["key"])
-    vars["expectedHash"] = hashlib.md5((vars["expectedEncrypt"] + info["plaintext"]).encode()).hexdigest()
+    info["unix"] = str(round(time.time())) 
+    vars[type + "expectedPayload"] = info["username"] + ":" + info["vendorid"] + ":" +  info["deviceid"] + ":" +  info["unix"]
+    vars[type + "expectedEncrypt"] = Cipher.encrypt(vars[type + "expectedPayload"],vars[type + "key"])
+    vars[type + "expectedHash"] = hashlib.md5((vars[type + "expectedEncrypt"] + info["plaintext"]).encode()).hexdigest()
     return True
 
-def verify(payload,creds):
+def verify(payload,creds,type):
     tracking["total"] += 1
-    if updateVars(payload):
+    if updateVars(payload,type):
         verifyVars["expectedLength"] = 0
-        verifyVars["decryptPayload"] = Cipher.decrypt(payload,vars["key"])
-
+        verifyVars["decryptPayload"] = Cipher.decrypt(payload,vars[type + "key"])
 
         if table[1] != info["vendorid"]:
             vars["reason"] = "Invalid VendorId"
@@ -95,14 +103,17 @@ def verify(payload,creds):
         if table[2] != info["deviceid"]:
             vars["reason"] = "Invalid DeviceID"
             return False
-        if vars["expectedEncrypt"] != payload:
+        if table[3] != info["unix"]:
+            vars["reason"] = "Unix mismatch " + str(int(info["unix"]) - int(table[3]))
+            return False
+        if vars[type + "expectedEncrypt"] != payload:
             vars["reason"] = "Improper Encrypt"
             return False
-        if vars["expectedPayload"] != verifyVars["decryptPayload"]:
+        if vars[type + "expectedPayload"] != verifyVars["decryptPayload"]:
             vars["reason"] = "Mismatched Payload"
             return False
-        if creds != vars["expectedHash"]:
-            vars["reason"] = "Mismatched Hash"
+        if creds != vars[type + "expectedHash"]:
+            vars[type + "reason"] = "Mismatched Hash"
             return False
         if len(verifyVars["decryptPayload"]) == verifyVars["expectedLength"]:
             vars["reason"] = "Improper payload length"
@@ -113,28 +124,50 @@ def verify(payload,creds):
         vars["reason"] = ""
         return True
 
+UP = "\x1B[6A"
+CLR = "\x1B[0K"
+print("\n\n")  # set up blank lines so cursor moves work
+
+
 @app.route('/')
 def index():
     return 'BasedSecurity.inc!'
 
-@app.route(vars["url"],methods = ['POST','GET'])
+@app.route(vars["loginURL"],methods = ['POST','GET'])
 def login(payload,creds):
     if request.method == 'GET':
-        if verify(payload,creds):
+        if verify(payload,creds,""):
             tracking["success"] += 1
-            print("Connection Tracking: \nSuccess = " + str(tracking["success"]) + "\nFail = " + str(tracking["fail"]) + "\nTotal = " + str(tracking["total"]))
+            print(f"{UP}Connection Tracking: \nSuccess = {tracking['success']}{CLR}\nHeartbeat = {tracking['heartbeat']}{CLR}\nFail = {tracking['fail']}{CLR}\nTotal = {tracking['total']}",end="\r",flush = True)
             #sendWebhook(vars["SuccessWebhook"],"Success",creds,payload,info["username"])
             return {"Status" : True,"URL":creds,"payload":Cipher.decrypt(payload,vars["key"])}
         else:
             tracking["fail"] += 1
-            print("Connection Tracking: \nSuccess = " + str(tracking["success"]) + "\nFail = " + str(tracking["fail"]) + "\nTotal = " + str(tracking["total"]))
+            print(f"{UP}Connection Tracking: \nSuccess = {tracking['success']}{CLR}\nHeartbeat = {tracking['heartbeat']}{CLR}\nFail = {tracking['fail']}{CLR}\nTotal = {tracking['total']}",end="\r")
             sendWebhook(vars["FailWebook"],"Fail",creds,payload,info["username"])
             return {"Status" : False,creds:vars["expectedHash"]}
     else:
         sendWebhook(vars["FailWebook"],"Improper Request",creds,payload,info["username"])
         return {"Status": False}
 
+@app.route(vars["heartbeatURL"],methods = ['POST','GET'])
+def heartbeat(payload,creds):
+    if request.method == 'GET':
+        if verify(payload,creds,"heartbeat"):
+            tracking["heartbeat"] += 1
+            return {"Status" : True, "Type" : "Heartbeat"},303
+        else:
+            tracking["fail"] += 1
+            print("Failed verification - " + vars["reason"])
+            return{"Status" : False, "Type" : "Heartbeat"}
+    else:
+        print("Incorrect request format")
+        return {"Status": False, "Type" : "Heartbeat"}
 
 if __name__ == '__main__':
     app.run()
+
+
+
+
 

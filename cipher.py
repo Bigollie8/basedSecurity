@@ -9,7 +9,7 @@ import pyfiglet
 banner = pyfiglet.figlet_format("Based Security")
 
 os.system('clear')
-print(banner)
+print(banner,flush=True)
 
 testpayload = 'x0001' + str(round(time.time()* 7.19123))
 testkey = random.randint(3,len(testpayload))

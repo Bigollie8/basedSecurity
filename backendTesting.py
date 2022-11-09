@@ -21,6 +21,14 @@ vars = {
     "url" : "",
 }
 
+heartbeatVars = {
+    "payload" : "",
+    "key" : 0,
+    "encryptedPayload" : "",
+    "hash" : "",
+    "url" : "",
+}
+
 def restoreVars():
     info["username"] = "Admin"
     info["vendorid"] = str(3021)
@@ -32,7 +40,15 @@ def updateVars():
     vars["key"] = int(str(round(time.time()))[9]) + 3
     vars["encryptedPayload"] = Cipher.encrypt(vars["payload"],vars["key"])
     vars["hash"] = hashlib.md5((vars["encryptedPayload"] + info["plaintext"]).encode()).hexdigest()
-    vars["url"] = "http://127.0.0.1:5000" + '/login'+ '/'+ vars["encryptedPayload"] +'/' + vars["hash"]
+    vars["url"] = "http://127.0.0.1:5000" + '/login/'+ vars["encryptedPayload"] +'/' + vars["hash"]
+
+def updateHeartbeatVars():
+    info["unix"] = str(round(time.time()))
+    heartbeatVars["payload"] = info["username"] + ":" + info["vendorid"] + ":" + info["deviceid"] + ":" + info["unix"]
+    heartbeatVars["key"] = int(str(round(time.time()))[9]) + 3
+    heartbeatVars["encryptedPayload"] = Cipher.encrypt(heartbeatVars["payload"],heartbeatVars["key"])
+    heartbeatVars["hash"] = hashlib.md5((heartbeatVars["encryptedPayload"] + info["plaintext"]).encode()).hexdigest()
+    heartbeatVars["url"] = "http://127.0.0.1:5000" + '/heartbeat/'+ heartbeatVars["encryptedPayload"] +'/' + heartbeatVars["hash"]
 
 def testConnection():
     print(vars["url"])
@@ -46,6 +62,21 @@ def testConnection():
 
     print("---"*40)
 
+def testHeartbeat():
+    print(heartbeatVars["url"])
+    textResponse = requests.get(heartbeatVars["url"])
+    responseJSON = textResponse.json()
+    if responseJSON['Status']:
+        print("Response : " + textResponse.text)
+        print("Success")
+    else:
+        print("Failed to connect")
+        print(textResponse)
+
+
+    print("---"*40)
+
+
 mode = input("Would you like to manually ping server ( Y or N ) : ")
 
 while True:
@@ -57,6 +88,7 @@ while True:
         [2] : Send False VendorID
         [3] : Send False DeviceID
         [4] : Send False hash
+        [5] : Test Heartbeat
 
         """)
         userinput = input("Press ENTER to test backend(type Q to quit) : ")
@@ -73,10 +105,16 @@ while True:
             vars["hash"] = hashlib.md5(info["deviceid"].encode()).hexdigest()
             vars["url"] = "http://127.0.0.1:5000" + '/login'+ '/'+ vars["encryptedPayload"] +'/' + vars["hash"]
             print(vars["hash"])
-
-        testConnection()
+        if userinput == "5":
+            updateHeartbeatVars()
+            testHeartbeat()
+        else:
+            testConnection()
 
     else:
         time.sleep(random.randint(1,3))
         updateVars()
         testConnection()
+        time.sleep(random.randint(2,4))
+        updateHeartbeatVars()
+        testHeartbeat()
