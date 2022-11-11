@@ -4,6 +4,18 @@ import Cipher
 import hashlib
 import random
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
 #Testing vars for loader connection
 info = {
     "username" : "Admin",
@@ -56,11 +68,11 @@ def testConnection():
     responseJSON = textResponse.json()
     if responseJSON['Status']:
         print("Response : " + textResponse.text)
-        print("Success")
+        print(f'{bcolors.OKGREEN} Success {bcolors.ENDC}')
     else:
-        print("Failed to connect")
+        print(f'{bcolors.FAIL}Failed to connect{bcolors.ENDC}')
 
-    print("---"*40)
+    print(f'{bcolors.OKCYAN}' + ('---'*35) + f'{bcolors.ENDC}')
 
 def testHeartbeat():
     print(heartbeatVars["url"])
@@ -68,16 +80,15 @@ def testHeartbeat():
     responseJSON = textResponse.json()
     if responseJSON['Status']:
         print("Response : " + textResponse.text)
-        print("Success")
+        print(f'{bcolors.OKGREEN} Success {bcolors.ENDC}')
     else:
-        print("Failed to connect")
-        print(textResponse)
+        print(f'{bcolors.FAIL}Failed to connect{bcolors.ENDC}')
 
-
-    print("---"*40)
-
+    print(f'{bcolors.OKCYAN}' + ('---'*35) + f'{bcolors.ENDC}')
 
 mode = input("Would you like to manually ping server ( Y or N ) : ")
+
+print(f'{bcolors.OKCYAN}' + ('---'*35) + f'{bcolors.ENDC}')
 
 while True:
     restoreVars()
@@ -112,9 +123,9 @@ while True:
             testConnection()
 
     else:
-        time.sleep(random.randint(1,3))
+        time.sleep(1)
         updateVars()
         testConnection()
-        time.sleep(random.randint(2,4))
+        time.sleep(1)
         updateHeartbeatVars()
         testHeartbeat()

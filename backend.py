@@ -5,11 +5,10 @@ import Cipher
 import time
 import hashlib
 import pyfiglet
-import os
 
 app = Flask(__name__)
 
-info = {
+info = {    
     "username" : "Filler",
     "vendorid" : str(123),
     "deviceid" : str(123),
@@ -124,26 +123,25 @@ def verify(payload,creds,type):
         vars["reason"] = ""
         return True
 
-UP = "\x1B[6A"
+UP = "\x1B[7A"
 CLR = "\x1B[0K"
-print("\n\n")  # set up blank lines so cursor moves work
-
 
 @app.route('/')
 def index():
     return 'BasedSecurity.inc!'
 
+print('\n')
 @app.route(vars["loginURL"],methods = ['POST','GET'])
 def login(payload,creds):
     if request.method == 'GET':
         if verify(payload,creds,""):
             tracking["success"] += 1
-            print(f"{UP}Connection Tracking: \nSuccess = {tracking['success']}{CLR}\nHeartbeat = {tracking['heartbeat']}{CLR}\nFail = {tracking['fail']}{CLR}\nTotal = {tracking['total']}",end="\r",flush = True)
+            print(f"{UP}Connection Tracking: \nSuccess = {tracking['success']}{CLR}\nHeartbeat = {tracking['heartbeat']}{CLR}\nFail = {tracking['fail']}{CLR}\nTotal = {tracking['total']}{CLR}\n",end="\r")
             #sendWebhook(vars["SuccessWebhook"],"Success",creds,payload,info["username"])
             return {"Status" : True,"URL":creds,"payload":Cipher.decrypt(payload,vars["key"])}
         else:
             tracking["fail"] += 1
-            print(f"{UP}Connection Tracking: \nSuccess = {tracking['success']}{CLR}\nHeartbeat = {tracking['heartbeat']}{CLR}\nFail = {tracking['fail']}{CLR}\nTotal = {tracking['total']}",end="\r")
+            print(f"{UP}Connection Tracking: \nSuccess = {tracking['success']}{CLR}\nHeartbeat = {tracking['heartbeat']}{CLR}\nFail = {tracking['fail']}{CLR}\nTotal = {tracking['total']}{CLR}\n",end="\r")
             sendWebhook(vars["FailWebook"],"Fail",creds,payload,info["username"])
             return {"Status" : False,creds:vars["expectedHash"]}
     else:
@@ -154,9 +152,11 @@ def login(payload,creds):
 def heartbeat(payload,creds):
     if request.method == 'GET':
         if verify(payload,creds,"heartbeat"):
+            print(f"{UP}Connection Tracking: \nSuccess = {tracking['success']}{CLR}\nHeartbeat = {tracking['heartbeat']}{CLR}\nFail = {tracking['fail']}{CLR}\nTotal = {tracking['total']}{CLR}\n",end="\r")
             tracking["heartbeat"] += 1
             return {"Status" : True, "Type" : "Heartbeat"},303
         else:
+            print(f"{UP}Connection Tracking: \nSuccess = {tracking['success']}{CLR}\nHeartbeat = {tracking['heartbeat']}{CLR}\nFail = {tracking['fail']}{CLR}\nTotal = {tracking['total']}{CLR}\n",end="\r")
             tracking["fail"] += 1
             print("Failed verification - " + vars["reason"])
             return{"Status" : False, "Type" : "Heartbeat"}
@@ -166,6 +166,8 @@ def heartbeat(payload,creds):
 
 if __name__ == '__main__':
     app.run()
+
+
 
 
 
