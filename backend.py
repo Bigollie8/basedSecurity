@@ -5,6 +5,9 @@ import Cipher
 import time
 import hashlib
 import pyfiglet
+import mysql_utils
+
+database = mysql_utils.mysql()
 
 app = Flask(__name__)
 
@@ -65,24 +68,23 @@ def updateUserInfo(payload,type):
             return False
         table = decrypted.split(":")
     except ValueError:
-        print("Invalid Payload")
         return False
 
     info["username"] = table[0]
-    var = True
     #Search databse for info and update it accordingly
-    if not var:
-        #If user is not found return false
+
+    userInfo = database.get_user(info["username"])
+    if userInfo == None:
         return False
-    #Updated user info with matched data from database
-    info["deviceid"] = str(1739)
-    info["vendorid"] = str(3021)
+    #If user is not found return false
+    info["deviceid"] = str(userInfo[5])
+    info["vendorid"] = str(userInfo[4])
     return True
+
 
 def updateVars(payload,type):
     vars[type + "key"] = int(str(round(time.time()))[9]) + 3
     if not updateUserInfo(payload,type):
-        print("Failed to update user info")
         return False
     info["unix"] = str(round(time.time())) 
     vars[type + "expectedPayload"] = info["username"] + ":" + info["vendorid"] + ":" +  info["deviceid"] + ":" +  info["unix"]
@@ -102,7 +104,7 @@ def verify(payload,creds,type):
         if table[2] != info["deviceid"]:
             vars["reason"] = "Invalid DeviceID"
             return False
-        if table[3] != info["unix"]:
+        if abs(int(table[3]) - int(info["unix"])) >= 2:
             vars["reason"] = "Unix mismatch " + str(int(info["unix"]) - int(table[3]))
             return False
         if vars[type + "expectedEncrypt"] != payload:
@@ -123,7 +125,7 @@ def verify(payload,creds,type):
         vars["reason"] = ""
         return True
 
-UP = "\x1B[7A"
+UP = "\x1B[6A"
 CLR = "\x1B[0K"
 
 @app.route('/')
