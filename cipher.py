@@ -1,8 +1,8 @@
 import math
 import random
 import time
+from rich.console import Console
 from time import sleep
-from tqdm import tqdm
 import os
 import pyfiglet
 
@@ -13,9 +13,9 @@ print('\033[96m')
 print(banner)
 print("\033[95m\033[4mDeveloped by Ollie#0069\033[0m\n")
 
+testpayload = ""
+testkey = ""
 
-testpayload = 'x0001' + str(round(time.time()* 7.19123))
-testkey = random.randint(3,len(testpayload))
 
 def encrypt(payload,key):
     cipher = ""
@@ -78,21 +78,23 @@ def decrypt(payload,key):
   
     return plaintext
 
+console = Console()
 
-print("Verifying encryption")
-
-for i in tqdm(range(100)):
-    sleep(.01)
-
-
-for x in range(1000):
-    testkey = random.randint(3,len(testpayload))
-    encrypted = encrypt(testpayload,testkey)
-    decrypted = decrypt(encrypted,testkey)
-    if testpayload != decrypted:
-        print("Failed check " + str(x+1) + "/10")
-
-print("Done")
+datas = [1,2,3,4,5,6,7,8,9,10]
+with console.status("[bold magenta]Verifying encryption...", spinner='aesthetic') as status:
+    while datas:
+        data = datas.pop(0)
+        sleep(1)
+        testpayload = 'x0001' + str(round(time.time()* random.randint(1,19)))
+        testkey = random.randint(3,len(testpayload))
+        encrypted = encrypt(testpayload,testkey)
+        decrypted = decrypt(encrypted,testkey)
+        if testpayload != decrypted:
+            print("Failed check")
+            break
+        console.log(f"[cyan]Encryption Verifed![/cyan] {encrypted} --> {decrypted}")
+    
+    console.log(f'[bold][magenta]Done!')
 
 
 
