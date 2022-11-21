@@ -1,5 +1,5 @@
 -- Security version 3.1.4
--- Developed by Ollie#0069 & Melly
+-- Developed by Ollie#0069 & .audit#1111 (aka Melly)
 
 --#region Important vars
 local http                      = require("gamesense/http") or error("Sub to https://gamesense.pub/forums/viewtopic.php?id=19253 on the lua workshop.")
@@ -26,11 +26,13 @@ local vars = {
     counter                     = 0,
     color                       = "ffffffff",
     data                        = nil,
-    version                     = 3.1.4
+    firstloop                   = false,
+    version                     = 1.4
 }
 
 local auth = {
-    authurl                     = "http://127.0.0.1:5000/",
+    authurl                     = "https://www.baseddepartment.store/",
+    authip                      = "172.67.163.57",
     reset                       = false,
     size                        = get_size,
     unix                        = string.sub(get_time,0,9),
@@ -180,17 +182,39 @@ local function rainbow()
     b = math.floor(math.sin(globals.realtime() * 2 + 4) * 127 + 128)
 end 
 
-local colors, hexTable
+local colors =  {
+    theme1                      = {174, 248, 219},
+    theme2                      = {198, 174, 248},
+    loaderTheme1                = {r, g, b},
+    loaderTheme2                = {r, g, b},
+    fail                        = {248, 177, 174},
+    success                     = {192, 248, 174},
+    pending                     = {248, 241, 174},
+    RGB                         = {0  , 0  ,   0}
+}
 
-local function updateColors()
-    colors =  {
+local hexTable =  {
+    themeHex                    = rgb_to_hex(colors.theme1[1],colors.theme1[2],colors.theme1[3]),
+    theme2Hex                   = rgb_to_hex(colors.theme2[1],colors.theme2[2],colors.theme2[3]),
+    loaderThemeHex1             = rgb_to_hex(colors.loaderTheme1[1],colors.loaderTheme1[2],colors.loaderTheme1[3]),
+    loaderThemeHex2             = rgb_to_hex(colors.loaderTheme2[1],colors.loaderTheme2[2],colors.loaderTheme2[3]),
+    failHex                     = rgb_to_hex(colors.fail[1],colors.fail[2],colors.fail[3]),
+    succesHex                   = rgb_to_hex(colors.success[1],colors.success[2],colors.success[3]),
+    pendingHex                  = rgb_to_hex(colors.pending[1],colors.pending[2],colors.pending[3]) 
+}
+
+
+local function watermark() -- there has to be a way better than up, maybe making it update vars that change only
+    if not ui.is_menu_open() then return end
+    
+    colors = {
         theme1                      = {174, 248, 219},
         theme2                      = {198, 174, 248},
         loaderTheme1                = {r, g, b},
         loaderTheme2                = {r, g, b},
-        ["fail"]                    = {248, 177, 174},
-        ["success"]                 = {192, 248, 174},
-        ["pending"]                 = {248, 241, 174},
+        fail                        = {248, 177, 174},
+        success                     = {192, 248, 174},
+        pending                     = {248, 241, 174},
         RGB                         = {0  , 0  ,   0}
     }
 
@@ -199,24 +223,17 @@ local function updateColors()
         theme2Hex                   = rgb_to_hex(colors.theme2[1],colors.theme2[2],colors.theme2[3]),
         loaderThemeHex1             = rgb_to_hex(colors.loaderTheme1[1],colors.loaderTheme1[2],colors.loaderTheme1[3]),
         loaderThemeHex2             = rgb_to_hex(colors.loaderTheme2[1],colors.loaderTheme2[2],colors.loaderTheme2[3]),
-        ["failHex"]                 = rgb_to_hex(colors["fail"][1],colors["fail"][2],colors["fail"][3]),
-        ["succesHex"]               = rgb_to_hex(colors.success[1],colors.success[2],colors.success[3]),
-        ["pendingHex"]              = rgb_to_hex(colors.pending[1],colors.pending[2],colors.pending[3]) 
+        failHex                     = rgb_to_hex(colors.fail[1],colors.fail[2],colors.fail[3]),
+        succesHex                   = rgb_to_hex(colors.success[1],colors.success[2],colors.success[3]),
+        pendingHex                  = rgb_to_hex(colors.pending[1],colors.pending[2],colors.pending[3]) 
     }
-end
-
-updateColors()
-
-local function watermark() -- there has to be a way better than up, maybe making it update vars that change only
-    if not ui.is_menu_open() then return end
-    
-    updateColors()
 
     ui.set(branding.frame1,hexTable.loaderThemeHex1 .. "-                \aFFFFFFFFPowered by".. hexTable.loaderThemeHex1 .."             -")
     
     if tag.location > 8 then 
         ui.set(branding.tag, "\aFFFFFFFF" .. tag["stage"..tag.location] .. hexTable.loaderThemeHex1 ..  seconday["stage" .. tag.location])
         ui.set(branding.version,hexTable.loaderThemeHex1 .. beta["stage" .. tag.location])
+        vars.firstloop = true 
 
     else
         ui.set(branding.tag, hexTable.loaderThemeHex1 .. seconday["stage"..tag.location])
@@ -245,12 +262,16 @@ local function watermark() -- there has to be a way better than up, maybe making
     end
 end
 
+
 client_set_event_callback("paint_ui",function()
+   
     watermark()
     rainbow()
+    
 end)
 
 --#endregion
+
 
 --#region Security --
 
@@ -306,10 +327,31 @@ local function logo(name)
     client_color_log(175, 175, 175,"] \0")
 end
 
-local function log(msg,status)
-    logo(branding.brand)
-    client_color_log(color[status][1] , color[status][2] , color[status][3]),msg)
-    vars.color = hexTable[status + "Hex"]
+local function failLog(msg,delay,padding)
+    client_delay_call(delay,function()
+        logo(branding.brand)
+        client_color_log(colors.fail[1],colors.fail[2],colors.fail[3], msg)
+        vars.content            = padding .. msg 
+        vars.color              = hexTable.failHex
+    end)
+end
+
+local function successLog(msg,delay,padding)
+    client_delay_call(delay,function()
+        logo(branding.brand)
+        client_color_log(colors.success[1],colors.success[2],colors.success[3], msg)
+        vars.content            = padding .. msg
+        vars.color              = hexTable.succesHex
+    end)
+end
+
+local function pendingLog(msg,delay,padding)
+    client_delay_call(delay,function()
+        logo(branding.brand)
+        client_color_log(colors.pending[1],colors.pending[2],colors.pending[3], msg)
+        vars.content            = padding .. msg 
+        vars.color              = hexTable.pendingHex
+    end)
 end
 
 --#endregion
@@ -381,7 +423,7 @@ local function get_web_data()
 
     --#region heartbeat
     local heartbeatVars = {
-        url = "https://baseddepartment.store/",
+        url = "https://baseddepartment.store/aura-edp221.php",
         checktime = tonumber(string.sub(get_time,0,9)),
         key = 1,
         data = nil
