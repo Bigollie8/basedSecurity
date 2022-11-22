@@ -2,7 +2,6 @@ import requests
 import time
 import Cipher
 import hashlib
-import random
 
 class bcolors:
     HEADER = '\033[95m'
@@ -47,7 +46,6 @@ def restoreVars():
     info["deviceid"] = str(1739)
 
 def updateVars():
-    info["unix"] = str(round(time.time()))
     vars["payload"] = info["username"] + ":" + info["vendorid"] + ":" + info["deviceid"] + ":" + info["unix"]
     vars["key"] = int(str(round(time.time()))[9]) + 3
     vars["encryptedPayload"] = Cipher.encrypt(vars["payload"],vars["key"])
@@ -55,7 +53,6 @@ def updateVars():
     vars["url"] = "http://127.0.0.1:5000" + '/login/'+ vars["encryptedPayload"] +'/' + vars["hash"]
 
 def updateHeartbeatVars():
-    info["unix"] = str(round(time.time()))
     heartbeatVars["payload"] = info["username"] + ":" + info["vendorid"] + ":" + info["deviceid"] + ":" + info["unix"]
     heartbeatVars["key"] = int(str(round(time.time()))[9]) + 3
     heartbeatVars["encryptedPayload"] = Cipher.encrypt(heartbeatVars["payload"],heartbeatVars["key"])
@@ -100,6 +97,9 @@ while True:
         [3] : Send False DeviceID
         [4] : Send False hash
         [5] : Test Heartbeat
+        [6] : Unix + 1
+        [7] : Unix + 3
+        [8] : Unix - 3
 
         """)
         userinput = input("Press ENTER to test backend(type Q to quit) : ")
@@ -111,19 +111,26 @@ while True:
             info["deviceid"] = "1234"
         elif userinput == "3":
             info["vendorid"] = "1234"
+        info["unix"] = str(round(time.time()))
+        if userinput == "6":
+            info["unix"] = str(round(time.time() + 1))
+        if userinput == "7":
+            info["unix"] = str(round(time.time() + 3))
+        if userinput == "8":
+            info["unix"] = str(round(time.time() - 3))
         updateVars()
         if userinput == "4":
             vars["hash"] = hashlib.md5(info["deviceid"].encode()).hexdigest()
             vars["url"] = "http://127.0.0.1:5000" + '/login'+ '/'+ vars["encryptedPayload"] +'/' + vars["hash"]
-            print(vars["hash"])
         if userinput == "5":
             updateHeartbeatVars()
             testHeartbeat()
-        else:
-            testConnection()
+            pass
+        testConnection()
 
     else:
         time.sleep(1)
+        info["unix"] = str(round(time.time()))
         updateVars()
         testConnection()
         time.sleep(1)
