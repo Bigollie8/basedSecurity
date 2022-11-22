@@ -19,7 +19,6 @@ local get_time                  = client.unix_time()
 local json_parse                = json.parse
 local global_curtime            = globals.curtime() 
 local get_size                  = #readfile(_NAME .. ".lua")
-local username                  = "Admin"
 
 local vars = {
     attempts                    = 2,
@@ -30,12 +29,27 @@ local vars = {
     version                     = 1.4
 }
 
+
+--UNIX MAY NOT MATCH NEED TO VERIFY
+local info = {
+    username = "Admin",
+    vendorID = "0"
+    deviceID = "0"
+    unix = string.sub(get_time,0,9),
+    plaintext = "BasedSecurity"
+}
+
+vars = {
+    payload = ""
+    key = 0
+    encryptedPayload = "" 
+    hash = ""
+    url = ""
+}
+
 local auth = {
-    authurl                     = "https://www.baseddepartment.store/",
-    authip                      = "172.67.163.57",
     reset                       = false,
     size                        = get_size,
-    unix                        = string.sub(get_time,0,9),
     alreadyauth                 = false
 }
 
@@ -413,6 +427,13 @@ local function filesize(reset)
     end
 end
 
+local function updateUrls()
+    auth.payload = info[username]
+    
+    auth.authurl = 
+
+end
+
 -- this should be able to be in a table lol
 local alphabet = "base64"
 local plaintext
@@ -423,7 +444,7 @@ local function get_web_data()
 
     --#region heartbeat
     local heartbeatVars = {
-        url = "https://baseddepartment.store/aura-edp221.php",
+        url = "",
         checktime = tonumber(string.sub(get_time,0,9)),
         key = 1,
         data = nil
