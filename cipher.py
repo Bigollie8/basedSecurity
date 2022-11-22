@@ -6,12 +6,13 @@ from time import sleep
 import os
 import pyfiglet
 
+#Draws the logo in the console 
 banner = pyfiglet.figlet_format("BasedSecurity", font = "slant")
-
 os.system('clear')
 print('\033[96m')
 print(banner)
-print("\033[95m\033[4mDeveloped by Ollie#0069\033[0m\n")
+print("\033[95m\033[4mDeveloped by Ollie#0069 " + u"\U0001F512")
+print("\033[0m\n")
 
 testpayload = ""
 testkey = ""
@@ -59,8 +60,6 @@ def decrypt(payload,key):
             try:
                 matrix[r][k_index] = payload_lst[payload_index]
             except IndexError:
-                print("Key mismatch impossible decryption")
-                print(str(key) + " - failed key")
                 return
             payload_index += 1
         k_index += 1
@@ -83,8 +82,10 @@ console = Console()
 datas = [1,2,3,4,5,6,7,8,9,10]
 with console.status("[bold magenta]Verifying encryption...", spinner='aesthetic') as status:
     while datas:
+        # This is intended to verify the integrity of the encryption and 
+        # ensure that there should be no issue with the cipher
         data = datas.pop(0)
-        sleep(1)
+        sleep(random.random()/2)
         testpayload = 'x0001' + str(round(time.time()* random.randint(1,19)))
         testkey = random.randint(3,len(testpayload))
         encrypted = encrypt(testpayload,testkey)
