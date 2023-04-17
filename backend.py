@@ -1,7 +1,7 @@
 from flask import Flask
 from flask import request
 from discord_webhook import DiscordWebhook, DiscordEmbed
-import Cipher
+import cipher
 import time
 import hashlib
 import mysql_utils
@@ -73,7 +73,7 @@ def updateUserInfo(payload,type):
     # vendor id. If not it returns false. 
 
     global table
-    decrypted = Cipher.decrypt(payload,vars[type + "key"])
+    decrypted = cipher.decrypt(payload,vars[type + "key"])
 
     try:
         if decrypted == None:
@@ -103,7 +103,7 @@ def updateVars(payload,type):
         return False
     info["unix"] = str(round(time.time())) 
     vars[type + "expectedPayload"] = info["username"] + ":" + info["vendorid"] + ":" +  info["deviceid"] + ":" +  info["unix"]
-    vars[type + "expectedEncrypt"] = Cipher.encrypt(vars[type + "expectedPayload"],vars[type + "key"])
+    vars[type + "expectedEncrypt"] = cipher.encrypt(vars[type + "expectedPayload"],vars[type + "key"])
     vars[type + "expectedHash"] = hashlib.md5((vars[type + "expectedEncrypt"] + info["plaintext"]).encode()).hexdigest()
     return True
 
@@ -112,7 +112,7 @@ def updateVerify(payload,type):
     # initiate connection
 
     verifyVars["expectedLength"] = len(vars[type + "expectedPayload"])
-    verifyVars["decryptPayload"] = [Cipher.decrypt(payload,vars[type + "key"]),Cipher.decrypt(payload,vars[type + "key"] - 1),Cipher.decrypt(payload,vars[type + "key"] + 1),Cipher.decrypt(payload,vars[type + "key"] - 2),Cipher.decrypt(payload,vars[type + "key"] + 2)]
+    verifyVars["decryptPayload"] = [cipher.decrypt(payload,vars[type + "key"]),cipher.decrypt(payload,vars[type + "key"] - 1),cipher.decrypt(payload,vars[type + "key"] + 1),cipher.decrypt(payload,vars[type + "key"] - 2),cipher.decrypt(payload,vars[type + "key"] + 2)]
     verifyVars["differance"] = abs(int(table[3]) - int(info["unix"]))
 
 def unixAdjustment(type):
@@ -120,7 +120,7 @@ def unixAdjustment(type):
     # in unix less than 1.
 
     vars[type + "expectedPayload"] = info["username"] + ":" + info["vendorid"] + ":" +  info["deviceid"] + ":" + str(int(info["unix"]) + abs(int(table[3]) - int(info["unix"])))
-    vars[type + "expectedEncrypt"] = Cipher.encrypt(vars[type + "expectedPayload"],vars[type + "key"])
+    vars[type + "expectedEncrypt"] = cipher.encrypt(vars[type + "expectedPayload"],vars[type + "key"])
     vars[type + "expectedHash"] = hashlib.md5((vars[type + "expectedEncrypt"] + info["plaintext"]).encode()).hexdigest()
 
 def verify(payload,creds,type):
@@ -183,7 +183,7 @@ def login(payload,creds):
             tracking["success"] += 1
             print(f"{UP}Connection Tracking: \nSuccess = {tracking['success']}{CLR}\nHeartbeat = {tracking['heartbeat']}{CLR}\nFail = {tracking['fail']}{CLR}\nTotal = {tracking['total']}{CLR}\n",end="\r")
             #sendWebhook(vars["SuccessWebhook"],"Success",creds,payload,info["username"])
-            return {"Status" : True,"URL":creds,"payload":Cipher.decrypt(payload,vars["key"])}
+            return {"Status" : True,"URL":creds,"payload":cipher.decrypt(payload,vars["key"])}
         else:
             tracking["fail"] += 1
             print(f"{UP}Connection Tracking: \nSuccess = {tracking['success']}{CLR}\nHeartbeat = {tracking['heartbeat']}{CLR}\nFail = {tracking['fail']}{CLR}\nTotal = {tracking['total']}{CLR}\n",end="\r")

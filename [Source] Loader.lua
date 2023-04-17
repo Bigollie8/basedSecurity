@@ -19,16 +19,37 @@ local get_time                  = client.unix_time()
 local json_parse                = json.parse
 local global_curtime            = globals.curtime() 
 local get_size                  = #readfile(_NAME .. ".lua")
-local username                  = "Admin"
+
+--UNIX MAY NOT MATCH NEED TO VERIFY
+local info = {
+    username = "Admin",
+    vendorID = "0",
+    deviceID = "0",
+    unix = string.sub(get_time,0,9),
+    plaintext = "BasedSecurity"
+}
 
 local vars = {
     attempts                    = 2,
     counter                     = 0,
     color                       = "ffffffff",
     data                        = nil,
-    version                     = 3.1.4
+    firstloop                   = false,
+    version                     = 1.4,-- orignal vars ^
+    payload = "", -- new vars 
+    key = 0,
+    encryptedPayload = "" ,
+    hash = "",
+    url = ""
 }
 
+local heartbeatVars = {
+    payload = "",
+    key = 0,
+    encryptedPayload = "",
+    hash = "",
+    url = "",
+}
 local auth = {
     authurl                     = "http://127.0.0.1:5000/",
     reset                       = false,
@@ -337,6 +358,25 @@ local function anti_http_debug() -- Sauron loader
         return true
     end  
 end
+
+local function updateVars()
+    vars.payload = ""
+    vars.key = ""
+    vars.encryptedPayload = "" 
+    vars.hash = ""
+    vars.url = ""
+end
+updateVars()
+
+local function updateHeartbeatVars()
+    heartbeatVars.payload = info.username + ":" + info.vendorID + ":" + info.deviceID + ":" + info.unix
+    heartbeatVars.key = 
+    heartbeatVars.encryptedPayload = ""
+    heartbeatVars.hash = ""
+    heartbeatVars.url = ""
+end
+
+updateHeartbeatVars()
 
 failLog("-------------------------",0,"") 
 

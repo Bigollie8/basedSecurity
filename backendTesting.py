@@ -1,6 +1,6 @@
 import requests
 import time
-import Cipher
+import cipher
 import hashlib
 
 class bcolors:
@@ -48,14 +48,14 @@ def restoreVars():
 def updateVars():
     vars["payload"] = info["username"] + ":" + info["vendorid"] + ":" + info["deviceid"] + ":" + info["unix"]
     vars["key"] = int(str(round(time.time()))[9]) + 3
-    vars["encryptedPayload"] = Cipher.encrypt(vars["payload"],vars["key"])
+    vars["encryptedPayload"] = cipher.encrypt(vars["payload"],vars["key"])
     vars["hash"] = hashlib.md5((vars["encryptedPayload"] + info["plaintext"]).encode()).hexdigest()
     vars["url"] = "http://127.0.0.1:5000" + '/login/'+ vars["encryptedPayload"] +'/' + vars["hash"]
 
 def updateHeartbeatVars():
     heartbeatVars["payload"] = info["username"] + ":" + info["vendorid"] + ":" + info["deviceid"] + ":" + info["unix"]
     heartbeatVars["key"] = int(str(round(time.time()))[9]) + 3
-    heartbeatVars["encryptedPayload"] = Cipher.encrypt(heartbeatVars["payload"],heartbeatVars["key"])
+    heartbeatVars["encryptedPayload"] = cipher.encrypt(heartbeatVars["payload"],heartbeatVars["key"])
     heartbeatVars["hash"] = hashlib.md5((heartbeatVars["encryptedPayload"] + info["plaintext"]).encode()).hexdigest()
     heartbeatVars["url"] = "http://127.0.0.1:5000" + '/heartbeat/'+ heartbeatVars["encryptedPayload"] +'/' + heartbeatVars["hash"]
 
