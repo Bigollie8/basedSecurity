@@ -50,14 +50,14 @@ def updateVars():
     vars["key"] = int(str(round(time.time()))[9]) + 3
     vars["encryptedPayload"] = cipher.encrypt(vars["payload"],vars["key"])
     vars["hash"] = hashlib.md5((vars["encryptedPayload"] + info["plaintext"]).encode()).hexdigest()
-    vars["url"] = "http://127.0.0.1:5000" + '/login/'+ vars["encryptedPayload"] +'/' + vars["hash"]
+    vars["url"] = "http://basedsecurity.net" + '/login/'+ vars["encryptedPayload"] +'/' + vars["hash"]
 
 def updateHeartbeatVars():
     heartbeatVars["payload"] = info["username"] + ":" + info["vendorid"] + ":" + info["deviceid"] + ":" + info["unix"]
     heartbeatVars["key"] = int(str(round(time.time()))[9]) + 3
     heartbeatVars["encryptedPayload"] = cipher.encrypt(heartbeatVars["payload"],heartbeatVars["key"])
     heartbeatVars["hash"] = hashlib.md5((heartbeatVars["encryptedPayload"] + info["plaintext"]).encode()).hexdigest()
-    heartbeatVars["url"] = "http://127.0.0.1:5000" + '/heartbeat/'+ heartbeatVars["encryptedPayload"] +'/' + heartbeatVars["hash"]
+    heartbeatVars["url"] = "http://basedsecurity.net" + '/heartbeat/'+ heartbeatVars["encryptedPayload"] +'/' + heartbeatVars["hash"]
 
 def testConnection():
     print(vars["url"])
@@ -121,7 +121,7 @@ while True:
         updateVars()
         if userinput == "4":
             vars["hash"] = hashlib.md5(info["deviceid"].encode()).hexdigest()
-            vars["url"] = "http://127.0.0.1:5000" + '/login'+ '/'+ vars["encryptedPayload"] +'/' + vars["hash"]
+            vars["url"] = "http://basedsecurity.net" + '/login'+ '/'+ vars["encryptedPayload"] +'/' + vars["hash"]
         if userinput == "5":
             updateHeartbeatVars()
             testHeartbeat()

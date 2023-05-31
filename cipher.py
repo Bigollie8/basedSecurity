@@ -1,7 +1,7 @@
 import math
 import random
 import time
-from rich.console import Console
+#from rich.console import Console
 from time import sleep
 import os
 import pyfiglet
@@ -77,25 +77,25 @@ def decrypt(payload,key):
   
     return plaintext
 
-console = Console()
+#console = Console()
 
 datas = [1,2,3,4,5,6,7,8,9,10]
-with console.status("[bold magenta]Verifying encryption...", spinner='aesthetic') as status:
-    while datas:
-        # This is intended to verify the integrity of the encryption and 
-        # ensure that there should be no issue with the cipher
-        data = datas.pop(0)
-        sleep(random.random()/2)
-        testpayload = 'x0001' + str(round(time.time()* random.randint(1,19)))
-        testkey = random.randint(3,len(testpayload))
-        encrypted = encrypt(testpayload,testkey)
-        decrypted = decrypt(encrypted,testkey)
-        if testpayload != decrypted:
-            print("Failed check")
-            break
-        console.log(f"[cyan]Encryption Verifed![/cyan] {encrypted} --> {decrypted}")
+#with console.status("[bold magenta]Verifying encryption...", spinner='aesthetic') as status:
+while datas:
+    # This is intended to verify the integrity of the encryption and 
+    # ensure that there should be no issue with the cipher
+    data = datas.pop(0)
+    sleep(random.random()/2)
+    testpayload = 'x0001' + str(round(time.time()* random.randint(1,19)))
+    testkey = random.randint(3,len(testpayload))
+    encrypted = encrypt(testpayload,testkey)
+    decrypted = decrypt(encrypted,testkey)
+    if testpayload != decrypted:
+        print("Failed check")
+        break
+        #console.log(f"[cyan]Encryption Verifed![/cyan] {encrypted} --> {decrypted}")
     
-    console.log(f'[bold][magenta]Done!')
+    #console.log(f'[bold][magenta]Done!')
 
 
 

@@ -360,7 +360,7 @@ local function anti_http_debug() -- Sauron loader
 end
 
 local function updateVars()
-    vars.payload = ""
+    vars.payload = info.username + ":" + info.vendorID + ":" + info.deviceID + ":" + info.unix
     vars.key = ""
     vars.encryptedPayload = "" 
     vars.hash = ""

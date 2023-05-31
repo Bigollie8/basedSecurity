@@ -1,0 +1,6 @@
+flask
+cipher
+discord_webhook 
+mysql_utils
+pyfiglet
+mysqlclient

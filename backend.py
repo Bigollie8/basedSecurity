@@ -5,7 +5,6 @@ import cipher
 import time
 import hashlib
 import mysql_utils
-from rich.console import Console
 
 database = mysql_utils.mysql()
 
@@ -210,11 +209,9 @@ def heartbeat(payload,creds):
         return {"Status": False, "Type" : "Heartbeat"}
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')
 
-
-
-
+#
 
 
 
