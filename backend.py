@@ -12,7 +12,7 @@ app = Flask(__name__)
 
 # General information that will be used to store user data
 info = {    
-    "username" : "Filler",
+    "username" : "NULL",
     "vendorid" : str(123),
     "deviceid" : str(123),
     "unix" : str(123),
@@ -32,7 +32,7 @@ vars = {
     "heartbeatexpectedEncrypt" : "",
     "heartbeatexpectedHash" : "",
     "heartbeatURL" : '/heartbeat/<payload>/<creds>',
-
+    "heartbeatFailWebook" : DiscordWebhook(url='https://discord.com/api/webhooks/991387394228097114/SrNPjcrV8UXnhSCXRO1BZHrkxqQqZsMS8574kVTnbeAruP39LD4bOrTAryGUkwPyMSEi'),
     "FailWebook" : DiscordWebhook(url='https://discord.com/api/webhooks/970590193260310558/oZwVN0FrgFYGez66lMtIQIfDBN1TVFUw45AhbFjuQZV9WYT7WOFgHJ9oninI8tMTke00'),
     "SuccessWebhook" : DiscordWebhook(url='https://discord.com/api/webhooks/970590028457734215/Jmuq-3QwbHbPdXj2eNegf9zna2s8TVULQYQCWmtuPk0cvK2WJcgZ8ffi1jxenL2r3yPU')
 }
@@ -52,15 +52,16 @@ tracking = {
     "heartbeat" : 0
 }
 
-def sendWebhook(url,status,hash,payload,name):
+def sendWebhook(url,status,hash,payload,name,type):
     # This function sends a webhook to a discord server giving the status of there login
 
     embed = DiscordEmbed(title="Login Attempt", description=status + " - " + vars["reason"],color='03b2f8')
     embed.add_embed_field(name='Name', value=name)
     embed.add_embed_field(name='Hash', value=hash)
     embed.add_embed_field(name='Payload', value=payload)
-    embed.add_embed_field(name='Expected Hash', value=vars["expectedHash"])
-    embed.add_embed_field(name='Expected Payload', value=vars["expectedEncrypt"])
+    embed.add_embed_field(name='Expected Hash', value=vars[type + "expectedHash"])
+    embed.add_embed_field(name='Expected Payload', value=vars[type + "expectedEncrypt"])
+    embed.add_embed_field(name='Key', value=vars["key"])
     url.add_embed(embed)
     url.execute(remove_embeds=True)
 
@@ -71,11 +72,12 @@ def updateUserInfo(payload,type):
     # user that is registered with that name, if so it returns the expected device id and
     # vendor id. If not it returns false. 
 
-    global table
+    global table 
     decrypted = cipher.decrypt(payload,vars[type + "key"])
 
     try:
         if decrypted == None:
+            table = ["Failed to decrypt with key : " + str(vars[type + "key"])]
             return False
         table = decrypted.split(":")
     except ValueError:
@@ -96,11 +98,11 @@ def updateVars(payload,type):
     # This function takes the most recent information passed and updates related variables used to 
     # secure the connection to the server.
 
-    vars[type + "key"] = int(str(round(time.time()))[9]) + 3
+    vars[type + "key"] = int(str(round(time.time()))[9]) + 1 # Add one so it can never be zero
     if not updateUserInfo(payload,type):
         vars["reason"] = "User not Found - " + table[0]
         return False
-    info["unix"] = str(round(time.time())) 
+    info["unix"] = str(round(time.time() - 2))
     vars[type + "expectedPayload"] = info["username"] + ":" + info["vendorid"] + ":" +  info["deviceid"] + ":" +  info["unix"]
     vars[type + "expectedEncrypt"] = cipher.encrypt(vars[type + "expectedPayload"],vars[type + "key"])
     vars[type + "expectedHash"] = hashlib.md5((vars[type + "expectedEncrypt"] + info["plaintext"]).encode()).hexdigest()
@@ -181,21 +183,21 @@ def login(payload,creds):
         if verify(payload,creds,""):
             tracking["success"] += 1
             print(f"{UP}Connection Tracking: \nSuccess = {tracking['success']}{CLR}\nHeartbeat = {tracking['heartbeat']}{CLR}\nFail = {tracking['fail']}{CLR}\nTotal = {tracking['total']}{CLR}\n",end="\r")
-            #sendWebhook(vars["SuccessWebhook"],"Success",creds,payload,info["username"])
+            sendWebhook(vars["SuccessWebhook"],"Success",creds,payload,info["username"],"")
             return {"Status" : True,"URL":creds,"payload":cipher.decrypt(payload,vars["key"])}
         else:
             tracking["fail"] += 1
             print(f"{UP}Connection Tracking: \nSuccess = {tracking['success']}{CLR}\nHeartbeat = {tracking['heartbeat']}{CLR}\nFail = {tracking['fail']}{CLR}\nTotal = {tracking['total']}{CLR}\n",end="\r")
-            sendWebhook(vars["FailWebook"],"Fail",creds,payload,info["username"])
+            sendWebhook(vars["FailWebook"],"Fail",creds,payload,info["username"],"")
             return {"Status" : False}
     else:
-        sendWebhook(vars["FailWebook"],"Improper Request",creds,payload,info["username"])
+        sendWebhook(vars["FailWebook"],"Improper Request",creds,payload,info["username"],"")
         return {"Status": False}
 
 @app.route(vars["heartbeatURL"],methods = ['POST','GET'])
 def heartbeat(payload,creds):
     if request.method == 'GET':
-        if  (payload,creds,"heartbeat"):
+        if verify(payload,creds,"heartbeat"):
             print(f"{UP}Connection Tracking: \nSuccess = {tracking['success']}{CLR}\nHeartbeat = {tracking['heartbeat']}{CLR}\nFail = {tracking['fail']}{CLR}\nTotal = {tracking['total']}{CLR}\n",end="\r")
             tracking["heartbeat"] += 1
             return {"Status" : True, "Type" : "Heartbeat"},303
@@ -203,6 +205,8 @@ def heartbeat(payload,creds):
             print(f"{UP}Connection Tracking: \nSuccess = {tracking['success']}{CLR}\nHeartbeat = {tracking['heartbeat']}{CLR}\nFail = {tracking['fail']}{CLR}\nTotal = {tracking['total']}{CLR}\n",end="\r")
             tracking["fail"] += 1
             print("Failed verification - " + vars["reason"])
+            sendWebhook(vars["heartbeatFailWebook"],"Fail",creds,payload,info["username"],"heartbeat")
+
             return{"Status" : False, "Type" : "Heartbeat"}
     else:
         print("Incorrect request format")
@@ -212,6 +216,5 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0')
 
 #
-
 
 

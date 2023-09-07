@@ -3,6 +3,9 @@ import time
 import cipher
 import hashlib
 
+BASE_URL = "http://basedsecurity.net"
+#BASE_URL = "http://localhost:5000"
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -48,16 +51,20 @@ def restoreVars():
 def updateVars():
     vars["payload"] = info["username"] + ":" + info["vendorid"] + ":" + info["deviceid"] + ":" + info["unix"]
     vars["key"] = int(str(round(time.time()))[9]) + 3
+    if vars["key"] > 10:
+        vars["key"] -= 10
     vars["encryptedPayload"] = cipher.encrypt(vars["payload"],vars["key"])
     vars["hash"] = hashlib.md5((vars["encryptedPayload"] + info["plaintext"]).encode()).hexdigest()
-    vars["url"] = "http://basedsecurity.net" + '/login/'+ vars["encryptedPayload"] +'/' + vars["hash"]
+    vars["url"] = BASE_URL + '/login/'+ vars["encryptedPayload"] +'/' + vars["hash"]
 
 def updateHeartbeatVars():
     heartbeatVars["payload"] = info["username"] + ":" + info["vendorid"] + ":" + info["deviceid"] + ":" + info["unix"]
     heartbeatVars["key"] = int(str(round(time.time()))[9]) + 3
+    if heartbeatVars["key"] > 10:
+        heartbeatVars["key"] -= 10
     heartbeatVars["encryptedPayload"] = cipher.encrypt(heartbeatVars["payload"],heartbeatVars["key"])
     heartbeatVars["hash"] = hashlib.md5((heartbeatVars["encryptedPayload"] + info["plaintext"]).encode()).hexdigest()
-    heartbeatVars["url"] = "http://basedsecurity.net" + '/heartbeat/'+ heartbeatVars["encryptedPayload"] +'/' + heartbeatVars["hash"]
+    heartbeatVars["url"] = BASE_URL + '/heartbeat/'+ heartbeatVars["encryptedPayload"] +'/' + heartbeatVars["hash"]
 
 def testConnection():
     print(vars["url"])
@@ -68,7 +75,7 @@ def testConnection():
         print(f'{bcolors.OKGREEN} Success {bcolors.ENDC}')
     else:
         print(f'{bcolors.FAIL}Failed to connect{bcolors.ENDC}')
-
+        print(vars["key"])
     print(f'{bcolors.OKCYAN}' + ('---'*35) + f'{bcolors.ENDC}')
 
 def testHeartbeat():
@@ -80,7 +87,7 @@ def testHeartbeat():
         print(f'{bcolors.OKGREEN} Success {bcolors.ENDC}')
     else:
         print(f'{bcolors.FAIL}Failed to connect{bcolors.ENDC}')
-
+        print(heartbeatVars["key"])
     print(f'{bcolors.OKCYAN}' + ('---'*35) + f'{bcolors.ENDC}')
 
 mode = input("Would you like to manually ping server ( Y or N ) : ")
@@ -119,14 +126,17 @@ while True:
         if userinput == "8":
             info["unix"] = str(round(time.time() - 3))
         updateVars()
+
         if userinput == "4":
             vars["hash"] = hashlib.md5(info["deviceid"].encode()).hexdigest()
-            vars["url"] = "http://basedsecurity.net" + '/login'+ '/'+ vars["encryptedPayload"] +'/' + vars["hash"]
+            vars["url"] = BASE_URL + '/login'+ '/'+ vars["encryptedPayload"] +'/' + vars["hash"]
         if userinput == "5":
             updateHeartbeatVars()
             testHeartbeat()
             pass
-        testConnection()
+        if userinput != "5":
+            print(vars["key"])
+            testConnection()
 
     else:
         time.sleep(1)
@@ -134,5 +144,6 @@ while True:
         updateVars()
         testConnection()
         time.sleep(1)
+        info["unix"] = str(round(time.time()))
         updateHeartbeatVars()
         testHeartbeat()
