@@ -25,7 +25,7 @@ def encrypt(payload,key):
     col = key
 
     if col == 0:
-        return "Fail"
+        return False
 
     row = int(math.ceil(payload_len / col))
 
@@ -50,35 +50,34 @@ def decrypt(payload,key):
     payload_len = len(payload)
     payload_lst = list(payload)
 
-    if key == 0:
-        return "Fail"
+    if payload_len == 0:
+        print("Invalid Payload")
+        return False
     
-    col = key
-    row = int(math.ceil(payload_len / col))
-
-    matrix = [payload_lst[i: i + col]
+    try:
+        col = key
+        row = int(math.ceil(payload_len / col))
+        matrix = [payload_lst[i: i + col]
                 for i in range(0, len(payload_lst),col)]
+    except:
+        return False
 
     for _ in range(col):
         for r in range(row):
-            try:
-                matrix[r][k_index] = payload_lst[payload_index]
-            except IndexError:
-                return
+            matrix[r][k_index] = payload_lst[payload_index]
             payload_index += 1
         k_index += 1
 
     try:
         plaintext = ''.join(sum(matrix, []))
     except TypeError:
-        raise TypeError("This program cannot",
-                        "handle repeating words.")
-  
+        print("Unable to construct payload")
+        return False
+
     null_count = plaintext.count('_')
-  
+
     if null_count > 0:
         return plaintext[: -null_count]
-  
     return plaintext
 
 datas = [1,2,3,4,5,6,7,8,9,10]

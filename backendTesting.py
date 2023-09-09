@@ -3,8 +3,8 @@ import time
 import cipher
 import hashlib
 
-BASE_URL = "http://basedsecurity.net"
-#BASE_URL = "http://localhost:5000"
+#BASE_URL = "http://basedsecurity.net"
+BASE_URL = "http://localhost:5000"
 
 class bcolors:
     HEADER = '\033[95m'
@@ -50,44 +50,42 @@ def restoreVars():
 
 def updateVars():
     vars["payload"] = info["username"] + ":" + info["vendorid"] + ":" + info["deviceid"] + ":" + info["unix"]
-    vars["key"] = int(str(round(time.time()))[9]) + 3
-    if vars["key"] > 10:
-        vars["key"] -= 10
+    print(vars["payload"])
+    vars["key"] = int(str(round(time.time()))[9])#accounts for dysnc in aws instance
+
     vars["encryptedPayload"] = cipher.encrypt(vars["payload"],vars["key"])
     vars["hash"] = hashlib.md5((vars["encryptedPayload"] + info["plaintext"]).encode()).hexdigest()
     vars["url"] = BASE_URL + '/login/'+ vars["encryptedPayload"] +'/' + vars["hash"]
 
 def updateHeartbeatVars():
     heartbeatVars["payload"] = info["username"] + ":" + info["vendorid"] + ":" + info["deviceid"] + ":" + info["unix"]
-    heartbeatVars["key"] = int(str(round(time.time()))[9]) + 3
-    if heartbeatVars["key"] > 10:
-        heartbeatVars["key"] -= 10
+    heartbeatVars["key"] = int(str(round(time.time()))[9])#accounts for dysnc in aws instance
     heartbeatVars["encryptedPayload"] = cipher.encrypt(heartbeatVars["payload"],heartbeatVars["key"])
     heartbeatVars["hash"] = hashlib.md5((heartbeatVars["encryptedPayload"] + info["plaintext"]).encode()).hexdigest()
     heartbeatVars["url"] = BASE_URL + '/heartbeat/'+ heartbeatVars["encryptedPayload"] +'/' + heartbeatVars["hash"]
 
 def testConnection():
     print(vars["url"])
-    textResponse = requests.get(vars["url"])
-    responseJSON = textResponse.json()
-    if responseJSON['Status']:
+    try:
+        textResponse = requests.get(vars["url"])
         print("Response : " + textResponse.text)
+        responseJSON = textResponse.json()
         print(f'{bcolors.OKGREEN} Success {bcolors.ENDC}')
-    else:
-        print(f'{bcolors.FAIL}Failed to connect{bcolors.ENDC}')
-        print(vars["key"])
+    except ValueError:
+        raise TypeError(f'{bcolors.FAIL}Failed to connect with key : {bcolors.ENDC}' + str(vars["key"]))
+    
     print(f'{bcolors.OKCYAN}' + ('---'*35) + f'{bcolors.ENDC}')
 
 def testHeartbeat():
     print(heartbeatVars["url"])
-    textResponse = requests.get(heartbeatVars["url"])
-    responseJSON = textResponse.json()
-    if responseJSON['Status']:
+    try: 
+        textResponse = requests.get(heartbeatVars["url"])
         print("Response : " + textResponse.text)
+        responseJSON = textResponse.json()
         print(f'{bcolors.OKGREEN} Success {bcolors.ENDC}')
-    else:
-        print(f'{bcolors.FAIL}Failed to connect{bcolors.ENDC}')
-        print(heartbeatVars["key"])
+    except:
+        raise TypeError(f'{bcolors.FAIL}Failed to connect with key : {bcolors.ENDC}' + str(heartbeatVars["key"]))
+    
     print(f'{bcolors.OKCYAN}' + ('---'*35) + f'{bcolors.ENDC}')
 
 mode = input("Would you like to manually ping server ( Y or N ) : ")
