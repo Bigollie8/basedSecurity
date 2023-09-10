@@ -3,8 +3,8 @@ import time
 import cipher
 import hashlib
 
-#BASE_URL = "http://basedsecurity.net"
-BASE_URL = "http://localhost:5000"
+BASE_URL = "http://basedsecurity.net"
+#BASE_URL = "http://localhost:5000"
 
 class bcolors:
     HEADER = '\033[95m'
@@ -33,6 +33,7 @@ vars = {
     "encryptedPayload" : "",
     "hash" : "",
     "url" : "",
+    "desync" : 0
 }
 
 heartbeatVars = {
@@ -51,15 +52,18 @@ def restoreVars():
 def updateVars():
     vars["payload"] = info["username"] + ":" + info["vendorid"] + ":" + info["deviceid"] + ":" + info["unix"]
     print(vars["payload"])
-    vars["key"] = int(str(round(time.time()))[9])#accounts for dysnc in aws instance
+    vars["key"] = int(info['unix'][9]) + 1#accounts for dysnc in aws instance
 
     vars["encryptedPayload"] = cipher.encrypt(vars["payload"],vars["key"])
+    if not vars["encryptedPayload"]: 
+        print(info['unix'])
+        return False
     vars["hash"] = hashlib.md5((vars["encryptedPayload"] + info["plaintext"]).encode()).hexdigest()
     vars["url"] = BASE_URL + '/login/'+ vars["encryptedPayload"] +'/' + vars["hash"]
 
 def updateHeartbeatVars():
     heartbeatVars["payload"] = info["username"] + ":" + info["vendorid"] + ":" + info["deviceid"] + ":" + info["unix"]
-    heartbeatVars["key"] = int(str(round(time.time()))[9])#accounts for dysnc in aws instance
+    heartbeatVars["key"] = int(info['unix'][9]) + 1 #accounts for dysnc in aws instance
     heartbeatVars["encryptedPayload"] = cipher.encrypt(heartbeatVars["payload"],heartbeatVars["key"])
     heartbeatVars["hash"] = hashlib.md5((heartbeatVars["encryptedPayload"] + info["plaintext"]).encode()).hexdigest()
     heartbeatVars["url"] = BASE_URL + '/heartbeat/'+ heartbeatVars["encryptedPayload"] +'/' + heartbeatVars["hash"]
@@ -70,7 +74,10 @@ def testConnection():
         textResponse = requests.get(vars["url"])
         print("Response : " + textResponse.text)
         responseJSON = textResponse.json()
-        print(f'{bcolors.OKGREEN} Success {bcolors.ENDC}')
+        if responseJSON['Status']:
+            print(f'{bcolors.OKGREEN} Success {bcolors.ENDC}')
+        else:
+            print(f'{bcolors.FAIL} Failed {bcolors.ENDC}')
     except ValueError:
         raise TypeError(f'{bcolors.FAIL}Failed to connect with key : {bcolors.ENDC}' + str(vars["key"]))
     
@@ -82,7 +89,11 @@ def testHeartbeat():
         textResponse = requests.get(heartbeatVars["url"])
         print("Response : " + textResponse.text)
         responseJSON = textResponse.json()
-        print(f'{bcolors.OKGREEN} Success {bcolors.ENDC}')
+        if responseJSON['Status']:
+            print(f'{bcolors.OKGREEN} Success {bcolors.ENDC}')
+        else:
+            print(f'{bcolors.FAIL} Failed {bcolors.ENDC}')
+
     except:
         raise TypeError(f'{bcolors.FAIL}Failed to connect with key : {bcolors.ENDC}' + str(heartbeatVars["key"]))
     
@@ -113,16 +124,16 @@ while True:
         elif userinput == "1":
             info["username"] = "Null"
         elif userinput == "2":
-            info["deviceid"] = "1234"
-        elif userinput == "3":
             info["vendorid"] = "1234"
-        info["unix"] = str(round(time.time()))
+        elif userinput == "3":
+            info["deviceid"] = "1234"
+        info["unix"] = str(round(time.time()) + vars["desync"])
         if userinput == "6":
-            info["unix"] = str(round(time.time() + 1))
+            info["unix"] = str(int(info["unix"]) + 1)
         if userinput == "7":
-            info["unix"] = str(round(time.time() + 3))
+            info["unix"] = str(int(info["unix"]) + 3)
         if userinput == "8":
-            info["unix"] = str(round(time.time() - 3))
+            info["unix"] = str(int(info["unix"]) - 3)
         updateVars()
 
         if userinput == "4":
@@ -138,10 +149,10 @@ while True:
 
     else:
         time.sleep(1)
-        info["unix"] = str(round(time.time()))
+        info["unix"] = str(round(time.time()) + vars["desync"])
         updateVars()
         testConnection()
         time.sleep(1)
-        info["unix"] = str(round(time.time()))
+        info["unix"] = str(round(time.time()) + vars["desync"])
         updateHeartbeatVars()
         testHeartbeat()

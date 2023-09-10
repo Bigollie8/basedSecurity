@@ -64,7 +64,10 @@ def decrypt(payload,key):
 
     for _ in range(col):
         for r in range(row):
-            matrix[r][k_index] = payload_lst[payload_index]
+            try:
+                matrix[r][k_index] = payload_lst[payload_index]
+            except IndexError:
+                return False
             payload_index += 1
         k_index += 1
 
