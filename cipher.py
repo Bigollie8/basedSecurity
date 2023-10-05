@@ -10,7 +10,7 @@ banner = pyfiglet.figlet_format("BasedSecurity", font = "slant")
 os.system('clear')
 print('\033[96m')
 print(banner)
-print("\033[95m\033[4mDeveloped by Ollie#0069 " + u"\U0001F512")
+print("\033[95m\033[4mDeveloped by bigollie8 " + u"\U0001F512")
 print("\033[0m\n")
 
 testpayload = ""
@@ -95,11 +95,9 @@ for x in datas:
     encrypted = encrypt(testpayload,testkey)
     decrypted = decrypt(encrypted,testkey)
     if testpayload != decrypted:
-        print("Failed check")
+        print("\033[91m\033[01m!WARNING! Encryption failed!")
         break
-    print("Encryption Verifed! " + encrypted + "-->" + decrypted)
+    print("\033[96m Encryption Verifed : \033[0m" + encrypted + "-->" + decrypted + "\n")
     
-    print('Done!')
-
 
 

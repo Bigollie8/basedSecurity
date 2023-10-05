@@ -58,29 +58,37 @@ returnDic = {
     "response" : "NULL"
 }
 
-def sendWebhook(url,status,name,hash,payload,key,type):
+def sendWebhook(url,status,name,hash,payload,type):
     # This function sends a webhook to a discord server giving the status of there login
 
-    embed = DiscordEmbed(title="Login Attempt - backendRecode", description= status + " - " + vars["reason"],color='03b2f8')
+    embed = DiscordEmbed(title="Login Attempt - Version 1.92", description= status + " - " + vars["reason"],color='03b2f8')
     embed.add_embed_field(name='Name', value=name)
     embed.add_embed_field(name='Hash', value=hash)
     embed.add_embed_field(name='Payload', value=payload)
     embed.add_embed_field(name='Expected Hash', value=vars[type + "expectedHash"])
     embed.add_embed_field(name='Expected Payload', value=vars[type + "expectedEncrypt"])
     embed.add_embed_field(name="desync", value=verifyVars["differance"])
+    embed.add_embed_field(name="Server Key", value=vars[type + "key"])
     url.add_embed(embed)
     url.execute(remove_embeds=True)
 
+
+def registerUser(username):
+    #This function will be used when the user has not registered
+    if info["deviceid"] == "None" or info["vendorid"] == "None":
+        print("Updating user info")
+        database.update_user(username,returnDic["response"][2],returnDic["response"][1])
+        return True
+
 def databaseQuery(username):
     userInfo = database.get_user(username)
-    if userInfo == None:
+    if userInfo == None or userInfo == False:
         return False
     
-    info["deviceid"] = str(userInfo[5])
-    info["vendorid"] = str(userInfo[4])
+    info["deviceid"] = str(userInfo[4])
+    info["vendorid"] = str(userInfo[5])
     return True
 
- 
 def updateUserInfo(payload,type):
     # This function takes the users payload, decrypts it and then proceeds to split it up
     # by a :. It then takes this information to search the database and see if we have a
@@ -99,6 +107,9 @@ def updateUserInfo(payload,type):
 
             info["passedUNIX"] = x[3]
             returnDic["response"] = x
+            
+            if registerUser(info["username"]):
+                if not databaseQuery(info["username"]): continue
 
             return True
         
@@ -157,7 +168,7 @@ def verify(payload,creds,type):
 
     tracking["total"] += 1
     if updateVars(payload,type):
-        print(returnDic["response"])
+
         if returnDic["response"][1] != info["vendorid"]: #may not be right
             vars["reason"] = "Invalid VendorId"
             return False
@@ -208,15 +219,15 @@ def login(payload,creds):
         if verify(payload,creds,""):
             tracking["success"] += 1
             print(f"Connection Tracking: \nSuccess = {tracking['success']}\nHeartbeat = {tracking['heartbeat']}\nFail = {tracking['fail']}\nTotal = {tracking['total']}\n",end="\r")
-            sendWebhook(vars["SuccessWebhook"],"Success",info["username"],creds,payload,vars["key"],"")
+            sendWebhook(vars["SuccessWebhook"],"Success",info["username"],creds,payload,"")
             return {"Status" : True,"URL":creds,"payload":cipher.decrypt(payload,vars["key"])}
         else:
             tracking["fail"] += 1
             print(f"Connection Tracking: \nSuccess = {tracking['success']}\nHeartbeat = {tracking['heartbeat']}\nFail = {tracking['fail']}\nTotal = {tracking['total']}\n",end="\r")
-            sendWebhook(vars["FailWebook"],"Fail",info["username"],creds,payload,vars["key"],"")
+            sendWebhook(vars["FailWebook"],"Fail",info["username"],creds,payload,"")
             return {"Status" : False}
     else:
-        sendWebhook(vars["FailWebook"],"Improper Request",info["username"],creds,payload,vars["key"],"")
+        sendWebhook(vars["FailWebook"],"Improper Request",info["username"],creds,payload,"")
         return {"Status": False}
     
 @app.route(vars["heartbeatURL"],methods = ['POST','GET'])
@@ -230,7 +241,7 @@ def heartbeat(payload,creds):
             print(f"Connection Tracking: \nSuccess = {tracking['success']}\nHeartbeat = {tracking['heartbeat']}\nFail = {tracking['fail']}\nTotal = {tracking['total']}\n",end="\r")
             tracking["fail"] += 1
             print("Failed verification - " + vars["reason"])
-            sendWebhook(vars["heartbeatFailWebook"],"Fail",info["username"],creds,payload,vars["heartbeatkey"],"heartbeat")
+            sendWebhook(vars["heartbeatFailWebook"],"Fail",info["username"],creds,payload,"heartbeat")
             return{"Status" : False, "Type" : "Heartbeat"}
     else:
         print("Incorrect request format")

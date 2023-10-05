@@ -2,13 +2,13 @@
     "path": "C:\\Users\\xotii\\Desktop\\luraph\\aura\\",
 
     "discord": {
-        "discordtoken": "OTk1NDQxNzY4ODc3MjY0OTE2.GRlFeg.28ZalKqxXmi5rjX9konwnY-YP1kYerp7Ny12R4",
-        "serverid": 977721056636842095
+        "discordtoken": "MTAyMDEwNzA0MTU2NzY5MDc1Mg.GamIhj.qPKD3JMb-DLu7Vbiv8kvpfQdcsKeRSrkO-QqT4",
+        "serverid": 958118562726289418
     },
     "database": {
-        "ip": "162.0.228.203",
-        "user": "baseddepartment",
-        "passwd": "+cvssATXEc@7",
-        "dbname": "baseddepartment_aura"
+        "ip": "34.230.223.44",
+        "user": "based",
+        "passwd": "q0UekP3DuEJBy9tOpXkJ",
+        "dbname": "baseddb"
     }
 }

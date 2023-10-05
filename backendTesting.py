@@ -3,8 +3,8 @@ import time
 import cipher
 import hashlib
 
-BASE_URL = "http://basedsecurity.net"
-#BASE_URL = "http://localhost:5000"
+#BASE_URL = "http://basedsecurity.net"
+BASE_URL = "http://localhost:5000"
 
 class bcolors:
     HEADER = '\033[95m'
@@ -118,6 +118,7 @@ while True:
         [8] : Unix - 3
 
         """)
+        print(vars["key"])
         userinput = input("Press ENTER to test backend(type Q to quit) : ")
         if userinput == "q" or userinput == "Q":
             break
