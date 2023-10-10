@@ -1,5 +1,5 @@
--- Security version 3.1.4
--- Developed by Ollie#0069 & .audit#1111 (aka Melly)
+-- Security version 4.0
+-- Developed by Ollie#0069 
 
 --#region Important vars
 local http                      = require("gamesense/http") or error("Sub to https://gamesense.pub/forums/viewtopic.php?id=19253 on the lua workshop.")
@@ -19,7 +19,11 @@ local get_time                  = client.unix_time()
 local json_parse                = json.parse
 local global_curtime            = globals.curtime() 
 local get_size                  = #readfile(_NAME .. ".lua")
-local username                  = "basedSecurity"
+local username                  = "Admin"
+
+--#endregion
+
+--#region Global Tables
 
 local vars = {
     attempts                    = 2,
@@ -57,6 +61,10 @@ local heartbeatVars = {
     data = nil
 }
 
+--#endregion
+
+--#region Branding Vars
+
 local branding = {
     brand                       = "basedSecurity",
     half1                       = "based",
@@ -69,7 +77,6 @@ local branding = {
     frame2                      = ui.new_label("Config","Lua","-"),
     animationSpeed              = 60,
 }
-
 
 local tag = {
     ["stage9"]  = "d",
@@ -183,15 +190,6 @@ local beta = {
     flip = false
 }
 
---#endregion
-
---#region Branding
-
-local function rgb_to_hex(r,g,b)
-    local rgb = (r * 0x10000) + (g * 0x100) + b
-    return "\a" .. string.format("%06x", rgb):upper() .."FF"
-end
-
 local r,g,b = 255,255,255 -- cleanup lol
 
 local function rainbow()
@@ -199,6 +197,11 @@ local function rainbow()
     g = math.floor(math.sin(globals.realtime() * 2 + 2) * 127 + 128)
     b = math.floor(math.sin(globals.realtime() * 2 + 4) * 127 + 128)
 end 
+
+local function rgb_to_hex(r,g,b)
+    local rgb = (r * 0x10000) + (g * 0x100) + b
+    return "\a" .. string.format("%06x", rgb):upper() .."FF"
+end
 
 local colors =  {
     theme1                      = {174, 248, 219},
@@ -221,6 +224,9 @@ local hexTable =  {
     pendingHex                  = rgb_to_hex(colors.pending[1],colors.pending[2],colors.pending[3]) 
 }
 
+--#endregion
+
+--#region Branding Animation
 
 local function watermark() -- there has to be a way better than up, maybe making it update vars that change only
     if not ui.is_menu_open() then return end
@@ -230,9 +236,9 @@ local function watermark() -- there has to be a way better than up, maybe making
         theme2                      = {198, 174, 248},
         loaderTheme1                = {r, g, b},
         loaderTheme2                = {r, g, b},
-        fail                        = {248, 177, 174},
-        success                     = {192, 248, 174},
-        pending                     = {248, 241, 174},
+        ["fail"]                    = {248, 177, 174},
+        ["success"]                 = {192, 248, 174},
+        ["pending"]                 = {248, 241, 174},
         RGB                         = {0  , 0  ,   0}
     }
 
@@ -241,9 +247,9 @@ local function watermark() -- there has to be a way better than up, maybe making
         theme2Hex                   = rgb_to_hex(colors.theme2[1],colors.theme2[2],colors.theme2[3]),
         loaderThemeHex1             = rgb_to_hex(colors.loaderTheme1[1],colors.loaderTheme1[2],colors.loaderTheme1[3]),
         loaderThemeHex2             = rgb_to_hex(colors.loaderTheme2[1],colors.loaderTheme2[2],colors.loaderTheme2[3]),
-        failHex                     = rgb_to_hex(colors.fail[1],colors.fail[2],colors.fail[3]),
-        succesHex                   = rgb_to_hex(colors.success[1],colors.success[2],colors.success[3]),
-        pendingHex                  = rgb_to_hex(colors.pending[1],colors.pending[2],colors.pending[3]) 
+        failHex                     = rgb_to_hex(colors["fail"][1],colors["fail"][2],colors["fail"][3]),
+        succesHex                   = rgb_to_hex(colors["success"][1],colors["success"] [2],colors["success"][3]),
+        pendingHex                  = rgb_to_hex(colors["pending"][1],colors["pending"][2],colors["pending"][3]) 
     }
 
     ui.set(branding.frame1,hexTable.loaderThemeHex1 .. "-                \aFFFFFFFFPowered by".. hexTable.loaderThemeHex1 .."             -")
@@ -282,17 +288,14 @@ end
 
 
 client_set_event_callback("paint_ui",function()
-   
     watermark()
     rainbow()
-    
 end)
 
 --#endregion
 
---#region Security --
-
 --#region Encryption
+
 local function combine(table1,table2)
     local string1,string2 ="",""
     for _, v in pairs(table1) do
@@ -412,6 +415,12 @@ end
 
 --#region Logging
 
+local logColors = {
+    ['fail']                        = {248, 177, 174},
+    ['success']                     = {192, 248, 174},
+    ['pending']                     = {248, 241, 174},
+}
+
 local function logo(name)
     client_color_log(175, 175, 175,"[\0")
     client_color_log(colors.theme1[1],colors.theme1[2],colors.theme1[3], branding.half1 .. "\0")
@@ -419,244 +428,77 @@ local function logo(name)
     client_color_log(175, 175, 175,"] \0")
 end
 
-local function failLog(msg,delay,padding)
+local function log(msg,delay,padding,status)
     client_delay_call(delay,function()
         logo(branding.brand)
-        client_color_log(colors.fail[1],colors.fail[2],colors.fail[3], msg)
-        vars.content            = padding .. msg 
-        vars.color              = hexTable.failHex
-    end)
-end
-
-local function successLog(msg,delay,padding)
-    client_delay_call(delay,function()
-        logo(branding.brand)
-        client_color_log(colors.success[1],colors.success[2],colors.success[3], msg)
+        client_color_log(colors[status][1],colors[status][2],colors[status][3], msg)
         vars.content            = padding .. msg
-        vars.color              = hexTable.succesHex
-    end)
-end
-
-local function pendingLog(msg,delay,padding)
-    client_delay_call(delay,function()
-        logo(branding.brand)
-        client_color_log(colors.pending[1],colors.pending[2],colors.pending[3], msg)
-        vars.content            = padding .. msg 
-        vars.color              = hexTable.pendingHex
     end)
 end
 
 --#endregion
 
-local ine
-
-local function blacklist_check() -- Sauron loader 
-    for i = 65, 90 do 
-        ine = i
-        local dir = string.char(i)..":\\Windows\\System32\\drivers\\etc\\hosts"
-        local hosts_file = readfile(dir)
-    
-        if (hosts_file and hosts_file:find(auth.authurl)) or (hosts_file and hosts_file:find(auth.authip)) then
-            failLog('Error 0x22 | Ip blacklisted - Not allowed >:(', 0,"")
-            return true
-        end
-    end
-end
-
-local function anti_http_debug() -- Sauron loader
-    local file_data = readfile(string.format(string.char(ine) .. ':\\Program Files (x86)\\Steam\\logs\\ipc_SteamClient.log'))
-
-    if file_data and string.find(file_data, auth.authurl)  or file_data and string.find(file_data, auth.authip) then
-        failLog('Error 0x23 | Debugfile found', 0,"")
-        return true
-    end  
-end
-
-failLog("-------------------------",0,"") 
+--#region Security
 
 local adapter_info              = get_adapter_info()
-local md5_as_hex                = md5.sumhexa(adapter_info.vendor_id .. adapter_info.device_id .. (auth.unix) .. "basedSecurity")  
--- table this
 
-local options = { 
-    ['encryption']              = md5_as_hex,
+local securityVars = {
     ['deviceID']                = adapter_info.device_id,
     ['vendorID']                = adapter_info.vendor_id,
-    ['name']                    = js.MyPersonaAPI.GetName(),
-    ['delay']                   = auth.unix,
-    ['username']                = username
+    ['unix']                    = 0,
+    ['username']                = username,
+    ['fails']                   = 0
 }
+
+--#region Filesize Check
 
 local function filesize(reset)
     if database_read("based") == nil or reset then
         database_write("based", auth.size)
-        pendingLog("Updated verification info!",0,"   ")
+        log("Updated verification info!",0,"   ",'pending')
     end
     
     if database_read("based") ~= auth.size then
-        failLog("Contact admin! Error - 0x15",0," ")
+        log("Contact admin! Error - 0x15",0," ",'fail')
         return true
     end
     
     if database_read("based") == auth.size and not auth.alreadyauth then
-        successLog("Verfied!",0,"             ")
+        log("Verfied!",0,"             ",'success')
         auth.alreadyauth = true
         return false
     end
 end
 
--- this should be able to be in a table lol
-local alphabet = "base64"
-local plaintext
+--#endregion
 
-local function get_web_data()
-    
-    if not pcall(load("return true")) then print("Someones trying to hook load") return false end
+--#region Update Vars Functions
 
-    --#region heartbeat
-    
-    local info = { 
-        ['encryption']              = nil,
-        ['deviceID']                = adapter_info.device_id,
-        ['vendorID']                = adapter_info.vendor_id,
-        ['unix']                    = 0,
-        ['username']                = username,
-        ['fails']                   = 0
-    }
-
-    local function updateAuthVars()
-        local unix = client.unix_time()
-        connectionVars.payload = info['username'] + ":" + info['vendor_id'] + ":" + info['device_id'] + ":" + info['unix']
-        connectionVars.key = tonumber(string.sub(unix,0,9)) + 3
-        connectionVars.encryptedPayload = encrypt(connectionVars.payload,connectionVars.key)
-        connectionVars.hash = md5.sumhexa(connectionVars.encryptedPayload)
-        connectionVars.url = "http://basedsecurity.net" + '/login/'+ connectionVars.encryptedPayload +'/' + connectionVars.hash
+local function updateAuthVars() -- 
+    local unix = client.unix_time() -
+    connectionVars.payload = string.format("%s:%s:%s:%s", securityVars.username, securityVars.vendor_id, securityVars.device_id, securityVars.unix)
+    connectionVars.key = tonumber(string.sub(unix,0,9)) + 3
+    if connectionVars.key > 10 then
+        connectionVars.key = connectionVars.key - 10
     end
-   
-    local function updateHeartbeatVars()
-        local unix = client.unix_time()
-        heartbeatVars.payload = info['username'] + ":" + info['vendor_id'] + ":" + info['device_id'] + ":" + info['unix']
-        heartbeatVars.key = tonumber(string.sub(unix,0,9)) + 3
-        heartbeatVars.encryptedPayload = encrypt(heartbeatVars.payload,heartbeatVars.key)
-        heartbeatVars.hash = md5.sumhexa(heartbeatVars.encryptedPayload)
-        heartbeatVars.url = "http://basedsecurity.net" + '/login/'+ heartbeatVars.encryptedPayload +'/' + heartbeatVars.hash
-    end
-
-    updateAuthVars()
-    updateHeartbeatVars()
-
-    local function heartbeat()
-        if heartbeatVars.checktime <= info['unix'] then
-            heartbeatVars.checktime = heartbeatVars.checktime + 1
-            http.post(heartbeatVars.url,{params = info},function(success, response)
-                if success and response.body ~= nil then
-                    if (heartbeatVars.checktime - info['unix'] ) ~= 1 then failLog("Error 0x98 | Delay failed",0,"");return end
-                    heartbeatVars.data = json.parse(response.body)
-                    if heartbeatVars.data.same ~= heartbeatVars.key then
-                      info['fails'] = info['fails'] + 1
-                      pendingLog("WARNING! heartbeat fail #" .. info['fails'],0,"")
-                      if info['fails'] < 3 then return end
-                      local x = 100
-                      failLog("Crash triggered | failed heartbeat |",0,"")
-                      --while x > 0 do
-                      --  x = x + 1
-                      --end
-                  end
-                else
-                    print(response.body)
-                end
-            end)
-        end
-      end
-    
-    client.set_event_callback("paint_ui",heartbeat)
-    --#endregion
-
-    if blacklist_check() then return end
-
-    if anti_http_debug() then return end
-
-    pendingLog("Attempting to connect!",0.5,"    ")
-
-    http.post(auth.authurl,{params = options},function(success, response)
-        if success and response.body ~= nil then
-
-            if string.sub(response.body,0,1) ~= "{" then
-                plaintext = base64.decode(response.body,alphabet)
-            else
-                plaintext = response.body
-            end
-
-            vars.data = json_parse(plaintext)
-
-
-            if string.find(plaintext,"404 Not Found") then failLog("Error 0x404 | Page not found",1.25,"       ") return end
-
-            if string.sub(plaintext,0,1) ~= "{" then failLog("Error 0x16 | Improper server response",1.25,"        ") return end
-
-            if (vars.data.msg == "Not authorized") then 
-                if vars.data.reason == nil then
-                    failLog("Error 0x44 | Not authorized",1.25, "         ")
-                    return
-                else
-                    failLog("Error 0x44 | Not authorized | " ..  vars.data.reason, 1.25, "         ")
-                    return
-                end
-            end
-
---            if (vars.data.version < vars.version) then print("Updated Required for loader") return end
-
-            if (filesize(true)) then return end
-
-            if (vars.data.status == "success" and not vars.data.blocked) then
-                successLog("Connected!",1.5,"          ")
-                client_delay_call(2,function()
-                    if vars.data.lua == nil or vars.data.lua == false then
-                        failLog("Error 0x17 | Error loading LUA",0," ")
-                    else
-                        local key = 5
-                        load(vars.data.lua)(vars.data.payload,key)
-                        successLog("Loaded! Enjoy!",0,"         ")
-                    end
-                end)
-            elseif vars.attempts ~= 4 and vars.data.status == "false" then 
-                failLog(string.format(vars.data.msg),1,"") 
-                vars.attempts = vars.attempts + 1
-                client.delay_call(5,get_web_data)
-            elseif vars.status == false then
-                failLog("Error | Not authorized",2.2,"")
-                return
-            else
-                failLog("Error 0x99 | Please contact admin",0,"")
-            end
----------------------------------------------------------------------------------------------------------------
-        elseif response.body == nil or not success then
-            failLog("Error 0x13 | Failed to connect to server",1,"") 
-            if vars.attempts ~= 4 then
-                failLog("-------------------------",1.2,"") 
-                pendingLog("Trying again, attempt #" .. vars.attempts,1.5,"   ")  
-                vars.attempts = vars.attempts + 1
-                client_delay_call(3,get_web_data)
-                auth.unix = string.sub(get_time,0,9)
-            elseif vars.attempts > 3 then
-                failLog("-------------------------",1.1,"") 
-                failLog("Error 0x14 | To many attempts, failed to laod",1.2,"            ") 
-                return
-            end
----------------------------------------------------------------------------------------------------------------
-        else
-            if response.body ~= nil then
-                local plaintext = base64.decode(response.body,alphabet)
-                print(plaintext)
-            else
-                print(response.body)
-            end
-        end
-    end)
+    connectionVars.encryptedPayload = encrypt(connectionVars.payload,connectionVars.key)
+    connectionVars.hash = md5.sumhexa(connectionVars.encryptedPayload)
+    connectionVars.url = "http://basedsecurity.net" .. '/login/' .. connectionVars.encryptedPayload .. '/' .. connectionVars.hash
 end
 
---#endregion 
+local function updateHeartbeatVars()
+    local unix = client.unix_time()
+    heartbeatVars.payload = string.format("%s:%s:%s:%s", securityVars.username, securityVars.vendor_id, securityVars.device_id, securityVars.unix)
+    heartbeatVars.key = tonumber(string.sub(unix,0,9)) + 3
+    if heartbeatVars.key > 10 then
+        heartbeatVars.key = heartbeatVars.key - 10
+    end
+    heartbeatVars.encryptedPayload = encrypt(heartbeatVars.payload,heartbeatVars.key)
+    heartbeatVars.hash = md5.sumhexa(heartbeatVars.encryptedPayload)
+    heartbeatVars.url = "http://basedsecurity.net" + '/login/'+ heartbeatVars.encryptedPayload +'/' + heartbeatVars.hash
+end
 
-pendingLog("Starting",0.1,"             ")
-client.delay_call(1,get_web_data)
+print(encrypt("testing this stupid encryption shit",2))
+--#endregion
+
 --#endregion
