@@ -58,7 +58,7 @@ returnDic = {
     "response" : "NULL"
 }
 
-def sendWebhook(url,status,name,hash,payload,type):
+def sendWebhook(url,status,name,hash,payload,type,userAgent):
     # This function sends a webhook to a discord server giving the status of there login
 
     embed = DiscordEmbed(title="Login Attempt - Version 1.92", description= status + " - " + vars["reason"],color='03b2f8')
@@ -69,9 +69,13 @@ def sendWebhook(url,status,name,hash,payload,type):
     embed.add_embed_field(name='Expected Payload', value=vars[type + "expectedEncrypt"])
     embed.add_embed_field(name="desync", value=verifyVars["differance"])
     embed.add_embed_field(name="Server Key", value=vars[type + "key"])
+    embed.add_embed_field(name="User Agent", value=userAgent)
     url.add_embed(embed)
     url.execute(remove_embeds=True)
 
+def endpoint():
+    user_agent = request.headers.get("user-agent")
+    return user_agent
 
 def registerUser(username):
     #This function will be used when the user has not registered
@@ -135,13 +139,20 @@ def updateVars(payload,type):
 
     if abs(verifyVars["differance"]) < 3:
         print("Adjusting vars - " + str(verifyVars["differance"]))
+        print("Old = " + str(vars[type + "key"]))
         vars[type + "key"] = int(info["unix"][9]) + 1 + verifyVars["differance"] # Add one so it can never be zero
-
-        vars["reason"] = "Updated expected payload"
-        unixAdjustment(type)
+        print("New = " + str(vars[type + "key"]))
+        
     elif abs(verifyVars["differance"]) >= 3:
         print("Adjustment is larger than 3 : " + info["passedUNIX"] + " - " + info["unix"] + "=" + str(verifyVars["differance"]))
-        return False        
+        return False   
+
+    while vars[type + "key"] <= 1: # A key of 1 does not apply an encryption and is bad
+        print("Key should not be 1")
+        vars[type + "key"] += 1     
+    
+    unixAdjustment(type)
+    vars["reason"] = "Updated expected payload"
 
     #if not cipher.encrypt: return True
     return True
@@ -152,6 +163,12 @@ def possibleDecryptions(payload,type):
     #checks for +/- dysnc of key
     return [cipher.decrypt(payload,vars[type + "key"]),cipher.decrypt(payload,vars[type + "key"] - 1),cipher.decrypt(payload,vars[type + "key"] + 1),cipher.decrypt(payload,vars[type + "key"] - 2),cipher.decrypt(payload,vars[type + "key"] + 2)]
 
+def ban_check():
+    if database.failed_connections(info["username"])[0] > 3:
+        database.ban_user(info["username"])
+        return True 
+    else:
+        return False
 
 def unixAdjustment(type):
     # This function is used to adjust the expected variables when there is a differenace 
@@ -168,6 +185,14 @@ def verify(payload,creds,type):
 
     tracking["total"] += 1
     if updateVars(payload,type):
+
+        if database.ban_status(info["username"])[0] != 0:
+            vars["reason"] = "User is banned"
+            return False
+
+        if ban_check():
+            vars["reason"] = "To many failed attemts, user banned"
+            return False
 
         if returnDic["response"][1] != info["vendorid"]: #may not be right
             vars["reason"] = "Invalid VendorId"
@@ -206,12 +231,13 @@ UP = "\x1B[7A"
 CLR = "\x1B[0K"
 
 @app.route('/')
-def index():
-    return 'BasedSecurity.inc!'
+def index():#This will be used for logging and allow us to blacklist ip, this may not work
+    return 'BasedSecurity.inc!' + str(request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr))
 
 print('\n')
 @app.route(vars["loginURL"],methods = ['POST','GET'])
 def login(payload,creds):
+    database.connect()
     # This is the general connection link. They pass payload and creds ( the hash ) and passes them to the verify 
     # function, If true it will send a success notifcation on discord and return information given to the user. If 
     #  they fail it seends a failed webhook with the reason, it returns false 
@@ -219,15 +245,20 @@ def login(payload,creds):
         if verify(payload,creds,""):
             tracking["success"] += 1
             print(f"Connection Tracking: \nSuccess = {tracking['success']}\nHeartbeat = {tracking['heartbeat']}\nFail = {tracking['fail']}\nTotal = {tracking['total']}\n",end="\r")
-            sendWebhook(vars["SuccessWebhook"],"Success",info["username"],creds,payload,"")
-            return {"Status" : True,"URL":creds,"payload":cipher.decrypt(payload,vars["key"])}
+            sendWebhook(vars["SuccessWebhook"],"Success",info["username"],creds,payload,"",endpoint())
+            database.disconnect()
+            return {"Status" : True,"URL":creds,"payload":cipher.decrypt(payload,vars["key"])}           
         else:
             tracking["fail"] += 1
+            database.update_failed_connections(info["username"],database.failed_connections(info["username"])[0])
             print(f"Connection Tracking: \nSuccess = {tracking['success']}\nHeartbeat = {tracking['heartbeat']}\nFail = {tracking['fail']}\nTotal = {tracking['total']}\n",end="\r")
-            sendWebhook(vars["FailWebook"],"Fail",info["username"],creds,payload,"")
+            sendWebhook(vars["FailWebook"],"Fail",info["username"],creds,payload,"",endpoint())
+            database.disconnect()
             return {"Status" : False}
     else:
-        sendWebhook(vars["FailWebook"],"Improper Request",info["username"],creds,payload,"")
+        database.update_failed_connections(info["username"],database.failed_connections(info["username"])[0])
+        sendWebhook(vars["FailWebook"],"Improper Request",info["username"],creds,payload,"",endpoint())
+        database.disconnect()
         return {"Status": False}
     
 @app.route(vars["heartbeatURL"],methods = ['POST','GET'])
@@ -241,7 +272,7 @@ def heartbeat(payload,creds):
             print(f"Connection Tracking: \nSuccess = {tracking['success']}\nHeartbeat = {tracking['heartbeat']}\nFail = {tracking['fail']}\nTotal = {tracking['total']}\n",end="\r")
             tracking["fail"] += 1
             print("Failed verification - " + vars["reason"])
-            sendWebhook(vars["heartbeatFailWebook"],"Fail",info["username"],creds,payload,"heartbeat")
+            sendWebhook(vars["heartbeatFailWebook"],"Fail",info["username"],creds,payload,"heartbeat",endpoint())
             return{"Status" : False, "Type" : "Heartbeat"}
     else:
         print("Incorrect request format")

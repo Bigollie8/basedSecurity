@@ -53,6 +53,9 @@ def updateVars():
     vars["payload"] = info["username"] + ":" + info["vendorid"] + ":" + info["deviceid"] + ":" + info["unix"]
     print(vars["payload"])
     vars["key"] = int(info['unix'][9]) + 1#accounts for dysnc in aws instance
+    
+    if vars["key"] == 1: # A key of 1 does not apply an encryption and is bad
+        vars["key"] += 1
 
     vars["encryptedPayload"] = cipher.encrypt(vars["payload"],vars["key"])
     if not vars["encryptedPayload"]: 
@@ -64,6 +67,10 @@ def updateVars():
 def updateHeartbeatVars():
     heartbeatVars["payload"] = info["username"] + ":" + info["vendorid"] + ":" + info["deviceid"] + ":" + info["unix"]
     heartbeatVars["key"] = int(info['unix'][9]) + 1 #accounts for dysnc in aws instance
+
+    if vars["key"] == 1: # A key of 1 does not apply an encryption and is bad
+        vars["key"] += 1
+
     heartbeatVars["encryptedPayload"] = cipher.encrypt(heartbeatVars["payload"],heartbeatVars["key"])
     heartbeatVars["hash"] = hashlib.md5((heartbeatVars["encryptedPayload"] + info["plaintext"]).encode()).hexdigest()
     heartbeatVars["url"] = BASE_URL + '/heartbeat/'+ heartbeatVars["encryptedPayload"] +'/' + heartbeatVars["hash"]
