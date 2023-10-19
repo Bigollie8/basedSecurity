@@ -139,9 +139,7 @@ def updateVars(payload,type):
 
     if abs(verifyVars["differance"]) < 3:
         print("Adjusting vars - " + str(verifyVars["differance"]))
-        print("Old = " + str(vars[type + "key"]))
         vars[type + "key"] = int(info["unix"][9]) + 1 + verifyVars["differance"] # Add one so it can never be zero
-        print("New = " + str(vars[type + "key"]))
         
     elif abs(verifyVars["differance"]) >= 3:
         print("Adjustment is larger than 3 : " + info["passedUNIX"] + " - " + info["unix"] + "=" + str(verifyVars["differance"]))
@@ -177,6 +175,10 @@ def unixAdjustment(type):
     vars[type + "expectedPayload"] = info["username"] + ":" + info["vendorid"] + ":" +  info["deviceid"] + ":" + str(int(info["unix"]) + verifyVars["differance"])
     vars[type + "expectedEncrypt"] = cipher.encrypt(vars[type + "expectedPayload"],vars[type + "key"])
     vars[type + "expectedHash"] = hashlib.md5((vars[type + "expectedEncrypt"] + info["plaintext"]).encode()).hexdigest()
+
+def totalConnectionsDB():
+    total = database.total_connections(info["username"])
+    database.update_connections(info["username"],total)
 
 def verify(payload,creds,type):
     # This function takes in payload, creds, and type. It then updates variables based off of the information given.
@@ -232,7 +234,7 @@ CLR = "\x1B[0K"
 
 @app.route('/')
 def index():#This will be used for logging and allow us to blacklist ip, this may not work
-    return 'BasedSecurity.inc!' + str(request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr))
+    return 'BasedSecurity.inc!'
 
 print('\n')
 @app.route(vars["loginURL"],methods = ['POST','GET'])
@@ -246,11 +248,17 @@ def login(payload,creds):
             tracking["success"] += 1
             print(f"Connection Tracking: \nSuccess = {tracking['success']}\nHeartbeat = {tracking['heartbeat']}\nFail = {tracking['fail']}\nTotal = {tracking['total']}\n",end="\r")
             sendWebhook(vars["SuccessWebhook"],"Success",info["username"],creds,payload,"",endpoint())
+            totalConnectionsDB()
+            database.update_failed_connections(info["username"],-1)
+            database.updateIP(info["username"],request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr))
             database.disconnect()
             return {"Status" : True,"URL":creds,"payload":cipher.decrypt(payload,vars["key"])}           
         else:
             tracking["fail"] += 1
-            database.update_failed_connections(info["username"],database.failed_connections(info["username"])[0])
+            try:
+                database.update_failed_connections(info["username"],database.failed_connections(info["username"])[0])
+            except:
+                print("Could Not update fails, user not found")
             print(f"Connection Tracking: \nSuccess = {tracking['success']}\nHeartbeat = {tracking['heartbeat']}\nFail = {tracking['fail']}\nTotal = {tracking['total']}\n",end="\r")
             sendWebhook(vars["FailWebook"],"Fail",info["username"],creds,payload,"",endpoint())
             database.disconnect()
@@ -263,19 +271,23 @@ def login(payload,creds):
     
 @app.route(vars["heartbeatURL"],methods = ['POST','GET'])
 def heartbeat(payload,creds):
+    database.connect()
     if request.method == 'GET':
         if verify(payload,creds,"heartbeat"):
             print(f"Connection Tracking: \nSuccess = {tracking['success']}\nHeartbeat = {tracking['heartbeat']}\nFail = {tracking['fail']}\nTotal = {tracking['total']}\n",end="\r")
             tracking["heartbeat"] += 1
+            database.disconnect()
             return {"Status" : True, "Type" : "Heartbeat"},303
         else:
             print(f"Connection Tracking: \nSuccess = {tracking['success']}\nHeartbeat = {tracking['heartbeat']}\nFail = {tracking['fail']}\nTotal = {tracking['total']}\n",end="\r")
             tracking["fail"] += 1
             print("Failed verification - " + vars["reason"])
             sendWebhook(vars["heartbeatFailWebook"],"Fail",info["username"],creds,payload,"heartbeat",endpoint())
+            database.disconnect()
             return{"Status" : False, "Type" : "Heartbeat"}
     else:
         print("Incorrect request format")
+        database.disconnect()
         return {"Status": False, "Type" : "Heartbeat"}
     
 if __name__ == '__main__':

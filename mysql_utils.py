@@ -23,6 +23,18 @@ class mysql:
         if self.database:
             self.database.close()
 
+    def updateIP(self, username, ip):
+        try:
+            query = "UPDATE lua_users SET IP_address = %s WHERE username = %s" 
+            params = (ip,username)
+            self.cursor.execute(query,params)
+            self.database.commit()
+            return True
+        except MySQLdb.Error as e:
+            print(e)
+            print("Failed to update IP")
+            return False
+
     def get_user(self, username):
         try:
             self.cursor.execute("SELECT * FROM lua_users WHERE username = %s", (username,))
@@ -41,6 +53,29 @@ class mysql:
         except Exception as e:
             print(e)
             print("Failed to update user info")
+            return False
+
+    def total_connections(self,username):
+        try:
+            query = "SELECT TotalConnections FROM lua_users WHERE username = %s"
+            params = (username,)
+            self.cursor.execute(query,params)
+            return self.cursor.fetchone()
+        except:
+            print("Failed to get Failed connections status")
+            return False
+
+    def update_connections(self,username,total):
+        try:
+            query = "UPDATE lua_users SET TotalConnections = %s WHERE username = %s" 
+            newTotal = total[0] + 1
+            params = (newTotal,username,)
+            self.cursor.execute(query,params)
+            self.database.commit()
+            return True
+        except Exception as e:
+            print(e)
+            print("Failed to updated total Loads")
             return False
         
     def ban_status(self,username):

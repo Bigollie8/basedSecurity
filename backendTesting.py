@@ -61,6 +61,7 @@ def updateVars():
     if not vars["encryptedPayload"]: 
         print(info['unix'])
         return False
+        
     vars["hash"] = hashlib.md5((vars["encryptedPayload"] + info["plaintext"]).encode()).hexdigest()
     vars["url"] = BASE_URL + '/login/'+ vars["encryptedPayload"] +'/' + vars["hash"]
 
