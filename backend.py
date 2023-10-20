@@ -264,7 +264,10 @@ def login(payload,creds):
             database.disconnect()
             return {"Status" : False}
     else:
-        database.update_failed_connections(info["username"],database.failed_connections(info["username"])[0])
+        try:
+            database.update_failed_connections(info["username"],database.failed_connections(info["username"])[0])
+        except:
+            print("Cant update fails username not captured")    
         sendWebhook(vars["FailWebook"],"Improper Request",info["username"],creds,payload,"",endpoint())
         database.disconnect()
         return {"Status": False}

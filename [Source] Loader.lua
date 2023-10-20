@@ -24,19 +24,22 @@ local username                  = "Admin"
 --#endregion
 
 --#region Global Tables
+local brandingVars = {
+    firstloop                   = false,
+    animationSpeed              = 60,
+    counter                     = 0,
+}
 
 local vars = {
     attempts                    = 2,
-    counter                     = 0,
     color                       = "ffffffff",
     data                        = nil,
-    firstloop                   = false,
-    version                     = 1.4
+    version                     = 2.0
 }
 
 local auth = {
     authurl                     = "https://basedsecurity.net",
-    authip                      = "172.67.163.57",
+    authip                      = "172.67.163.57", --Dont know if we need (Will decide later)
     reset                       = false,
     size                        = get_size,
     unix                        = string.sub(get_time,0,9),
@@ -75,7 +78,6 @@ local branding = {
     tag                         = ui.new_label("Config","Lua","-"),
     version                     = ui.new_label("Config","Lua","-"),
     frame2                      = ui.new_label("Config","Lua","-"),
-    animationSpeed              = 60,
 }
 
 local tag = {
@@ -257,7 +259,7 @@ local function watermark() -- there has to be a way better than up, maybe making
     if tag.location > 8 then 
         ui.set(branding.tag, "\aFFFFFFFF" .. tag["stage"..tag.location] .. hexTable.loaderThemeHex1 ..  seconday["stage" .. tag.location])
         ui.set(branding.version,hexTable.loaderThemeHex1 .. beta["stage" .. tag.location])
-        vars.firstloop = true 
+        brandingVars.firstloop = true 
 
     else
         ui.set(branding.tag, hexTable.loaderThemeHex1 .. seconday["stage"..tag.location])
@@ -266,7 +268,7 @@ local function watermark() -- there has to be a way better than up, maybe making
     end
     ui.set(branding.frame2,hexTable.loaderThemeHex1 .. "-                                               -")
 
-    vars.counter = vars.counter + 1
+    brandingVar.counter = brandingVars.counter + 1
 
     if tag.location >= 35 then
         tag.flip = true
@@ -274,8 +276,8 @@ local function watermark() -- there has to be a way better than up, maybe making
         tag.flip = false
     end
 
-    if vars.counter >= branding.animationSpeed then
-        vars.counter = 0 
+    if brandingVars.counter >= brandingVars.animationSpeed then
+        brandingVars.counter = 0 
         if tag.flip then
             tag.location = tag.location - 1
         elseif not tag.flip then
@@ -463,7 +465,7 @@ local function filesize(reset)
         return true
     end
     
-    if database_read("based") == auth.size and not auth.alreadyauth then
+    if database_read("based") == auth.size and not auth.alreadyauth then --May not be good ij
         log("Verfied!",0,"             ",'success')
         auth.alreadyauth = true
         return false
@@ -477,7 +479,7 @@ end
 local function updateAuthVars() -- 
     local unix = client.unix_time() -
     connectionVars.payload = string.format("%s:%s:%s:%s", securityVars.username, securityVars.vendor_id, securityVars.device_id, securityVars.unix)
-    connectionVars.key = tonumber(string.sub(unix,0,9)) + 3
+    connectionVars.key = tonumber(string.sub(unix,0,9)) + 1
     if connectionVars.key > 10 then
         connectionVars.key = connectionVars.key - 10
     end
