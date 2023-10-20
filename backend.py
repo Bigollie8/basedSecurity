@@ -60,16 +60,16 @@ returnDic = {
 
 def sendWebhook(url,status,name,hash,payload,type,userAgent):
     # This function sends a webhook to a discord server giving the status of there login
-
-    embed = DiscordEmbed(title="Login Attempt - Version 1.92", description= status + " - " + vars["reason"],color='03b2f8')
+    embed = DiscordEmbed(title="Login Attempt - Version 1.95", description= status + " - " + vars["reason"],color='03b2f8')
+    embed.set_author(name="BasedSecurity",icon_url ="https://cdn.discordapp.com/attachments/1097943477754527836/1164934299666104452/4fb7a80e-204f-4fb9-8675-509d4fbcb862.jpeg?ex=6545049c&is=65328f9c&hm=0efc1fb515bbb4e08fa56832054799e416740330d574b2ed34affa4cab0eb198&")
     embed.add_embed_field(name='Name', value=name)
     embed.add_embed_field(name='Hash', value=hash)
     embed.add_embed_field(name='Payload', value=payload)
     embed.add_embed_field(name='Expected Hash', value=vars[type + "expectedHash"])
     embed.add_embed_field(name='Expected Payload', value=vars[type + "expectedEncrypt"])
     embed.add_embed_field(name="desync", value=verifyVars["differance"])
-    embed.add_embed_field(name="Server Key", value=vars[type + "key"])
-    embed.add_embed_field(name="User Agent", value=userAgent)
+    embed.set_footer(text="User Agent - " + str(userAgent))
+
     url.add_embed(embed)
     url.execute(remove_embeds=True)
 

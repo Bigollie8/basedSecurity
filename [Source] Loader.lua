@@ -1,5 +1,5 @@
--- Security version 4.0
--- Developed by Ollie#0069 
+-- Security version 2.0
+-- Developed by Bigollie8 
 
 --#region Important vars
 local http                      = require("gamesense/http") or error("Sub to https://gamesense.pub/forums/viewtopic.php?id=19253 on the lua workshop.")
