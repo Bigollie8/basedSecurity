@@ -5,6 +5,7 @@ import cipher
 import time
 import hashlib
 import mysql_utils
+from flask import Flask, render_template, redirect, url_for, request
 
 database = mysql_utils.mysql()
 
@@ -234,7 +235,30 @@ CLR = "\x1B[0K"
 
 @app.route('/')
 def index():#This will be used for logging and allow us to blacklist ip, this may not work
-    return 'BasedSecurity.inc!'
+    return render_template('home.html')
+
+@app.route('/home')
+def home():#This will be used for logging and allow us to blacklist ip, this may not work
+    return render_template('home.html')
+
+@app.route('/about')
+def about():#This will be used for logging and allow us to blacklist ip, this may not work
+    return render_template('about.html')
+
+@app.route('/signin')
+def signin():#This will be used for logging and allow us to blacklist ip, this may not work
+    return render_template('signin.html')
+
+# Route for handling the login page logic
+@app.route('/admin', methods=['GET', 'POST'])
+def register():
+    error = None
+    if request.method == 'POST':
+        if request.form['username'] != 'admin' or request.form['password'] != 'admin':
+            error = 'Invalid Credentials. Please try again.'
+        else:
+            return render_template('admin.html',error=error)
+    return render_template('signin.html', error=error)
 
 print('\n')
 @app.route(vars["loginURL"],methods = ['POST','GET'])
