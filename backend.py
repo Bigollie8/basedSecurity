@@ -61,7 +61,7 @@ returnDic = {
 
 def sendWebhook(url,status,name,hash,payload,type,userAgent):
     # This function sends a webhook to a discord server giving the status of there login
-    embed = DiscordEmbed(title="Login Attempt - Version 1.95", description= status + " - " + vars["reason"],color='03b2f8')
+    embed = DiscordEmbed(title="Login Attempt - Version 2.0", description= status + " - " + vars["reason"],color='03b2f8')
     embed.set_author(name="BasedSecurity",icon_url ="https://cdn.discordapp.com/attachments/1097943477754527836/1164934299666104452/4fb7a80e-204f-4fb9-8675-509d4fbcb862.jpeg?ex=6545049c&is=65328f9c&hm=0efc1fb515bbb4e08fa56832054799e416740330d574b2ed34affa4cab0eb198&")
     embed.add_embed_field(name='Name', value=name)
     embed.add_embed_field(name='Hash', value=hash)
@@ -90,8 +90,8 @@ def databaseQuery(username):
     if userInfo == None or userInfo == False:
         return False
     
-    info["deviceid"] = str(userInfo[4])
-    info["vendorid"] = str(userInfo[5])
+    info["deviceid"] = str(userInfo[5])
+    info["vendorid"] = str(userInfo[4])
     return True
 
 def updateUserInfo(payload,type):
@@ -163,11 +163,14 @@ def possibleDecryptions(payload,type):
     return [cipher.decrypt(payload,vars[type + "key"]),cipher.decrypt(payload,vars[type + "key"] - 1),cipher.decrypt(payload,vars[type + "key"] + 1),cipher.decrypt(payload,vars[type + "key"] - 2),cipher.decrypt(payload,vars[type + "key"] + 2)]
 
 def ban_check():
-    if database.failed_connections(info["username"])[0] > 3:
-        database.ban_user(info["username"])
-        return True 
-    else:
-        return False
+    try:
+        if database.failed_connections(info["username"])[0] > 3:
+            database.ban_user(info["username"])
+            return True 
+        else:
+            return False
+    except Exception as e:
+        print("Failed to get failed connection attempts" + str(e))
 
 def unixAdjustment(type):
     # This function is used to adjust the expected variables when there is a differenace 
@@ -190,7 +193,7 @@ def verify(payload,creds,type):
     if updateVars(payload,type):
 
         if database.ban_status(info["username"])[0] != 0:
-            vars["reason"] = "User is banned"
+            vars["reason"] = "User is failedconnection"
             return False
 
         if ban_check():
@@ -198,6 +201,8 @@ def verify(payload,creds,type):
             return False
 
         if returnDic["response"][1] != info["vendorid"]: #may not be right
+            print(info)
+            print(returnDic["response"][1] + " - " + info["vendorid"])
             vars["reason"] = "Invalid VendorId"
             return False
 
@@ -221,11 +226,11 @@ def verify(payload,creds,type):
             vars["reason"] = "Mismatched Hash"
             return False
             
-#        if len(verifyVars["decryptPayload"][0]) != verifyVars["expectedLength"]:
-#            vars["reason"] = "Improper payload length " + str(verifyVars["expectedLength"]) + " " + str(len(verifyVars["decryptPayload"][0]))
-#            return False
+        # if len(verifyVars["decryptPayload"][0]) != verifyVars["expectedLength"]:
+        #     vars["reason"] = "Improper payload length " + str(verifyVars["expectedLength"]) + " " + str(len(verifyVars["decryptPayload"][0]))
+        #     return False
         
-        vars["reason"] = ""
+        vars["reason"] = "Success"
         return True
     else:
         return False
@@ -263,7 +268,12 @@ def register():
 print('\n')
 @app.route(vars["loginURL"],methods = ['POST','GET'])
 def login(payload,creds):
-    database.connect()
+    try:
+        print("Attempting to connect to database")
+        database.connect()
+    except:
+        print("Connection Failed")
+
     # This is the general connection link. They pass payload and creds ( the hash ) and passes them to the verify 
     # function, If true it will send a success notifcation on discord and return information given to the user. If 
     #  they fail it seends a failed webhook with the reason, it returns false 
@@ -280,6 +290,7 @@ def login(payload,creds):
         else:
             tracking["fail"] += 1
             try:
+                print("Tracking Fails")
                 database.update_failed_connections(info["username"],database.failed_connections(info["username"])[0])
             except:
                 print("Could Not update fails, user not found")

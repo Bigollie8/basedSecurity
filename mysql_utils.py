@@ -1,7 +1,7 @@
 import MySQLdb
 
 #Melly DB - host="162.0.225.59", user="lurker", passwd="Wv4H$BPBEFEvk#D7", db="lurker_based"
-#AWS DB - host="34.230.223.44", user="based", passwd="q0UekP3DuEJBy9tOpXkJ", db="baseddb"
+#AWS DB - 
 
 status = False
 
@@ -13,7 +13,7 @@ class mysql:
     
     def connect(self):
         try:
-            self.database = MySQLdb.connect(host="162.0.225.59", user="lurker", passwd="Wv4H$BPBEFEvk#D7", db="lurker_based")
+            self.database = MySQLdb.connect(host="34.230.223.44", user="based", passwd="q0UekP3DuEJBy9tOpXkJ", db="baseddb")
             self.cursor = self.database.cursor()
             print("\033[95mEstablished connection to server\033[0m")
         except:
@@ -25,7 +25,7 @@ class mysql:
 
     def updateIP(self, username, ip):
         try:
-            query = "UPDATE lua_users SET IP_address = %s WHERE username = %s" 
+            query = "UPDATE lua_users SET ip = %s WHERE username = %s" 
             params = (ip,username)
             self.cursor.execute(query,params)
             self.database.commit()
@@ -39,8 +39,8 @@ class mysql:
         try:
             self.cursor.execute("SELECT * FROM lua_users WHERE username = %s", (username,))
             return self.cursor.fetchone()
-        except:
-            print("User not found")
+        except Exception as e:
+            print("User not found: " + str(e))
             return False
 
     def update_user(self,username,deviceid,vendorid):
@@ -91,7 +91,7 @@ class mysql:
         
     def failed_connections(self,username):
         try:
-            query = "SELECT failedConnection FROM lua_users WHERE username = %s"
+            query = "SELECT failedConnections FROM lua_users WHERE username = %s"
             params = (username,)
             self.cursor.execute(query,params)
             return self.cursor.fetchone()
@@ -101,7 +101,7 @@ class mysql:
         
     def update_failed_connections(self,username,bans):
         try:
-            query = "UPDATE lua_users SET failedConnection = %s WHERE username = %s"
+            query = "UPDATE lua_users SET failedConnections = %s WHERE username = %s"
             bans += 1
             params = (bans,username,)
             self.cursor.execute(query,params)
