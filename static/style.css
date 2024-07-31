@@ -1,0 +1,80 @@
+
+* {
+    box-sizing: border-box;
+  }
+ 
+
+html {
+    font-family: sans-serif;
+    background: #eee;
+    padding: 1rem;
+}  
+
+body {
+    color: black;
+    margin: 0;
+
+}
+
+.header {
+    background-color: darkgray;
+    text-align: center;
+    padding: 10px 0;
+}
+
+.login {
+    background-color: darkgray;
+    position:relative;
+    text-align: center;
+    width: 200px;
+    line-height: 35px;
+    margin-top: 10%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: auto;   
+    padding: 10px;
+}
+
+.listUsers{
+    background-color: darkgray;
+    width:33%;
+    padding: 5px;
+    margin-left: 5px;
+    font-style:italic;
+    font-weight:bolder;
+    text-align: center;
+    list-style-type:none;
+}
+
+  /* Style the header */
+  .header {
+    background-color: #f1f1f1;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  /* Style the top navigation bar */
+  .topnav {
+    overflow: hidden;
+    background-color: #333;
+  }
+  
+  /* Style the topnav links */
+  .topnav a {
+    float: left;
+    display: block;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+  }
+  
+  /* Change color on hover */
+  .topnav a:hover {
+    background-color: #ddd;
+    color: black;
+  }
+
+a.right {
+    float:right;
+  }
