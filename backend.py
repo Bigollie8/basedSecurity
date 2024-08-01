@@ -6,10 +6,11 @@ import time
 import hashlib
 import mysql_utils
 from flask import Flask, render_template, redirect, url_for, request
+from pathlib import Path
 
 database = mysql_utils.mysql()
 
-app = Flask(__name__)
+app = Flask(__name__,template_folder=Path(__file__).parent / 'templates',static_folder=Path(__file__).parent / 'static')
 
 # General information that will be used to store user data
 info = {    
