@@ -1,15 +1,28 @@
 FROM python:3.8
 
-EXPOSE 5000/tcp
+# Set the working directory in the container
 
 WORKDIR /app
 
+EXPOSE 5000/tcp
+
+# Copy the dependencies file to the working directory
+
 COPY requirement.txt .
 
-COPY *.py .
+# Install any dependencies
 
 RUN pip install -r requirement.txt
 
-ENV PYTHONPATH "${PYTHONPATH}:/basedSecurity/"
+# Copy the content of the local src directory to the working directory
 
-CMD [ "python", "./backend.py"]
+COPY . .
+
+# Specify the command to run on container start
+
+CMD [ "python", "./backend.py" ]
+
+
+
+#ENV PYTHONPATH "${PYTHONPATH}:/basedSecurity/"
+

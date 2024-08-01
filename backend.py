@@ -1,12 +1,12 @@
-from flask import Flask
-from flask import request
+from flask import Flask, request, render_template, redirect, url_for    
 from discord_webhook import DiscordWebhook, DiscordEmbed
 import cipher
 import time
 import hashlib
 import mysql_utils
-from flask import Flask, render_template, redirect, url_for, request
 from pathlib import Path
+
+print("Starting Backend!")
 
 database = mysql_utils.mysql()
 
