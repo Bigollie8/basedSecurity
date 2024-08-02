@@ -64,6 +64,16 @@ class mysql:
         except:
             print("Failed to get Failed connections status")
             return False
+        
+    def get_password(self, username):
+        try:
+            query = "SELECT password FROM lua_users WHERE username = %s"
+            params = (username,)
+            self.cursor.execute(query,params)
+            return self.cursor.fetchone()
+        except Exception as e:
+            print("Failed to get password: " + str(e))
+            return False
 
     def update_connections(self,username,total):
         try:

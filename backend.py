@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for    
+from flask import Flask, request, render_template, redirect, url_for
 from discord_webhook import DiscordWebhook, DiscordEmbed
 import cipher
 import time
@@ -13,12 +13,13 @@ database = mysql_utils.mysql()
 app = Flask(__name__,template_folder=Path(__file__).parent / 'templates',static_folder=Path(__file__).parent / 'static')
 
 # General information that will be used to store user data
-info = {    
+info = {
     "username" : "NULL",
     "vendorid" : "NULL",
     "deviceid" : "NULL",
     "passedUNIX" : "Null",
     "unix" : "NULL",
+    "password" : "NULL",
     "plaintext" : "BasedSecurity"
 }
 
@@ -90,7 +91,7 @@ def databaseQuery(username):
     userInfo = database.get_user(username)
     if userInfo == None or userInfo == False:
         return False
-    
+    print(str(userInfo))
     info["deviceid"] = str(userInfo[5])
     info["vendorid"] = str(userInfo[4])
     return True
@@ -99,12 +100,12 @@ def updateUserInfo(payload,type):
     # This function takes the users payload, decrypts it and then proceeds to split it up
     # by a :. It then takes this information to search the database and see if we have a
     # user that is registered with that name, if so it returns the expected device id and
-    # vendor id. If not it returns false.  
+    # vendor id. If not it returns false.
 
-    global decrypted 
+    global decrypted
 
     decrypted = possibleDecryptions(payload,type)
-    for x in decrypted: 
+    for x in decrypted:
         if x != False:
             x = x.split(":")
             info["username"] = x[0] #first item should be username
@@ -113,26 +114,26 @@ def updateUserInfo(payload,type):
 
             info["passedUNIX"] = x[3]
             returnDic["response"] = x
-            
+
             if registerUser(info["username"]):
                 if not databaseQuery(info["username"]): continue
 
             return True
-        
+
     vars["reason"] = "Username not found inside of database or unable to establish connection"
     return False
 
 
 def updateVars(payload,type):
-    # This function takes the most recent information passed and updates related variables used to 
+    # This function takes the most recent information passed and updates related variables used to
     # secure the connection to the server.
     info["unix"] = str(round(time.time()))
 
     vars[type + "key"] = int(info["unix"][9]) + 1 # Add one so it can never be zero
-    
+
     if not updateUserInfo(payload,type):
         return False
-    
+
     vars[type + "expectedPayload"] = info["username"] + ":" + info["vendorid"] + ":" +  info["deviceid"] + ":" +  info["unix"]
     vars[type + "expectedEncrypt"] = cipher.encrypt(vars[type + "expectedPayload"],vars[type + "key"])
     vars[type + "expectedHash"] = hashlib.md5((vars[type + "expectedEncrypt"] + info["plaintext"]).encode()).hexdigest()
@@ -142,15 +143,15 @@ def updateVars(payload,type):
     if abs(verifyVars["differance"]) < 3:
         print("Adjusting vars - " + str(verifyVars["differance"]))
         vars[type + "key"] = int(info["unix"][9]) + 1 + verifyVars["differance"] # Add one so it can never be zero
-        
+
     elif abs(verifyVars["differance"]) >= 3:
         print("Adjustment is larger than 3 : " + info["passedUNIX"] + " - " + info["unix"] + "=" + str(verifyVars["differance"]))
-        return False   
+        return False
 
     while vars[type + "key"] <= 1: # A key of 1 does not apply an encryption and is bad
         print("Key should not be 1")
-        vars[type + "key"] += 1     
-    
+        vars[type + "key"] += 1
+
     unixAdjustment(type)
     vars["reason"] = "Updated expected payload"
 
@@ -158,7 +159,7 @@ def updateVars(payload,type):
     return True
 
 def possibleDecryptions(payload,type):
-    # This is used to update user expected variables right when you 
+    # This is used to update user expected variables right when you
     # initiate connection
     #checks for +/- dysnc of key
     return [cipher.decrypt(payload,vars[type + "key"]),cipher.decrypt(payload,vars[type + "key"] - 1),cipher.decrypt(payload,vars[type + "key"] + 1),cipher.decrypt(payload,vars[type + "key"] - 2),cipher.decrypt(payload,vars[type + "key"] + 2)]
@@ -167,14 +168,14 @@ def ban_check():
     try:
         if database.failed_connections(info["username"])[0] > 3:
             database.ban_user(info["username"])
-            return True 
+            return True
         else:
             return False
     except Exception as e:
         print("Failed to get failed connection attempts" + str(e))
 
 def unixAdjustment(type):
-    # This function is used to adjust the expected variables when there is a differenace 
+    # This function is used to adjust the expected variables when there is a differenace
     # in unix less than 1.
 
     vars[type + "expectedPayload"] = info["username"] + ":" + info["vendorid"] + ":" +  info["deviceid"] + ":" + str(int(info["unix"]) + verifyVars["differance"])
@@ -226,16 +227,16 @@ def verify(payload,creds,type):
         if creds != vars[type + "expectedHash"]:
             vars["reason"] = "Mismatched Hash"
             return False
-            
+
         # if len(verifyVars["decryptPayload"][0]) != verifyVars["expectedLength"]:
         #     vars["reason"] = "Improper payload length " + str(verifyVars["expectedLength"]) + " " + str(len(verifyVars["decryptPayload"][0]))
         #     return False
-        
+
         vars["reason"] = "Success"
         return True
     else:
         return False
-    
+
 UP = "\x1B[7A"
 CLR = "\x1B[0K"
 
@@ -257,16 +258,27 @@ def signin():#This will be used for logging and allow us to blacklist ip, this m
 
 # Route for handling the login page logic
 @app.route('/admin', methods=['GET', 'POST'])
-def register():
+def register(): 
     error = None
+    try:
+        print("Attempting to connect to database")
+        database.connect()
+    except:
+        print("Connection Failed")
+
     if request.method == 'POST':
-        if request.form['username'] != 'admin' or request.form['password'] != 'admin':
+        if not database.get_user(request.form['username']):
+            error = 'Invalid Credentials. Please try again.'
+            
+        elif request.form['password'] != database.get_password(request.form['username'])[0]:
             error = 'Invalid Credentials. Please try again.'
         else:
-            return render_template('admin.html',error=error)
+            username = request.form['username']
+            return render_template('admin.html', error=error, username=username)
     return render_template('signin.html', error=error)
 
 print('\n')
+
 @app.route(vars["loginURL"],methods = ['POST','GET'])
 def login(payload,creds):
     try:
@@ -275,9 +287,9 @@ def login(payload,creds):
     except:
         print("Connection Failed")
 
-    # This is the general connection link. They pass payload and creds ( the hash ) and passes them to the verify 
-    # function, If true it will send a success notifcation on discord and return information given to the user. If 
-    #  they fail it seends a failed webhook with the reason, it returns false 
+    # This is the general connection link. They pass payload and creds ( the hash ) and passes them to the verify
+    # function, If true it will send a success notifcation on discord and return information given to the user. If
+    #  they fail it seends a failed webhook with the reason, it returns false
     if request.method == 'GET':
         if verify(payload,creds,""):
             tracking["success"] += 1
@@ -287,7 +299,7 @@ def login(payload,creds):
             database.update_failed_connections(info["username"],-1)
             database.updateIP(info["username"],request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr))
             database.disconnect()
-            return {"Status" : True,"URL":creds,"payload":cipher.decrypt(payload,vars["key"])}           
+            return {"Status" : True,"URL":creds,"payload":cipher.decrypt(payload,vars["key"])}
         else:
             tracking["fail"] += 1
             try:
@@ -303,11 +315,11 @@ def login(payload,creds):
         try:
             database.update_failed_connections(info["username"],database.failed_connections(info["username"])[0])
         except:
-            print("Cant update fails username not captured")    
+            print("Cant update fails username not captured")
         sendWebhook(vars["FailWebook"],"Improper Request",info["username"],creds,payload,"",endpoint())
         database.disconnect()
         return {"Status": False}
-    
+
 @app.route(vars["heartbeatURL"],methods = ['POST','GET'])
 def heartbeat(payload,creds):
     database.connect()
@@ -328,6 +340,6 @@ def heartbeat(payload,creds):
         print("Incorrect request format")
         database.disconnect()
         return {"Status": False, "Type" : "Heartbeat"}
-    
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
