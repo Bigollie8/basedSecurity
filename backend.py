@@ -276,7 +276,13 @@ def register():
             error = 'User is banned. Please contact support.'
         else:
             username = request.form['username']
-            return render_template('admin.html', error=error, username=username)
+            print(username + " - " + str(database.total_connections(username)))
+            FFsuccessConnections = str(database.total_connections(username)[0])
+            FEheartbeat = str(tracking['heartbeat'])
+            FEfailedConnections = str(tracking['fail'])
+            FEtotalConections = str(tracking['total'])
+            database.disconnect()
+            return render_template('admin.html', error=error, username=username, successConnections =FFsuccessConnections, heartbeat=FEheartbeat, failedConnections=FEfailedConnections, totalConnections = FEtotalConections)
     return render_template('signin.html', error=error)
 
 print('\n')
