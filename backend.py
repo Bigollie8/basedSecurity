@@ -258,7 +258,7 @@ def signin():#This will be used for logging and allow us to blacklist ip, this m
 
 # Route for handling the login page logic
 @app.route('/admin', methods=['GET', 'POST'])
-def register(): 
+def register():
     error = None
     try:
         print("Attempting to connect to database")
@@ -269,9 +269,11 @@ def register():
     if request.method == 'POST':
         if not database.get_user(request.form['username']):
             error = 'Invalid Credentials. Please try again.'
-            
         elif request.form['password'] != database.get_password(request.form['username'])[0]:
             error = 'Invalid Credentials. Please try again.'
+        elif database.ban_status(request.form['username'])[0] != 0:
+            print(database.ban_status(request.form['username']))
+            error = 'User is banned. Please contact support.'
         else:
             username = request.form['username']
             return render_template('admin.html', error=error, username=username)

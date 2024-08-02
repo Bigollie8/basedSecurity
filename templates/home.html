@@ -1,27 +1,249 @@
 <!doctype html>
 <html>
-  <head>    
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <title>Admin Page</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  </head>
-  <body>
-
-
-    <pre class="header">
-        ____                      _______                      _ __       
+    <head>
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', filename='style.css') }}"
+        />
+        <title>Admin Page</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    </head>
+    <body class="home">
+        <pre class="header">
+  ____                      _______                      _ __
         / __ )____ _________  ____/ / ___/___  _______  _______(_) /___  __
        / __  / __ `/ ___/ _ \/ __  /\__ \/ _ \/ ___/ / / / ___/ / __/ / / /
       / /_/ / /_/ (__  )  __/ /_/ /___/ /  __/ /__/ /_/ / /  / / /_/ /_/ /
      /_____/\__,_/____/\___/\__,_//____/\___/\___/\__,_/_/  /_/\__/\__, /
                                                                   /____/
-    </pre>
-    
-    <div class="topnav">
-      <a href="home">Home</a>
-      <a href="about">About</a>
-      <a class="right" href="admin">Admin Panel Login</a>
-    </div>
+    </pre
+        >
 
-  </body>
+        <div class="topnav">
+            <a href="home">Home</a>
+            <a href="about">About</a>
+            <a class="right" href="admin">Admin Panel Login</a>
+        </div>
+
+        <div class="container">
+            <h1>Update Logs 2022 - 2024</h1>
+
+            <h3>#20240001 - 2024 Release 5</h3>
+
+            <hr />
+
+            <h3>#20230001 - 2023 Release 4</h3>
+
+            <ul>
+                <li>
+                    <strong>Docker Update:</strong> Worked on making the script
+                    compatible with Docker images, including AWS Lightsail and
+                    DB.
+                </li>
+                <li>
+                    <strong>Experimental Docker Changes:</strong> Implemented
+                    various changes to the Docker version.
+                </li>
+                <li>
+                    <strong>Changes Made with David:</strong> Started a complete
+                    recode of the backend to address de-sync issues. Continued
+                    work on backend testing to ensure seamless integration.
+                </li>
+                <li>
+                    <strong>Fixed De-Sync Error:</strong> Improved backend to
+                    properly compensate for 2 seconds of de-sync.
+                </li>
+                <li>
+                    <strong>Update User Info:</strong> Updated user information
+                    if missing and migrated to Melly DB.
+                </li>
+                <li>
+                    <strong>Updating Loaders:</strong> Cleaned up for upcoming
+                    deployment. Deprecation of old code is still pending.
+                </li>
+                <li>
+                    <strong>Sync with Laptop:</strong> Ensured synchronization
+                    with laptop setup.
+                </li>
+                <li>
+                    <strong>Added Basic Logging:</strong> Implemented basic
+                    logging of user information.
+                </li>
+                <li>
+                    <strong>Removed Old Security Code:</strong> Cleaned up
+                    repository by removing outdated security code.
+                </li>
+                <li>
+                    <strong>Fixed Variable Name:</strong> Standardized
+                    encryption for heartbeat and regular testing.
+                </li>
+                <li>
+                    <strong>Lightsail Compatibility Updates:</strong> Made
+                    updates to improve functionality on Lightsail.
+                </li>
+                <li>
+                    <strong>Miscellaneous File Fixes:</strong> Applied various
+                    updates and fixes to files.
+                </li>
+            </ul>
+
+            <hr />
+
+            <h3>#20220003 - 2022 Release 3</h3>
+
+            <ul>
+                <li>
+                    <strong>Added Webhook to Auto Update:</strong> Deprecated
+                    unnecessary code.
+                </li>
+                <li>
+                    <strong>Removed Unused Variables:</strong> Started cleaning
+                    up messy code.
+                </li>
+                <li>
+                    <strong>Updated MasterLoader:</strong> Support build
+                    enhancements.
+                </li>
+                <li>
+                    <strong>Separated Split Function:</strong> Improved code
+                    organization.
+                </li>
+                <li>
+                    <strong
+                        >First Attempt at Preventing Loadstring Hooking:</strong
+                    >
+                    Implemented initial framework for detection.
+                </li>
+                <li>
+                    <strong>Removed Example Lua:</strong> Cleaned up example
+                    code.
+                </li>
+                <li>
+                    <strong>Script Cleanup and Reorganization:</strong> Improved
+                    script management and structure.
+                </li>
+                <li>
+                    <strong>Improving Encryption Update [Source]:</strong>
+                    Enhanced encryption methods.
+                </li>
+                <li>
+                    <strong>PayloadV2.lua:</strong> Added server-side
+                    encryption.
+                </li>
+                <li>
+                    <strong>Update Loader Patch:</strong> Fixed encryption bug.
+                </li>
+                <li>
+                    <strong>Added Discord Bot:</strong> Integrated new bot
+                    functionality.
+                </li>
+                <li>
+                    <strong>Initial Load Hook Detection:</strong> Began
+                    detecting load hooks.
+                </li>
+                <li>
+                    <strong>Added Client-Side Ban Functionality:</strong>
+                    Implemented banning features.
+                </li>
+                <li>
+                    <strong>Updated Script Locations:</strong> Refined script
+                    paths and locations.
+                </li>
+                <li>
+                    <strong>Sync Backends:</strong> Completed backend
+                    synchronization.
+                </li>
+                <li>
+                    <strong>Update Aura URLs:</strong> Fixed aura not working
+                    issues.
+                </li>
+                <li>
+                    <strong>Backend Sync Completed:</strong> Finished backend
+                    synchronization tasks.
+                </li>
+            </ul>
+
+            <hr />
+
+            <h3>#20220002 - 2022 Release 2 - Code Cleanup</h3>
+
+            <p3>
+                Intial cleanup of code, removed old code and updated backend to
+                be more readable
+            </p3>
+
+            <hr />
+
+            <h3>#20220001 - 2022 Release 1 - Initial Release</h3>
+            <ul>
+                <li>
+                    <strong>Start of V2:</strong> Added backend framework for
+                    security in Python, including a basic outline for dynamic
+                    URL with MD5 hash.
+                </li>
+                <li>
+                    <strong>Backend Testing Script:</strong> Added framework for
+                    backend testing of connecting and requesting a payload.
+                </li>
+                <li>
+                    <strong>Update on Cipher/Backend:</strong> Need to fix an
+                    error with index error for encryption.
+                </li>
+                <li>
+                    <strong>Matrix Index Error:</strong> Fixed matrix index
+                    error as well as other minor changes.
+                </li>
+                <li>
+                    <strong>Communication Established:</strong> Backend now
+                    communicates externally with backend testing.
+                </li>
+                <li>
+                    <strong>Patched None Index Bug:</strong> Addressed and fixed
+                    none index bug.
+                </li>
+                <li>
+                    <strong>Testing Improvements:</strong> Cleaned up backend
+                    testing and backend variables, added tracking, and
+                    streamlined backend testing.
+                </li>
+                <li>
+                    <strong>Webhook Framework:</strong> Implemented Discord
+                    webhook framework; still need to polish responses.
+                </li>
+                <li>
+                    <strong>Backend Checks Added:</strong> Added backend check
+                    framework, cleaned up code, and started work on improving
+                    backend testing.
+                </li>
+                <li>
+                    <strong>Fixed Backend Testing:</strong> Addressed and fixed
+                    issues with backend testing.
+                </li>
+                <li>
+                    <strong>Updated Color Function:</strong> Enhanced color
+                    function.
+                </li>
+                <li>
+                    <strong>Added Heartbeat and Updated Server Output:</strong>
+                    Added heartbeat framework and updated testing script and
+                    backend.
+                </li>
+                <li>
+                    <strong
+                        >General Cleanup and Addition of Colors to Logs:</strong
+                    >
+                    Performed general cleanup and added colors to logs.
+                </li>
+                <li>
+                    <strong>Connection to Server:</strong> Implemented DB
+                    connection.
+                </li>
+                <li>
+                    <strong>Start of Lua Implementation:</strong> Started
+                    implementing new backend into Lua and polishing output of
+                    cipher.
+                </li>
+            </ul>
+        </div>
+    </body>
 </html>
