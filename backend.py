@@ -40,7 +40,7 @@ vars = {
     "FailWebook" : DiscordWebhook(url='https://discord.com/api/webhooks/970590193260310558/oZwVN0FrgFYGez66lMtIQIfDBN1TVFUw45AhbFjuQZV9WYT7WOFgHJ9oninI8tMTke00'),
     "SuccessWebhook" : DiscordWebhook(url='https://discord.com/api/webhooks/970590028457734215/Jmuq-3QwbHbPdXj2eNegf9zna2s8TVULQYQCWmtuPk0cvK2WJcgZ8ffi1jxenL2r3yPU'),
     "websiteLogin" : DiscordWebhook(url='https://discord.com/api/webhooks/1269163565689081916/W6kCMKLcL4csEd82-QjwKGmSH19iV_WINAnNHBDG5ISa3lBOKzekSvhOIQE8e7lEvETW'),
-    "location" : "http://localhost:5000/"
+    "location" : "http://basedSecurity.net/"
 }
 
 # "Location" : "http://localhost:5000/"
