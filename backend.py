@@ -38,8 +38,14 @@ vars = {
     "heartbeatURL" : '/heartbeat/<payload>/<creds>',
     "heartbeatFailWebook" : DiscordWebhook(url='https://discord.com/api/webhooks/991387394228097114/SrNPjcrV8UXnhSCXRO1BZHrkxqQqZsMS8574kVTnbeAruP39LD4bOrTAryGUkwPyMSEi'),
     "FailWebook" : DiscordWebhook(url='https://discord.com/api/webhooks/970590193260310558/oZwVN0FrgFYGez66lMtIQIfDBN1TVFUw45AhbFjuQZV9WYT7WOFgHJ9oninI8tMTke00'),
-    "SuccessWebhook" : DiscordWebhook(url='https://discord.com/api/webhooks/970590028457734215/Jmuq-3QwbHbPdXj2eNegf9zna2s8TVULQYQCWmtuPk0cvK2WJcgZ8ffi1jxenL2r3yPU')
+    "SuccessWebhook" : DiscordWebhook(url='https://discord.com/api/webhooks/970590028457734215/Jmuq-3QwbHbPdXj2eNegf9zna2s8TVULQYQCWmtuPk0cvK2WJcgZ8ffi1jxenL2r3yPU'),
+    "websiteLogin" : DiscordWebhook(url='https://discord.com/api/webhooks/1269163565689081916/W6kCMKLcL4csEd82-QjwKGmSH19iV_WINAnNHBDG5ISa3lBOKzekSvhOIQE8e7lEvETW'),
+    "location" : "http://localhost:5000/"
 }
+
+# "Location" : "http://localhost:5000/"
+# "Location" : "http://basedSecurity.net/"
+
 
 # This table is used to store information used to verify user
 verifyVars = {
@@ -75,6 +81,19 @@ def sendWebhook(url,status,name,hash,payload,type,userAgent):
 
     url.add_embed(embed)
     url.execute(remove_embeds=True)
+    
+def sendWebhookWebsite(url,status,name,role,endpoint):
+    # This function sends a webhook to a discord server giving the status of there login
+    embed = DiscordEmbed(title="Website Login - Version 2.0",color='03b2f8')
+    embed.set_author(name="BasedSecurity",icon_url ="https://cdn.discordapp.com/attachments/1097943477754527836/1164934299666104452/4fb7a80e-204f-4fb9-8675-509d4fbcb862.jpeg?ex=6545049c&is=65328f9c&hm=0efc1fb515bbb4e08fa56832054799e416740330d574b2ed34affa4cab0eb198&")
+    embed.add_embed_field(name='Name', value=name)
+    embed.add_embed_field(name='Role', value=role)
+    embed.add_embed_field(name='Endpoint', value=endpoint)
+
+
+    url.add_embed(embed)
+    url.execute(remove_embeds=True)
+
 
 def endpoint():
     user_agent = request.headers.get("user-agent")
@@ -280,9 +299,11 @@ def register():
 
         elif database.user_role(request.form['username'])[0] == "User":
             print("Trying to render user panel")
+            sendWebhookWebsite(vars["websiteLogin"],"Success",request.form['username'],"User",vars['location'])
+
             username = request.form['username']
             print(username + " - " + str(database.total_connections(username)))
-            FFsuccessConnections = str(database.total_connections(username)[0])
+            FFsuccessConnections = str(tracking['success'])
             FEheartbeat = str(tracking['heartbeat'])
             FEfailedConnections = str(tracking['fail'])
             FEtotalConections = str(tracking['total'])
@@ -290,8 +311,10 @@ def register():
             return render_template('users.html', error=error, username=username, successConnections =FFsuccessConnections, heartbeat=FEheartbeat, failedConnections=FEfailedConnections, totalConnections = FEtotalConections)
         elif database.user_role(request.form['username'])[0] == "Admin":
             print("Trying to render user panel")
+            sendWebhookWebsite(vars["websiteLogin"],"Success",request.form['username'],"Admin",vars['location'])
+
             username = request.form['username']
-            FFsuccessConnections = str(database.total_connections(username)[0])
+            FFsuccessConnections = str(tracking['success'])
             FEheartbeat = str(tracking['heartbeat'])
             FEfailedConnections = str(tracking['fail'])
             FEtotalConections = str(tracking['total'])
