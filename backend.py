@@ -240,13 +240,14 @@ def verify(payload,creds,type):
 UP = "\x1B[7A"
 CLR = "\x1B[0K"
 
+
+def template_choice():
+    return render_template('adminPrompt.html')
+
 @app.route('/')
 def index():#This will be used for logging and allow us to blacklist ip, this may not work
     return render_template('home.html')
 
-@app.route('/home')
-def home():#This will be used for logging and allow us to blacklist ip, this may not work
-    return render_template('home.html')
 
 @app.route('/about')
 def about():#This will be used for logging and allow us to blacklist ip, this may not work
@@ -261,6 +262,7 @@ def signin():#This will be used for logging and allow us to blacklist ip, this m
 def register():
     error = None
     try:
+
         print("Attempting to connect to database")
         database.connect()
     except:
@@ -271,10 +273,13 @@ def register():
             error = 'Invalid Credentials. Please try again.'
         elif request.form['password'] != database.get_password(request.form['username'])[0]:
             error = 'Invalid Credentials. Please try again.'
+
         elif database.ban_status(request.form['username'])[0] != 0:
             print(database.ban_status(request.form['username']))
             error = 'User is banned. Please contact support.'
-        else:
+
+        elif database.user_role(request.form['username'])[0] == "User":
+            print("Trying to render user panel")
             username = request.form['username']
             print(username + " - " + str(database.total_connections(username)))
             FFsuccessConnections = str(database.total_connections(username)[0])
@@ -282,8 +287,35 @@ def register():
             FEfailedConnections = str(tracking['fail'])
             FEtotalConections = str(tracking['total'])
             database.disconnect()
+            return render_template('users.html', error=error, username=username, successConnections =FFsuccessConnections, heartbeat=FEheartbeat, failedConnections=FEfailedConnections, totalConnections = FEtotalConections)
+        elif database.user_role(request.form['username'])[0] == "Admin":
+            print("Trying to render user panel")
+            username = request.form['username']
+            FFsuccessConnections = str(database.total_connections(username)[0])
+            FEheartbeat = str(tracking['heartbeat'])
+            FEfailedConnections = str(tracking['fail'])
+            FEtotalConections = str(tracking['total'])
+            database.disconnect()
             return render_template('admin.html', error=error, username=username, successConnections =FFsuccessConnections, heartbeat=FEheartbeat, failedConnections=FEfailedConnections, totalConnections = FEtotalConections)
+        else:
+            error = 'Internal Error, Please contact Aministrator'
+            return(render_template('signin.html', error=error))
     return render_template('signin.html', error=error)
+
+
+@app.route('/adminPrompt', methods=['GET', 'POST'])
+def admin_prompt():
+    if request.method == 'POST':
+        if request.form['admin'] == 'yes':
+            return render_template('admin.html')
+        else:
+            return render_template('user.html')
+    return render_template('adminPrompt.html')
+
+
+@app.route('/home')
+def home():#This will be used for logging and allow us to blacklist ip, this may not work
+    return render_template('home.html')
 
 print('\n')
 

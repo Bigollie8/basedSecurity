@@ -4,7 +4,7 @@
 
 html {
     font-family: sans-serif;
-    background: #eee;
+    background: black;
     padding: 1rem;
 }
 
@@ -30,6 +30,8 @@ body {
     margin-right: auto;
     margin-bottom: auto;
     padding: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
 }
 
 .listUsers {
@@ -45,7 +47,8 @@ body {
 
 /* Style the header */
 .header {
-    background-color: #f1f1f1;
+    color: white;
+    background-color:  black;
     padding: 20px;
     text-align: center;
 }
@@ -122,4 +125,12 @@ h1 {
 
 .section {
     margin-bottom: 20px;
+    
+}
+
+.gradient-text {
+    background: linear-gradient(to bottom, rgb(31, 31, 116), rgb(255, 0, 247));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
 }

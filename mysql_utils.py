@@ -98,6 +98,16 @@ class mysql:
             print(e)
             print("Failed to get ban status")
             return False
+        
+    def user_role(self,username):
+        try:
+            query = "SELECT Role FROM lua_users WHERE username = %s"
+            params = (username,)
+            self.cursor.execute(query,params)
+            return self.cursor.fetchone()
+        except Exception as e:
+            print("Failed to get Role : " + str(e))
+            return False
 
     def failed_connections(self,username):
         try:
@@ -130,4 +140,24 @@ class mysql:
             return True
         except:
             print("Failed to ban user")
+            return False
+        
+    def version_update(self,username, value):
+        try:
+            query = "Update lua_version SET version = %s WHERE username = %s"
+            params = (value, username,)
+            self.cursor.execute(query,params)
+            return self.cursor.fetchone()
+        except:
+            print("Failed to get version")
+            return False    
+
+    def version(self,username):
+        try:
+            query = "SELECT version FROM lua_version WHERE username = %s"
+            params = (username,)
+            self.cursor.execute(query,params)
+            return self.cursor.fetchone()
+        except:
+            print("Failed to get version")
             return False
