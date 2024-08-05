@@ -141,3 +141,32 @@ h4 {
     background-clip: text;
     color: transparent;
 }
+
+table.database{
+    width: 90%;
+    text-align: left;
+    border-collapse: collapse;
+    margin: 40px auto;
+    table-layout: auto;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+table.stats{
+    width: auto;
+}
+
+th{
+    font-size: smaller;
+    border: black;
+    border-width: 2px;
+    border-style: solid;
+}
+
+td:nth-child(odd) {
+    background-color: #e5eed6;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}

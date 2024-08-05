@@ -42,6 +42,15 @@ class mysql:
         except Exception as e:
             print("User not found: " + str(e))
             return False
+        
+    def get_users(self):
+        try:
+            query = "SELECT * FROM lua_users"
+            self.cursor.execute(query)
+            return self.cursor.fetchall()
+        except Exception as e:
+            print("Failed to get users: " + str(e))
+            return False
 
     def update_user(self,username,deviceid,vendorid):
         try:

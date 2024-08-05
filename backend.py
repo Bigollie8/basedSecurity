@@ -40,7 +40,7 @@ vars = {
     "FailWebook" : DiscordWebhook(url='https://discord.com/api/webhooks/970590193260310558/oZwVN0FrgFYGez66lMtIQIfDBN1TVFUw45AhbFjuQZV9WYT7WOFgHJ9oninI8tMTke00'),
     "SuccessWebhook" : DiscordWebhook(url='https://discord.com/api/webhooks/970590028457734215/Jmuq-3QwbHbPdXj2eNegf9zna2s8TVULQYQCWmtuPk0cvK2WJcgZ8ffi1jxenL2r3yPU'),
     "websiteLogin" : DiscordWebhook(url='https://discord.com/api/webhooks/1269163565689081916/W6kCMKLcL4csEd82-QjwKGmSH19iV_WINAnNHBDG5ISa3lBOKzekSvhOIQE8e7lEvETW'),
-    "location" : "http://basedSecurity.net/"
+    "location" : "http://localhost:5000/"
 }
 
 # "Location" : "http://localhost:5000/"
@@ -299,27 +299,26 @@ def register():
 
         elif database.user_role(request.form['username'])[0] == "User":
             print("Trying to render user panel")
-            sendWebhookWebsite(vars["websiteLogin"],"Success",request.form['username'],"User",vars['location'])
+            #sendWebhookWebsite(vars["websiteLogin"],"Success",request.form['username'],"User",vars['location'])
 
-            username = request.form['username']
-            print(username + " - " + str(database.total_connections(username)))
-            FFsuccessConnections = str(tracking['success'])
-            FEheartbeat = str(tracking['heartbeat'])
-            FEfailedConnections = str(tracking['fail'])
-            FEtotalConections = str(tracking['total'])
+            info['username'] = request.form['username']
+            totalConnectionsDB()
             database.disconnect()
-            return render_template('users.html', error=error, username=username, successConnections =FFsuccessConnections, heartbeat=FEheartbeat, failedConnections=FEfailedConnections, totalConnections = FEtotalConections)
+            return render_template('users.html', error=error, username=info['username'])
         elif database.user_role(request.form['username'])[0] == "Admin":
-            print("Trying to render user panel")
+            print("Trying to render Admin panel")
             sendWebhookWebsite(vars["websiteLogin"],"Success",request.form['username'],"Admin",vars['location'])
 
-            username = request.form['username']
+            info['username'] = request.form['username']
+            totalConnectionsDB()
+            users = database.get_users()
             FFsuccessConnections = str(tracking['success'])
             FEheartbeat = str(tracking['heartbeat'])
             FEfailedConnections = str(tracking['fail'])
             FEtotalConections = str(tracking['total'])
+            FEaverage = str(round((tracking['success'] + tracking["heartbeat"]) / (tracking['total'] + .00000000000000000000000001) * 100)) ## cant divide by 0
             database.disconnect()
-            return render_template('admin.html', error=error, username=username, successConnections =FFsuccessConnections, heartbeat=FEheartbeat, failedConnections=FEfailedConnections, totalConnections = FEtotalConections)
+            return render_template('admin.html', users = users,error=error, username=info['username'], average=FEaverage, successConnections =FFsuccessConnections, heartbeat=FEheartbeat, failedConnections=FEfailedConnections, totalConnections = FEtotalConections)
         else:
             error = 'Internal Error, Please contact Aministrator'
             return(render_template('signin.html', error=error))

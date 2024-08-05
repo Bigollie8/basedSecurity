@@ -3,8 +3,8 @@ import time
 import cipher
 import hashlib
 
-BASE_URL = "http://basedsecurity.net"
-#BASE_URL = "http://localhost:5000"
+#BASE_URL = "http://basedsecurity.net"
+BASE_URL = "http://localhost:5000"
 
 class bcolors:
     HEADER = '\033[95m'
@@ -97,9 +97,10 @@ def testHeartbeat():
         textResponse = requests.get(heartbeatVars["url"])
         print("Response : " + textResponse.text)
         responseJSON = textResponse.json()
-        if responseJSON['Status']:
-            print(f'{bcolors.OKGREEN} Success {bcolors.ENDC}')
-        else:
+        try:
+            if responseJSON['Status']:
+                print(f'{bcolors.OKGREEN} Success {bcolors.ENDC}')
+        except:
             print(f'{bcolors.FAIL} Failed {bcolors.ENDC}')
 
     except:

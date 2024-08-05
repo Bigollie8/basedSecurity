@@ -16,30 +16,84 @@ ____                      _______                      _ __
     / /_/ / /_/ (__  )  __/ /_/ /___/ /  __/ /__/ /_/ / /  / / /_/ /_/ /
    /_____/\__,_/____/\___/\__,_//____/\___/\___/\__,_/_/  /_/\__/\__, /
                                                                 /____/
-    </pre
-        >
+    </pre>
 
         <div class="topnav">
             <a href="home">Home</a>
             <a href="about">About</a>
             <a href="https://discord.com/invite/qXb9XkYZRd">Discord</a>
-            <a class="right" href="admin">Logout!</a>
+            <a class="right" href="admin">Logout</a>
+            <a class="right" href="admin">Admin Panel</a>
         </div>
 
         <br>
 
         <div class="container">
-            <h1>Admin Page</h1>
             <h2>Logged in as: <strong class="gradient-text">{{ username }}</strong></h2>
+            
             <hr />
 
-            <p>
-                <strong>Successful Connections:</strong> {{ successConnections
-                }}
-            </p>
-            <p><strong>Failed Connections:</strong> {{ failedConnections }}</p>
-            <p><strong>Heartbeat:</strong> {{ heartbeat }}</p>
-            <p><strong>Total Connections:</strong> {{ totalConnections }}</p>
+            <h3>Connection Statistics: {{ average }}%</h3>
+
+            <table class="stats">
+                <tr>
+                    <th>Successful Connections:</th>
+                    <td>{{ successConnections }}</td>
+                </tr>
+                <tr>
+                    <th>Failed Connections:</th>
+                    <td>{{ failedConnections }}</td>
+                </tr>
+                <tr>
+                    <th>Heartbeat:</th>
+                    <td>{{ heartbeat }}</td>
+                </tr>
+                <tr>
+                    <th>Total Connections:</th>
+                    <td>{{ totalConnections }}</td>
+                </tr>
+            </table>
+
+            <hr>
+
+            <h3>Active Users:</h3>
+            <table class="database">
+                <tr>
+                    <th>UID</th>
+                    <th>Username</th>
+                    <th>IP</th>
+                    <th>User Agent</th>
+                    <th>VendorID</th>
+                    <th>DeviceID</th>
+                    <th>lastEncryption</th>
+                    <th>Last Seen</th>
+                    <th>Filesize</th>
+                    <th>Banned</th>
+                    <th>Failed Connections</th>
+                    <th>Total Connections</th>
+                    <th>Password</th>
+                    <th>Role</th>
+                </tr>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user[0] }}</td>
+                    <td>{{ user[1] }}</td>
+                    <td>{{ user[2] }}</td>
+                    <td>{{ user[3] }}</td>
+                    <td>{{ user[4] }}</td>
+                    <td>{{ user[5] }}</td>
+                    <td>{{ user[6] }}</td>
+                    <td>{{ user[7] }}</td>
+                    <td>{{ user[8] }}</td>
+                    <td>{{ user[9] }}</td>
+                    <td>{{ user[10] }}</td>
+                    <td>{{ user[11] }}</td>
+                    <td>{{ user[12] }}</td>
+                    <td>{{ user[13] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
         </div>
     </body>
 </html>
