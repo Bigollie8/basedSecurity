@@ -312,11 +312,20 @@ def signin():#This will be used for logging and allow us to blacklist ip, this m
             elif database.ban_status(request.form['username'])[0] != 0:
                 error = 'User is banned. Please contact support.'
             elif database.user_role(request.form['username'])[0] == "User":
-                sendWebhookWebsite(vars["websiteLogin"],"Success",request.form['username'],"User",vars['location'])
-
+                print("Trying to render Admin panel")
+                sendWebhookWebsite(vars["websiteLogin"],"Success",request.form['username'],"Admin",vars['location'])
+                cookie =  cookie_encrypt(info['username'],"BasedCookie89745326487632498765928376")
                 info['username'] = request.form['username']
+                database.update_cookie(info['username'],cookie)
                 totalConnectionsDB()
                 database.disconnect()
+
+                #update cookie info
+                response = make_response(redirect('/user', 302))
+                response.set_cookie("based",cookie)
+                response.set_cookie("username",info['username'])
+                return response
+            
             elif database.user_role(request.form['username'])[0] == "Admin":
                 print("Trying to render Admin panel")
                 sendWebhookWebsite(vars["websiteLogin"],"Success",request.form['username'],"Admin",vars['location'])
@@ -331,7 +340,6 @@ def signin():#This will be used for logging and allow us to blacklist ip, this m
                 response.set_cookie("based",cookie)
                 response.set_cookie("username",info['username'])
                 return response
-                error = "failed to redirect"
 
         except Exception as e:
             print(e)
@@ -388,6 +396,7 @@ def user():
     try:
         if database.get_cookie(info['username'])[0] == request.cookies.get("based"):
             perms = database.user_role(info['username'])
+            print(perms)
             database.disconnect()
             return render_template('users.html', username=info['username'], perms=perms[0])
         else:
