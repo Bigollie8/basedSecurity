@@ -5,6 +5,19 @@ import time
 import hashlib
 import mysql_utils
 from pathlib import Path
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn="https://41492d979138c903702bfdc45f335cff@o4507728101048320.ingest.us.sentry.io/4507728105242624",
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    traces_sample_rate=1.0,
+    # Set profiles_sample_rate to 1.0 to profile 100%
+    # of sampled transactions.
+    # We recommend adjusting this value in production.
+    profiles_sample_rate=1.0,
+)
+
 
 print("Starting Backend!")
 
@@ -426,6 +439,11 @@ def home():#This will be used for logging and allow us to blacklist ip, this may
     
 
     return render_template('home.html')
+
+@app.route('/sentry-debug')
+def sentry():
+    1/0  # raises an error
+    return "<p>Hello, World!</p>"
 
 @app.route('/about')
 def about():#This will be used for logging and allow us to blacklist ip, this may not work
