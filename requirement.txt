@@ -4,3 +4,4 @@ discord_webhook
 mysql_utils
 pyfiglet
 mysqlclient
+sentry_sdk

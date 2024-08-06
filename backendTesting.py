@@ -87,7 +87,7 @@ def testConnection():
         else:
             print(f'{bcolors.FAIL} Failed {bcolors.ENDC}')
     except ValueError:
-        raise TypeError(f'{bcolors.FAIL}Failed to connect with key : {bcolors.ENDC}' + str(vars["key"]))
+        print(f'{bcolors.FAIL}Failed to connect with key : {bcolors.ENDC}' + str(vars["key"]))
     
     print(f'{bcolors.OKCYAN}' + ('---'*35) + f'{bcolors.ENDC}')
 
@@ -104,7 +104,7 @@ def testHeartbeat():
             print(f'{bcolors.FAIL} Failed {bcolors.ENDC}')
 
     except:
-        raise TypeError(f'{bcolors.FAIL}Failed to connect with key : {bcolors.ENDC}' + str(heartbeatVars["key"]))
+        print(f'{bcolors.FAIL}Failed to connect with key : {bcolors.ENDC}' + str(heartbeatVars["key"]))
     
     print(f'{bcolors.OKCYAN}' + ('---'*35) + f'{bcolors.ENDC}')
 

@@ -27,7 +27,7 @@ class mysql:
             print("\033[91m\033[01m!WARNING! Connection to database failed\033[0m")
 
     def disconnect(self):
-        if self.database:
+        if self.database is not None:
             self.database.close()
 
     def updateIP(self, username, ip):
