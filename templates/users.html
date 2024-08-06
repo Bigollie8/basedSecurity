@@ -23,7 +23,13 @@ ____                      _______                      _ __
             <a href="home">Home</a>
             <a href="about">About</a>
             <a href="https://discord.com/invite/qXb9XkYZRd">Discord</a>
-            <a class="right" href="admin">Logout!</a>
+            {% if perms != 'Admin' %}
+            <a class="right" href="signin">Login</a>
+            {% else %}
+            <a class="right" href="logout">Logout</a>
+            <a class="right" href="admin">Admin Panel</a>
+            <a class="right" href="user">User Panel</a>
+            {% endif %}
         </div>
 
         <br>

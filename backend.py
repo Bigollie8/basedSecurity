@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, make_response
 from discord_webhook import DiscordWebhook, DiscordEmbed
 import cipher
 import time
@@ -40,7 +40,7 @@ vars = {
     "FailWebook" : DiscordWebhook(url='https://discord.com/api/webhooks/970590193260310558/oZwVN0FrgFYGez66lMtIQIfDBN1TVFUw45AhbFjuQZV9WYT7WOFgHJ9oninI8tMTke00'),
     "SuccessWebhook" : DiscordWebhook(url='https://discord.com/api/webhooks/970590028457734215/Jmuq-3QwbHbPdXj2eNegf9zna2s8TVULQYQCWmtuPk0cvK2WJcgZ8ffi1jxenL2r3yPU'),
     "websiteLogin" : DiscordWebhook(url='https://discord.com/api/webhooks/1269163565689081916/W6kCMKLcL4csEd82-QjwKGmSH19iV_WINAnNHBDG5ISa3lBOKzekSvhOIQE8e7lEvETW'),
-    "location" : "http://localhost:5000/"
+    "location" : "http://basedSecurity.net/"
 }
 
 # "Location" : "http://localhost:5000/"
@@ -218,7 +218,7 @@ def verify(payload,creds,type):
             return False
 
         if ban_check():
-            vars["reason"] = "To many failed attemts, user banned"
+            vars["reason"] = "Too many failed attemts, user banned"
             return False
 
         if returnDic["response"][1] != info["vendorid"]: #may not be right
@@ -259,6 +259,15 @@ def verify(payload,creds,type):
 UP = "\x1B[7A"
 CLR = "\x1B[0K"
 
+def cookie_encrypt(username,cookie):
+    encrypted = cipher.encrypt(hashlib.md5(cookie.encode()).hexdigest(),3)
+    database.update_cookie(username,encrypted)
+    return encrypted
+
+def cookie_decrypt(cookie):
+    decrypted = cipher.decrypt(cookie,3)
+    return decrypted
+
 
 def template_choice():
     return render_template('adminPrompt.html')
@@ -267,77 +276,162 @@ def template_choice():
 def index():#This will be used for logging and allow us to blacklist ip, this may not work
     return render_template('home.html')
 
+@app.route('/logout')
+def logout():
+    response = make_response(redirect('/signin', 302))
+    response.set_cookie('username', '', expires=0)
+    response.set_cookie('based', '', expires=0)
+    return response
 
-@app.route('/about')
-def about():#This will be used for logging and allow us to blacklist ip, this may not work
-    return render_template('about.html')
 
-@app.route('/signin')
+
+@app.route('/get_cookie', methods=['GET'])
+def get_cookie():
+    database.connect()
+    cookie_value = request.cookies.get("based")
+    database.disconnect()
+    print(cookie_value)
+    return cookie_decrypt(cookie_value)
+
+
+@app.route('/signin', methods=['GET', 'POST'])
 def signin():#This will be used for logging and allow us to blacklist ip, this may not work
-    return render_template('signin.html')
-
-# Route for handling the login page logic
-@app.route('/admin', methods=['GET', 'POST'])
-def register():
     error = None
     try:
-
         print("Attempting to connect to database")
         database.connect()
     except:
         print("Connection Failed")
 
     if request.method == 'POST':
-        if not database.get_user(request.form['username']):
-            error = 'Invalid Credentials. Please try again.'
-        elif request.form['password'] != database.get_password(request.form['username'])[0]:
-            error = 'Invalid Credentials. Please try again.'
+        try:
+            if not database.get_user(request.form['username']):
+                error = 'Invalid Credentials. Please try again.'
+            elif request.form['password'] != database.get_password(request.form['username'])[0]:
+                error = 'Invalid Credentials. Please try again.'
+            elif database.ban_status(request.form['username'])[0] != 0:
+                error = 'User is banned. Please contact support.'
+            elif database.user_role(request.form['username'])[0] == "User":
+                sendWebhookWebsite(vars["websiteLogin"],"Success",request.form['username'],"User",vars['location'])
 
-        elif database.ban_status(request.form['username'])[0] != 0:
-            print(database.ban_status(request.form['username']))
-            error = 'User is banned. Please contact support.'
+                info['username'] = request.form['username']
+                totalConnectionsDB()
+                database.disconnect()
+            elif database.user_role(request.form['username'])[0] == "Admin":
+                print("Trying to render Admin panel")
+                sendWebhookWebsite(vars["websiteLogin"],"Success",request.form['username'],"Admin",vars['location'])
+                cookie =  cookie_encrypt(info['username'],"BasedCookie89745326487632498765928376")
+                info['username'] = request.form['username']
+                database.update_cookie(info['username'],cookie)
+                totalConnectionsDB()
+                database.disconnect()
 
-        elif database.user_role(request.form['username'])[0] == "User":
-            print("Trying to render user panel")
-            #sendWebhookWebsite(vars["websiteLogin"],"Success",request.form['username'],"User",vars['location'])
+                #update cookie info
+                response = make_response(redirect('/admin', 302))
+                response.set_cookie("based",cookie)
+                response.set_cookie("username",info['username'])
+                return response
+                error = "failed to redirect"
 
-            info['username'] = request.form['username']
-            totalConnectionsDB()
-            database.disconnect()
-            return render_template('users.html', error=error, username=info['username'])
-        elif database.user_role(request.form['username'])[0] == "Admin":
-            print("Trying to render Admin panel")
-            sendWebhookWebsite(vars["websiteLogin"],"Success",request.form['username'],"Admin",vars['location'])
+        except Exception as e:
+            print(e)
+            
+        error = "Failed to get role"
+    return render_template('signin.html')
 
-            info['username'] = request.form['username']
-            totalConnectionsDB()
+
+# Route for handling the login page logic
+@app.route('/admin', methods=['GET', 'POST'])
+def admin():
+    error = None
+    try:
+        print("Attempting to connect to database")
+        database.connect()
+    except:
+        print("Connection Failed")
+        error = 'Login Expired, please Login again'    
+        return redirect('/signin', 302)
+
+    try:
+        if database.get_cookie(info['username'])[0] == request.cookies.get("based"):
             users = database.get_users()
-            FFsuccessConnections = str(tracking['success'])
-            FEheartbeat = str(tracking['heartbeat'])
-            FEfailedConnections = str(tracking['fail'])
-            FEtotalConections = str(tracking['total'])
-            FEaverage = str(round((tracking['success'] + tracking["heartbeat"]) / (tracking['total'] + .00000000000000000000000001) * 100)) ## cant divide by 0
+            FFsuccessConnections = tracking["success"]
+            FEheartbeat = tracking["heartbeat"]
+            FEfailedConnections = tracking["fail"]
+            FEtotalConections = tracking["total"]
+            FEaverage = round(((FFsuccessConnections + FEheartbeat) / (FEtotalConections + .0001)) * 100,2)
             database.disconnect()
-            return render_template('admin.html', users = users,error=error, username=info['username'], average=FEaverage, successConnections =FFsuccessConnections, heartbeat=FEheartbeat, failedConnections=FEfailedConnections, totalConnections = FEtotalConections)
+            return render_template('admin.html', users=users,  error=error, username=info['username'], average=FEaverage, successConnections =FFsuccessConnections, heartbeat=FEheartbeat, failedConnections=FEfailedConnections, totalConnections = FEtotalConections)
         else:
-            error = 'Internal Error, Please contact Aministrator'
-            return(render_template('signin.html', error=error))
-    return render_template('signin.html', error=error)
+            error = "Login Expired, please Login again"
+            print(error)
+            database.disconnect()
+            print("Permissions not found")
+            return redirect('/home', 302)
 
+    except Exception as e:
+        print("Cant display Admin Panel")
+        print(e)
+        error = "Failed to get role"
+        database.disconnect()
+        return redirect('/home', 302)
+    
+    return redirect('/home', 302)
 
-@app.route('/adminPrompt', methods=['GET', 'POST'])
-def admin_prompt():
-    if request.method == 'POST':
-        if request.form['admin'] == 'yes':
-            return render_template('admin.html')
+@app.route('/user')
+def user():
+    try:
+        print("Attempting to connect to database")
+        database.connect()
+    except:
+        print("Connection Failed")
+    try:
+        if database.get_cookie(info['username'])[0] == request.cookies.get("based"):
+            perms = database.user_role(info['username'])
+            database.disconnect()
+            return render_template('users.html', username=info['username'], perms=perms[0])
         else:
-            return render_template('user.html')
-    return render_template('adminPrompt.html')
+            print("Permissions not found")
+            database.disconnect()
+            return redirect('/home', 302)
+    except Exception as e:
+        print("Cant display User Panel")
+        print(e)
+        database.disconnect()
+        return redirect('/home', 302)
 
 
 @app.route('/home')
 def home():#This will be used for logging and allow us to blacklist ip, this may not work
+    try:
+        print("Attempting to connect to database")
+        database.connect()
+        perms = database.user_role(request.cookies.get("username"))
+        print("User found with the role : " + perms[0])
+        return render_template('home.html', perms=perms[0])
+
+    except:
+        perms = ["Visitor"]
+        print("Connection Failed")
+
+    
+
     return render_template('home.html')
+
+@app.route('/about')
+def about():#This will be used for logging and allow us to blacklist ip, this may not work
+    try:
+
+        print("Attempting to connect to database")
+        database.connect()
+        perms = database.user_role(request.cookies.get("username"))
+        print("User found with the role : " + perms[0])
+        return render_template('about.html', perms=perms[0])
+    except:
+        perms = ["Visitor"]
+        print("Connection Failed")
+
+    return render_template('about.html', perms=perms[0])
 
 print('\n')
 
