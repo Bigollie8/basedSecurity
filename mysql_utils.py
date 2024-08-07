@@ -30,6 +30,15 @@ class mysql:
         if self.database is not None:
             self.database.close()
 
+    def Masterkey(self):
+        try:
+            query = "SELECT Masterkey FROM lua_users WHERE username = 'Admin'"
+            self.cursor.execute(query)
+            return self.cursor.fetchone()
+        except:
+            print("Failed to get Masterkey")
+            return False
+
     def updateIP(self, username, ip):
         try:
             query = "UPDATE lua_users SET ip = %s WHERE username = %s"

@@ -368,11 +368,12 @@ def admin():
     try:
         print("Attempting to connect to database")
         database.connect()
+        print(database.Masterkey())
+
     except:
         print("Connection Failed")
         error = 'Login Expired, please Login again'    
         return redirect('/signin', 302)
-
     try:
         if database.get_cookie(info['username'])[0] == request.cookies.get("based"):
             users = database.get_users()
