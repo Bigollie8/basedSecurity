@@ -160,19 +160,19 @@ table.database{
     margin: 40px auto;
     table-layout: auto;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 20px;
+    border-radius: 10px;
     min-width: 100%; /* Ensure the table stretches to fill the container */
     border-collapse: collapse;
 }
 
 table.stats{
-    width: auto;
+    width: 25%;
     background: rgb(236, 236, 236);
     max-width: 80%;
     text-align: left;
     table-layout: auto;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 20px;
+    border-radius: 10px;
     
 }
 
@@ -182,14 +182,12 @@ th{
     padding: 3px;
     background-color: white;
     border-style: solid;
-    border-radius: 10px;
 }
 td{
     font-size: 60%;
     border-width: 0px;
     padding: 3px;
     border-style: solid;
-    border-radius: 10px;
 }
 
 
@@ -255,12 +253,12 @@ tr:nth-child(even) {
 }
 
 .progress-bar {
-    background: rgb(236, 236, 236);
+    background: #333;
     border-radius: 5px;
     overflow: hidden;
     height: 20px;
     margin-top: 5px;
-    width: 20%;
+    width: 25%;
     min-width: 15%;
 }
 

@@ -331,7 +331,7 @@ def signin():#This will be used for logging and allow us to blacklist ip, this m
             elif database.user_role(request.form['username'])[0] == "User":
                 print("Trying to render Admin panel")
                 sendWebhookWebsite(vars["websiteLogin"],"Success",request.form['username'],"Admin",vars['location'])
-                cookie =  cookie_encrypt(info['username'],"BasedCookie89745326487632498765928376")
+                cookie =  cookie_encrypt(info['username'],"BasedCookie" + info['username'] + str(time.time())[:7])
                 info['username'] = request.form['username']
                 database.update_cookie(info['username'],cookie)
                 totalConnectionsDB()
@@ -348,7 +348,7 @@ def signin():#This will be used for logging and allow us to blacklist ip, this m
             elif database.user_role(request.form['username'])[0] == "Admin":
                 print("Trying to render Admin panel")
                 sendWebhookWebsite(vars["websiteLogin"],"Success",request.form['username'],"Admin",vars['location'])
-                cookie =  cookie_encrypt(info['username'],"BasedCookie89745326487632498765928376")
+                cookie =  cookie_encrypt(info['username'],"BasedCookie" + info['username'] + str(time.time())[:7])
                 info['username'] = request.form['username']
                 database.update_cookie(info['username'],cookie)
                 totalConnectionsDB()
