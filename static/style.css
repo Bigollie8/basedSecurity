@@ -142,15 +142,27 @@ h4 {
     color: transparent;
 }
 
+div.active-users {
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+    background: rgb(236, 236, 236);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow-x: auto;  /* Enable horizontal scrolling */
+}
+
+
 table.database{
     width: auto;
     max-width: 100%;
     text-align: left;
-    border-collapse: collapse;
     margin: 40px auto;
     table-layout: auto;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 20px;
+    min-width: 100%; /* Ensure the table stretches to fill the container */
+    border-collapse: collapse;
 }
 
 table.stats{
