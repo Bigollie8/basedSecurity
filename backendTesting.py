@@ -3,8 +3,8 @@ import time
 import cipher
 import hashlib
 
-BASE_URL = "http://basedsecurity.net"
-#BASE_URL = "http://localhost:5000"
+#BASE_URL = "http://basedsecurity.net"
+BASE_URL = "http://localhost:5000"
 
 class bcolors:
     HEADER = '\033[95m'

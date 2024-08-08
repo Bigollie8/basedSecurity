@@ -306,6 +306,10 @@ def get_cookie():
     print(cookie_value)
     return cookie_decrypt(cookie_value)
 
+def user_agent():
+    user_agent = request.headers.get("user-agent")
+    return user_agent
+
 
 @app.route('/signin', methods=['GET', 'POST'])
 def signin():#This will be used for logging and allow us to blacklist ip, this may not work
@@ -331,6 +335,8 @@ def signin():#This will be used for logging and allow us to blacklist ip, this m
                 info['username'] = request.form['username']
                 database.update_cookie(info['username'],cookie)
                 totalConnectionsDB()
+                database.last_seen(info['username'])
+                database.update_user_agent(info['username'],user_agent())
                 database.disconnect()
 
                 #update cookie info
@@ -346,6 +352,8 @@ def signin():#This will be used for logging and allow us to blacklist ip, this m
                 info['username'] = request.form['username']
                 database.update_cookie(info['username'],cookie)
                 totalConnectionsDB()
+                database.last_seen(info['username'])
+                database.update_user_agent(info['username'],user_agent())
                 database.disconnect()
 
                 #update cookie info
@@ -477,6 +485,8 @@ def login(payload,creds):
     if request.method == 'GET':
         if verify(payload,creds,""):
             tracking["success"] += 1
+            database.last_seen(info['username'])
+            database.update_user_agent(info['username'],user_agent())
             print(f"Connection Tracking: \nSuccess = {tracking['success']}\nHeartbeat = {tracking['heartbeat']}\nFail = {tracking['fail']}\nTotal = {tracking['total']}\n",end="\r")
             sendWebhook(vars["SuccessWebhook"],"Success",info["username"],creds,payload,"",endpoint())
             totalConnectionsDB()

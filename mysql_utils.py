@@ -1,5 +1,6 @@
 import MySQLdb
 import logging
+from datetime import datetime
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -162,6 +163,28 @@ class mysql:
         except Exception as e:
             print("Failed to get Role : " + str(e))
             return False
+        
+    def last_seen(self,username):
+        try:
+            query = "UPDATE lua_users SET last_seen = %s WHERE username = %s"
+            params = (datetime.now(),username)
+            self.cursor.execute(query,params)
+            self.database.commit()
+            return True
+        except Exception as e:
+            print("Failed to update last seen : " + str(e))
+            return False
+        
+    def update_user_agent(self,username,agent):
+        try:
+            query = "UPDATE lua_users SET user_agent = %s WHERE username = %s"
+            params = (agent,username)
+            self.cursor.execute(query,params)
+            self.database.commit()
+            return True
+        except Exception as e:
+            print("Failed to update User Agent : " + str(e))
+            return False    
 
     def failed_connections(self,username):
         try:

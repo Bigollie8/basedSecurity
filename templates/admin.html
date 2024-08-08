@@ -32,31 +32,6 @@ ____                      _______                      _ __
 
         <div class="container">
             <h2>Logged in as: <strong class="gradient-text">{{ username }}</strong></h2>
-            
-            <hr />
-
-            <h3>Connection Statistics: {{ average }}%</h3>
-
-            <table class="stats">
-                <tr>
-                    <th>Successful Connections:</th>
-                    <td>{{ successConnections }}</td>
-                </tr>
-                <tr>
-                    <th>Failed Connections:</th>
-                    <td>{{ failedConnections }}</td>
-                </tr>
-                <tr>
-                    <th>Heartbeat:</th>
-                    <td>{{ heartbeat }}</td>
-                </tr>
-                <tr>
-                    <th>Total Connections:</th>
-                    <td>{{ totalConnections }}</td>
-                </tr>
-            </table>
-
-            <hr>
 
             <div class="active-users">
             <h2>Active Users:</h2>
@@ -67,9 +42,7 @@ ____                      _______                      _ __
                     <th>User Agent</th>
                     <th>VendorID</th>
                     <th>DeviceID</th>
-                    <th>lastEncryption</th>
                     <th>Last Seen</th>
-                    <th>Filesize</th>
                     <th>Banned</th>
                     <th>Failed Connections</th>
                     <th>Total Connections</th>
@@ -89,11 +62,40 @@ ____                      _______                      _ __
                     <td>{{ user[9] }}</td>
                     <td>{{ user[10] }}</td>
                     <td>{{ user[11] }}</td>
-                    <td>{{ user[12] }}</td>
-                    <td>{{ user[13] }}</td>
+
+                    
                 </tr>
                 {% endfor %}
             </table>
+                        </table>
+
+            <table class="stats">
+                <tr>
+                    <th>Successful Connections:</th>
+                    <td>{{ successConnections }}</td>
+                </tr>
+                <tr>
+                    <th>Failed Connections:</th>
+                    <td>{{ failedConnections }}</td>
+                </tr>
+                <tr>
+                    <th>Heartbeat:</th>
+                    <td>{{ heartbeat }}</td>
+                </tr>
+                <tr>
+                    <th>Total Connections:</th>
+                    <td>{{ totalConnections }}</td>
+                </tr>
+
+            </table>
+
+            <th>Success Rate:</th>
+            <td>
+                <div class="progress-bar">
+                    <div class="progress" style="width: {{ average }}%;"></div>
+                </div>
+                <span>{{ average }}%</span>
+            </td>
         </div>
     </body>
 </html>
