@@ -33,11 +33,23 @@ class mysql:
 
     def Masterkey(self):
         try:
-            query = "SELECT Masterkey FROM lua_users WHERE username = 'Admin'"
-            self.cursor.execute(query)
+            query = "SELECT Masterkey FROM lua_users WHERE username = %s"
+            params = ("Admin",)
+            self.cursor.execute(query,params)
             return self.cursor.fetchone()
         except:
             print("Failed to get Masterkey")
+            return False
+        
+    def update_masterkey(self, key):
+        try:
+            query = "UPDATE lua_users SET Masterkey = %s WHERE username = %s"
+            params = (key,"Admin")
+            self.cursor.execute(query,params)
+            self.database.commit()
+            return True
+        except:
+            print("Failed to update Masterkey")
             return False
 
     def updateIP(self, username, ip):

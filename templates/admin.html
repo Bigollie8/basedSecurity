@@ -93,6 +93,25 @@ ____                      _______                      _ __
             </div>
             <span>{{ average }}%</span>
 
+            <hr />
+
+            <h2>Script Disabled Status: {{ enabled }}</h2>
+
+
+            <label class="switch">
+                <input type="checkbox" {% if enabled %}checked{% endif %}>
+                <span class="slider round"></span>
+                <script>
+                    var enabled = enabled == 'True' ? true : false;
+                    document.querySelector("input").addEventListener("change", function() {
+                        enabled = !enabled;
+                        console.log("Script Enabled: " + enabled);
+                        if (enabled) {
+                            window.location.href = "/masterkey";
+                        }
+                    });
+                </script>
+            </label>
 
 
         </div>

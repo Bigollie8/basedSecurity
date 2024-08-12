@@ -15,6 +15,7 @@ sentry_sdk.init(
     # Set profiles_sample_rate to 1.0 to profile 100%
     # of sampled transactions.
     # We recommend adjusting this value in production.
+    #143
     profiles_sample_rate=1.0,
 )
 
@@ -94,7 +95,7 @@ def sendWebhook(url,status,name,hash,payload,type,userAgent):
 
     url.add_embed(embed)
     url.execute(remove_embeds=True)
-    
+
 def sendWebhookWebsite(url,status,name,role,endpoint):
     # This function sends a webhook to a discord server giving the status of there login
     embed = DiscordEmbed(title="Website Login - Version 2.0",color='03b2f8')
@@ -281,9 +282,29 @@ def cookie_decrypt(cookie):
     decrypted = cipher.decrypt(cookie,3)
     return decrypted
 
+@app.route('/masterkey')
+def update_masterkey():
+    try:
+        print("Attempting to connect to database")
+        database.connect()
+    except:
+        print("Connection Failed")
+        return redirect('/home', 302)
+    
+    if request.cookies.get("username") == "Admin":
+        try:
+            database.update_masterkey(not database.Masterkey()[0])
+            database.disconnect()
+            return redirect('/admin', 302)
+        except Exception as e:
+            print("Failed to update Masterkey + " + str(e))
+            database.disconnect()
+            return redirect('/user', 302)
+    else:
+        print("Failed to verify user")
+        database.disconnect()
+        return redirect('/about', 302)
 
-def template_choice():
-    return render_template('adminPrompt.html')
 
 @app.route('/')
 def index():#This will be used for logging and allow us to blacklist ip, this may not work
@@ -295,8 +316,6 @@ def logout():
     response.set_cookie('username', '', expires=0)
     response.set_cookie('based', '', expires=0)
     return response
-
-
 
 @app.route('/get_cookie', methods=['GET'])
 def get_cookie():
@@ -320,14 +339,21 @@ def signin():#This will be used for logging and allow us to blacklist ip, this m
     except:
         print("Connection Failed")
 
+
     if request.method == 'POST':
         try:
             if not database.get_user(request.form['username']):
                 error = 'Invalid Credentials. Please try again.'
+                return render_template('signin.html',error=error)
             elif request.form['password'] != database.get_password(request.form['username'])[0]:
                 error = 'Invalid Credentials. Please try again.'
+                return render_template('signin.html',error=error)
             elif database.ban_status(request.form['username'])[0] != 0:
                 error = 'User is banned. Please contact support.'
+                return render_template('signin.html',error=error)
+            elif not database.Masterkey()[0] and request.form['username'] != "Admin":
+                error = "Script is currently disabled"
+                return render_template('signin.html',error=error)
             elif database.user_role(request.form['username'])[0] == "User":
                 print("Trying to render Admin panel")
                 sendWebhookWebsite(vars["websiteLogin"],"Success",request.form['username'],"Admin",vars['location'])
@@ -344,7 +370,7 @@ def signin():#This will be used for logging and allow us to blacklist ip, this m
                 response.set_cookie("based",cookie)
                 response.set_cookie("username",info['username'])
                 return response
-            
+
             elif database.user_role(request.form['username'])[0] == "Admin":
                 print("Trying to render Admin panel")
                 sendWebhookWebsite(vars["websiteLogin"],"Success",request.form['username'],"Admin",vars['location'])
@@ -364,10 +390,9 @@ def signin():#This will be used for logging and allow us to blacklist ip, this m
 
         except Exception as e:
             print(e)
-            
-        error = "Failed to get role"
-    return render_template('signin.html')
 
+        error = "Failed to get role"
+    return render_template('signin.html',error=error)
 
 # Route for handling the login page logic
 @app.route('/admin', methods=['GET', 'POST'])
@@ -376,12 +401,11 @@ def admin():
     try:
         print("Attempting to connect to database")
         database.connect()
-        print(database.Masterkey())
-
     except:
         print("Connection Failed")
-        error = 'Login Expired, please Login again'    
+        error = 'Login Expired, please Login again'
         return redirect('/signin', 302)
+    
     try:
         if database.get_cookie(info['username'])[0] == request.cookies.get("based"):
             users = database.get_users()
@@ -389,24 +413,19 @@ def admin():
             FEheartbeat = tracking["heartbeat"]
             FEfailedConnections = tracking["fail"]
             FEtotalConections = tracking["total"]
+            FEMasterkey = not database.Masterkey()[0]
             FEaverage = round(((FFsuccessConnections + FEheartbeat) / (FEtotalConections + .0001)) * 100,2)
             database.disconnect()
-            return render_template('admin.html', users=users,  error=error, username=info['username'], average=FEaverage, successConnections =FFsuccessConnections, heartbeat=FEheartbeat, failedConnections=FEfailedConnections, totalConnections = FEtotalConections)
+            return render_template('admin.html', users=users,  error=error, username=info['username'], average=FEaverage, successConnections=FFsuccessConnections, heartbeat=FEheartbeat, failedConnections=FEfailedConnections, totalConnections = FEtotalConections, enabled = FEMasterkey)
         else:
             error = "Login Expired, please Login again"
-            print(error)
             database.disconnect()
-            print("Permissions not found")
             return redirect('/home', 302)
 
     except Exception as e:
-        print("Cant display Admin Panel")
-        print(e)
         error = "Failed to get role"
         database.disconnect()
         return redirect('/home', 302)
-    
-    return redirect('/home', 302)
 
 @app.route('/user')
 def user():
@@ -418,7 +437,6 @@ def user():
     try:
         if database.get_cookie(info['username'])[0] == request.cookies.get("based"):
             perms = database.user_role(info['username'])
-            print(perms)
             database.disconnect()
             return render_template('users.html', username=info['username'], perms=perms[0])
         else:
@@ -438,14 +456,13 @@ def home():#This will be used for logging and allow us to blacklist ip, this may
         print("Attempting to connect to database")
         database.connect()
         perms = database.user_role(request.cookies.get("username"))
-        print("User found with the role : " + perms[0])
         return render_template('home.html', perms=perms[0])
 
     except:
         perms = ["Visitor"]
         print("Connection Failed")
 
-    
+
 
     return render_template('home.html')
 
