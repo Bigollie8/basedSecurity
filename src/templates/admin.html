@@ -1,0 +1,125 @@
+<!doctype html>
+<html>
+    <head>
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', filename='style.css') }}"
+        />
+        <title>Admin Page</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    </head>
+    <body>
+        <pre class="header">
+____                      _______                      _ __
+      / __ )____ _________  ____/ / ___/___  _______  _______(_) /___  __
+     / __  / __ `/ ___/ _ \/ __  /\__ \/ _ \/ ___/ / / / ___/ / __/ / / /
+    / /_/ / /_/ (__  )  __/ /_/ /___/ /  __/ /__/ /_/ / /  / / /_/ /_/ /
+   /_____/\__,_/____/\___/\__,_//____/\___/\___/\__,_/_/  /_/\__/\__, /
+                                                                /____/
+    </pre>
+
+        <div class="topnav">
+            <a href="home">Home</a>
+            <a href="about">About</a>
+            <a href="https://discord.com/invite/qXb9XkYZRd">Discord</a>
+            <a class="right" href="logout">Logout</a>
+            <a class="right" href="admin">Admin Panel</a>
+            <a class="right" href="user">User Panel</a>
+
+        </div>
+
+        <br>
+
+        <div class="container">
+            <div class="box">
+                <h3>Logged in as: <strong class="gradient-text">{{ username }}</strong></h3>
+            </div>
+
+            <div class="box">
+                <h2>Script Disabled: {{ enabled }}</h2>
+
+                <label class="switch">
+                    <input type="checkbox" {% if enabled %}checked{% endif %}>
+                    <span class="slider round"></span>
+                    <script>
+                        var enabled = enabled == 'True' ? true : false;
+                        document.querySelector("input").addEventListener("change", function() {
+                            enabled = !enabled;
+                            console.log("Script Enabled: " + enabled);
+                            if (enabled) {
+                                window.location.href = "/masterkey";
+                            }
+                        });
+                    </script>
+                </label>
+    
+            </div>
+
+            <div class="box">
+                <div class="active-users">
+                    <h2>Active Users:</h2>
+                    <table class="database">
+                        <tr>
+                            <th>UID</th>
+                            <th>Username</th>
+                            <th>User Agent</th>
+                            <th>VendorID</th>
+                            <th>DeviceID</th>
+                            <th>Last Seen</th>
+                            <th>Banned</th>
+                            <th>Failed Connections</th>
+                            <th>Total Connections</th>
+                            <th>Password</th>
+                            <th>Role</th>
+                        </tr>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user[0] }}</td>
+                            <td>{{ user[1] }}</td>
+                            <td>{{ user[3] }}</td>
+                            <td>{{ user[4] }}</td>
+                            <td>{{ user[5] }}</td>
+                            <td>{{ user[6] }}</td>
+                            <td>{{ user[7] }}</td>
+                            <td>{{ user[8] }}</td>
+                            <td>{{ user[9] }}</td>
+                            <td>{{ user[10] }}</td>
+                            <td>{{ user[11] }}</td>
+
+                            
+                        </tr>
+                        {% endfor %}
+                    </table>
+
+                </div>
+            </div>
+
+            <div class="box">
+                    <h2>Script Statistics:</h2>
+                <table class="stats">
+                    <tr>
+                        <th>Successful Connections:</th>
+                        <td>{{ successConnections }}</td>
+                    </tr>
+                    <tr>
+                        <th>Failed Connections:</th>
+                        <td>{{ failedConnections }}</td>
+                    </tr>
+                    <tr>
+                        <th>Heartbeat:</th>
+                        <td>{{ heartbeat }}</td>
+                    </tr>
+                    <tr>
+                        <th>Total Connections:</th>
+                        <td>{{ totalConnections }}</td>
+                    </tr>
+
+                </table>
+                <div class="progress-bar">
+                    <div class="progress" style="width: {{ average }}%;"></div>
+                </div>
+            <span>{{ average }}%</span>
+        </div>
+        </div>
+    </body>
+</html>

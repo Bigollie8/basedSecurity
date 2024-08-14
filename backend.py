@@ -1,9 +1,9 @@
 from flask import Flask, request, render_template, redirect, url_for, make_response
 from discord_webhook import DiscordWebhook, DiscordEmbed
-import cipher
+import src.python.cipher as cipher
 import time
 import hashlib
-import mysql_utils
+import src.python.mysql_utils as mysql_utils
 from pathlib import Path
 import sentry_sdk
 
@@ -24,7 +24,7 @@ print("Starting Backend!")
 
 database = mysql_utils.mysql()
 
-app = Flask(__name__,template_folder=Path(__file__).parent / 'templates',static_folder=Path(__file__).parent / 'static')
+app = Flask(__name__,template_folder='./src/templates',static_folder='./src/static')
 
 # General information that will be used to store user data
 info = {
@@ -290,7 +290,7 @@ def update_masterkey():
     except:
         print("Connection Failed")
         return redirect('/home', 302)
-    
+
     if request.cookies.get("username") == "Admin":
         try:
             database.update_masterkey(not database.Masterkey()[0])
@@ -405,7 +405,7 @@ def admin():
         print("Connection Failed")
         error = 'Login Expired, please Login again'
         return redirect('/signin', 302)
-    
+
     try:
         if database.get_cookie(info['username'])[0] == request.cookies.get("based"):
             users = database.get_users()

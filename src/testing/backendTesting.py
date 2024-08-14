@@ -1,6 +1,6 @@
 import requests
 import time
-import cipher
+import python.cipher as cipher
 import hashlib
 
 #BASE_URL = "http://basedsecurity.net"

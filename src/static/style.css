@@ -334,3 +334,16 @@ tr:nth-child(even) {
   .slider.round:before {
     border-radius: 50%;
   }
+
+.box {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: auto;
+    margin: 0;
+    padding: 10px;
+    background: rgb(236, 236, 236);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow-x: auto;  /* Enable horizontal scrolling */
+}
