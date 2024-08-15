@@ -6,6 +6,9 @@ import hashlib
 import src.python.mysql_utils as mysql_utils
 from pathlib import Path
 import sentry_sdk
+import datetime
+
+
 
 sentry_sdk.init(
     dsn="https://41492d979138c903702bfdc45f335cff@o4507728101048320.ingest.us.sentry.io/4507728105242624",
@@ -273,6 +276,19 @@ def verify(payload,creds,type):
 UP = "\x1B[7A"
 CLR = "\x1B[0K"
 
+def verified(username,cookie):
+    try:
+        print("Expected Cookie: " + database.get_cookie(username)[0])
+
+        if database.get_cookie(username)[0] == cookie:
+            return True
+        else:
+            return False
+    except:
+        print("Failed to verify user")
+        return False
+
+
 def cookie_encrypt(username,cookie):
     encrypted = cipher.encrypt(hashlib.md5(cookie.encode()).hexdigest(),3)
     database.update_cookie(username,encrypted)
@@ -333,6 +349,8 @@ def user_agent():
 @app.route('/signin', methods=['GET', 'POST'])
 def signin():#This will be used for logging and allow us to blacklist ip, this may not work
     error = None
+    expire_date = datetime.datetime.now()
+    expire_date = expire_date + datetime.timedelta(days=.25)
     try:
         print("Attempting to connect to database")
         database.connect()
@@ -367,8 +385,8 @@ def signin():#This will be used for logging and allow us to blacklist ip, this m
 
                 #update cookie info
                 response = make_response(redirect('/user', 302))
-                response.set_cookie("based",cookie)
-                response.set_cookie("username",info['username'])
+                response.set_cookie("based",cookie,expires=expire_date)
+                response.set_cookie("username",info['username'],expires=expire_date)
                 return response
 
             elif database.user_role(request.form['username'])[0] == "Admin":
@@ -384,8 +402,8 @@ def signin():#This will be used for logging and allow us to blacklist ip, this m
 
                 #update cookie info
                 response = make_response(redirect('/admin', 302))
-                response.set_cookie("based",cookie)
-                response.set_cookie("username",info['username'])
+                response.set_cookie("based",cookie,expires=expire_date)
+                response.set_cookie("username",info['username'],expires=expire_date)
                 return response
 
         except Exception as e:
@@ -405,9 +423,11 @@ def admin():
         print("Connection Failed")
         error = 'Login Expired, please Login again'
         return redirect('/signin', 302)
+    
+    expectedCookie = database.get_cookie(info['username'])
 
     try:
-        if database.get_cookie(info['username'])[0] == request.cookies.get("based"):
+        if verified(info['username'],request.cookies.get("based")):
             users = database.get_users()
             FFsuccessConnections = tracking["success"]
             FEheartbeat = tracking["heartbeat"]
@@ -416,11 +436,12 @@ def admin():
             FEMasterkey = not database.Masterkey()[0]
             FEaverage = round(((FFsuccessConnections + FEheartbeat) / (FEtotalConections + .0001)) * 100,2)
             database.disconnect()
-            return render_template('admin.html', users=users,  error=error, username=info['username'], average=FEaverage, successConnections=FFsuccessConnections, heartbeat=FEheartbeat, failedConnections=FEfailedConnections, totalConnections = FEtotalConections, enabled = FEMasterkey)
+            return render_template('admin.html', users=users, error=error, username=info['username'], average=FEaverage, successConnections=FFsuccessConnections, heartbeat=FEheartbeat, failedConnections=FEfailedConnections, totalConnections = FEtotalConections, enabled = FEMasterkey)
         else:
-            error = "Login Expired, please Login again"
             database.disconnect()
-            return redirect('/home', 302)
+            error = "Login Expired, please Login again"
+            print("Permissions not found")
+            return redirect('/signin', 302)
 
     except Exception as e:
         error = "Failed to get role"
@@ -435,10 +456,11 @@ def user():
     except:
         print("Connection Failed")
     try:
-        if database.get_cookie(info['username'])[0] == request.cookies.get("based"):
+        if verified(info['username'],request.cookies.get("based")):
             perms = database.user_role(info['username'])
+            flag = verified(info["username"],request.cookies.get("based"))
             database.disconnect()
-            return render_template('users.html', username=info['username'], perms=perms[0])
+            return render_template('users.html',username=info['username'], perms=perms[0],Admin=flag)
         else:
             print("Permissions not found")
             database.disconnect()
@@ -456,7 +478,7 @@ def home():#This will be used for logging and allow us to blacklist ip, this may
         print("Attempting to connect to database")
         database.connect()
         perms = database.user_role(request.cookies.get("username"))
-        return render_template('home.html', perms=perms[0])
+        return render_template('home.html', perms=perms[0],Admin=verified(info['username'],request.cookies.get("based")))
 
     except:
         perms = ["Visitor"]
@@ -479,12 +501,12 @@ def about():#This will be used for logging and allow us to blacklist ip, this ma
         database.connect()
         perms = database.user_role(request.cookies.get("username"))
         print("User found with the role : " + perms[0])
-        return render_template('about.html', perms=perms[0])
+        return render_template('about.html', perms=perms[0],Admin=verified(info["username"],request.cookies.get("based")))
     except:
         perms = ["Visitor"]
         print("Connection Failed")
 
-    return render_template('about.html', perms=perms[0])
+    return render_template('about.html', perms=perms[0],Admin=verified(info["username"],request.cookies.get("based")))
 
 print('\n')
 
