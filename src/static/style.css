@@ -166,13 +166,14 @@ table.database{
 }
 
 table.stats{
-    width: 25%;
+    width: 50%;
+    margin: 0 auto;
     background: rgb(236, 236, 236);
     max-width: 80%;
     text-align: left;
     table-layout: auto;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
+    border-radius: 5px;
     
 }
 
@@ -252,13 +253,24 @@ tr:nth-child(even) {
     }
 }
 
+h2.center{
+    text-align: center;
+    font-size: 30px;
+    font-weight: bold;
+    font-style: italic;
+    margin-top: 10px;
+    padding: 1px;
+    margin-bottom: 10px;
+}
+
 .progress-bar {
     background: #333;
     border-radius: 5px;
     overflow: hidden;
+    margin: 0 auto;
     height: 20px;
     margin-top: 5px;
-    width: 25%;
+    width: 50%;
     min-width: 15%;
 }
 
@@ -267,10 +279,21 @@ tr:nth-child(even) {
     background-color: #4caf50;
     text-align: center;
     line-height: 20px;
+    margin: 0 auto;
     color: white;
     border-radius: 5px;
 }
 
+.progress-text{
+    text-align: center;
+    font-size: 12px;
+    color: white;
+    font-weight: bold;
+    font-style: italic;
+    margin-top: -18px;
+    padding: 1px;
+    margin-bottom: 10px;
+}
 
 /* The switch - the box around the slider */
 .switch {
@@ -346,4 +369,27 @@ tr:nth-child(even) {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     overflow-x: auto;  /* Enable horizontal scrolling */
+}
+
+.userPanel{
+    width: 30%;
+    margin: 10px;
+    padding: 10px;
+    background: rgb(236, 236, 236);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow-x: auto;  /* Enable horizontal scrolling */
+}
+
+.float-right {
+    float: right;
+    background: rgb(236, 236, 236);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    min-width: 40%;
+    overflow-x: auto;
+}
+
+.float-left {
+    float: left;
+
 }

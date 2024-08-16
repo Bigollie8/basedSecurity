@@ -54,23 +54,23 @@ ____                      _______                      _ __
                 </label>
     
             </div>
-
+            <!--
             <div class="box">
                 <div class="active-users">
                     <h2>Active Users:</h2>
                     <table class="database">
                         <tr>
-                            <th>UID</th>
-                            <th>Username</th>
-                            <th>User Agent</th>
-                            <th>VendorID</th>
-                            <th>DeviceID</th>
-                            <th>Last Seen</th>
-                            <th>Banned</th>
-                            <th>Failed Connections</th>
-                            <th>Total Connections</th>
-                            <th>Password</th>
-                            <th>Role</th>
+                            <th>UID</th> 0 
+                            <th>Username</th> 1 
+                            <th>User Agent</th>3
+                            <th>VendorID</th>4
+                            <th>DeviceID</th> 5
+                            <th>Last Seen</th>6
+                            <th>Banned</th>7
+                            <th>Failed Connections</th>8
+                            <th>Total Connections</th>9
+                            <th>Password</th>10
+                            <th>Role</th>11
                         </tr>
                         {% for user in users %}
                         <tr>
@@ -93,33 +93,62 @@ ____                      _______                      _ __
 
                 </div>
             </div>
-
+             -->
             <div class="box">
-                    <h2>Script Statistics:</h2>
-                <table class="stats">
-                    <tr>
-                        <th>Successful Connections:</th>
-                        <td>{{ successConnections }}</td>
-                    </tr>
-                    <tr>
-                        <th>Failed Connections:</th>
-                        <td>{{ failedConnections }}</td>
-                    </tr>
-                    <tr>
-                        <th>Heartbeat:</th>
-                        <td>{{ heartbeat }}</td>
-                    </tr>
-                    <tr>
-                        <th>Total Connections:</th>
-                        <td>{{ totalConnections }}</td>
-                    </tr>
+                <div class="active-users">
+                    <tag class="float-left">
+                    <table class="userPanel">
+                        <tr>
+                            <th>UID</th>
+                            <th>Username</th>
+                            <th>Last Seen</th>
+                            <th>Banned</th>
+                            <th>Total Connections</th>
+                            <th>Role</th>
+                        </tr>
+                        {% for user in users %}
+                        <tr {% if user[7] %}style="background-color: coral;"{% endif %}>
+                            <td>{{ user[0] }}</td>
+                            <td>{{ user[1] }}</td>
+                            <td>{{ user[6] }}</td>
+                            <td>{{ user[7] }}</td>
+                            <td>{{ user[9] }}</td>
+                            <td>{{ user[11] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                    </tag>
+                    <tag class="float-right">
+                        <h2 class="center">Script Statistics:</h2>
+                    <table class="stats">
+                        <tr>
+                            <th>Successful Connections:</th>
+                            <td>{{ successConnections }}</td>
+                        </tr>
+                        <tr>
+                            <th>Failed Connections:</th>
+                            <td>{{ failedConnections }}</td>
+                        </tr>
+                        <tr>
+                            <th>Heartbeat:</th>
+                            <td>{{ heartbeat }}</td>
+                        </tr>
+                        <tr>
+                            <th>Total Connections:</th>
+                            <td>{{ totalConnections }}</td>
+                        </tr>
+    
+                    </table>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: {{ average }}%;"></div>
+                    </div>
+                    <div class="progress-text">
+                    <span>{{ average }}%</span>
+                    </div>
+                 </tag>
 
-                </table>
-                <div class="progress-bar">
-                    <div class="progress" style="width: {{ average }}%;"></div>
                 </div>
-            <span>{{ average }}%</span>
-        </div>
+            </div>
         </div>
     </body>
 </html>
