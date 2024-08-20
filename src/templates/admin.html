@@ -27,6 +27,7 @@ ____                      _______                      _ __
             <a class="right" href="user">User Panel</a>
 
         </div>
+    </tag>
 
         <br>
 
@@ -34,26 +35,7 @@ ____                      _______                      _ __
             <div class="box">
                 <h3>Logged in as: <strong class="gradient-text">{{ username }}</strong></h3>
             </div>
-
-            <div class="box">
-                <h2>Script Disabled: {{ enabled }}</h2>
-
-                <label class="switch">
-                    <input type="checkbox" {% if enabled %}checked{% endif %}>
-                    <span class="slider round"></span>
-                    <script>
-                        var enabled = enabled == 'True' ? true : false;
-                        document.querySelector("input").addEventListener("change", function() {
-                            enabled = !enabled;
-                            console.log("Script Enabled: " + enabled);
-                            if (enabled) {
-                                window.location.href = "/masterkey";
-                            }
-                        });
-                    </script>
-                </label>
-    
-            </div>
+            
             <!--
             <div class="box">
                 <div class="active-users">
@@ -95,8 +77,7 @@ ____                      _______                      _ __
             </div>
              -->
             <div class="box">
-                <div class="active-users">
-                    <tag class="float-left">
+                    <tag class="float-inline">
                     <table class="userPanel">
                         <tr>
                             <th>UID</th>
@@ -118,8 +99,25 @@ ____                      _______                      _ __
                         {% endfor %}
                     </table>
                     </tag>
-                    <tag class="float-right">
-                        <h2 class="center">Script Statistics:</h2>
+                    <tag class="float-inline">
+                        <h2>Script Disabled: {{ enabled }}</h2>
+
+                        <label class="switch">
+                            <input type="checkbox" {% if enabled %}checked{% endif %}>
+                            <span class="slider round"></span>
+                            <script>
+                                var enabled = enabled == 'True' ? true : false;
+                                document.querySelector("input").addEventListener("change", function() {
+                                    enabled = !enabled;
+                                    console.log("Script Enabled: " + enabled);
+                                    if (enabled) {
+                                        window.location.href = "/masterkey";
+                                    }
+                                });
+                            </script>
+                        </label>
+                    </tag>
+                    <tag class="float-inline">
                     <table class="stats">
                         <tr>
                             <th>Successful Connections:</th>
@@ -147,8 +145,7 @@ ____                      _______                      _ __
                     </div>
                  </tag>
 
-                </div>
             </div>
-        </div>
+        </div>  
     </body>
 </html>

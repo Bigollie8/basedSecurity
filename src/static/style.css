@@ -167,13 +167,14 @@ table.database{
 
 table.stats{
     width: 50%;
-    margin: 0 auto;
+    margin: 20px;
     background: rgb(236, 236, 236);
     max-width: 80%;
     text-align: left;
     table-layout: auto;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 5px;
+    align-items: center;
     
 }
 
@@ -269,7 +270,7 @@ h2.center{
     overflow: hidden;
     margin: 0 auto;
     height: 20px;
-    margin-top: 5px;
+    margin-top: -5px;
     width: 50%;
     min-width: 15%;
 }
@@ -280,6 +281,7 @@ h2.center{
     text-align: center;
     line-height: 20px;
     margin: 0 auto;
+    margin-top: -5px;
     color: white;
     border-radius: 5px;
 }
@@ -381,15 +383,15 @@ h2.center{
     overflow-x: auto;  /* Enable horizontal scrolling */
 }
 
-.float-right {
-    float: right;
+.float-inline {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 33%;
+    margin: 0;
+    padding: 10px;
     background: rgb(236, 236, 236);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    min-width: 40%;
-    overflow-x: auto;
-}
-
-.float-left {
-    float: left;
-
+    border-radius: 8px;
+    overflow-x: auto;  /* Enable horizontal scrolling */
 }
