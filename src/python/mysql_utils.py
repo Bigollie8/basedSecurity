@@ -107,6 +107,35 @@ class mysql:
         except Exception as e:
             logger.error("Failed to get users: %s", e)
             return False
+        
+    def get_admin_usernames(self):
+        try:
+            query = "SELECT username FROM lua_users WHERE Role = 'Admin'"
+            self.cursor.execute(query)
+            return self.cursor.fetchall()
+        except Exception as e:
+            logger.error("Failed to get usernames: %s", e)
+            return False
+        
+    def get_version(self):
+        try:
+            query = "SELECT version FROM lua_users WHERE username = 'Admin'"
+            self.cursor.execute(query)
+            return self.cursor.fetchall()
+        except Exception as e:
+            logger.error("Failed to get version: %s", e)
+            return 
+        
+    def update_version(self, version):
+        try:
+            query = "UPDATE lua_users SET version = %s WHERE username = 'Admin'"
+            params = (version,)
+            self.cursor.execute(query, params)
+            self.database.commit()
+            return True
+        except Exception as e:
+            logger.error("Failed to update version: %s", e)
+            return False
 
     def update_user(self, username, deviceid, vendorid):
         if not username or not deviceid or not vendorid:
